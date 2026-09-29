@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 2D Arrays: Runtime Creation & Scanner</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --var2: #10b981;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --barrier: #ef4444;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+    --term-input: #eab308;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --var2: #10b981;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --barrier: #f87171;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+    --term-input: #facc15;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1750px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage { display: grid; grid-template-columns: 1fr 1.15fr 0.95fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--rule); flex-shrink: 0;}
+.panel-label, .panel-tag { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; flex-direction: row; align-items: center;}
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap; flex: 1;}
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 28px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+
+.mascot-frame { width: 56px; height: 56px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 18px; transform-origin: left center; }
+.speech-bubble p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink); min-height: 22px; font-weight: 500;}
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Controls */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; padding-right: 20px;}
+.theme-toggle { width: auto; padding: 0 16px; height: 44px; border-radius: 22px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink); font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-only-btn { width: 44px; padding: 0; border-radius: 50%; }
+
+/* ---------- SOURCE CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.8; padding: 16px 0; height: 420px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+.code-line { display: flex; padding: 2px 20px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease, border-color 0.25s ease; position: relative; }
+.spacer-line { margin-bottom: 12px; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 32px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); font-weight: 600;}
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.vr2 { color: var(--var2); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.str { color: var(--val); transition: opacity 0.3s; }
+.cmt { color: var(--cmt); font-style: italic; }
+
+/* ---------- FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body { padding: 30px 20px 20px; flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; min-height: 300px; }
+
+.focus-slot { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: flex-start; gap: 20px; padding: 24px; border: 1.5px solid var(--accent); background: var(--accent-wash); border-radius: 16px; position: relative; }
+.focus-slot.show { display: flex; }
+.execution-code { font-family: "JetBrains Mono", monospace; font-size: 16px; font-weight: 600; color: var(--ink); background: var(--code-bg); border: 1px dashed var(--dt); padding: 10px 20px; border-radius: 8px; text-align: center; z-index: 20; }
+.execution-code .kw { color: var(--kw); }
+.execution-code .op { color: var(--math-op); }
+.execution-code .val { color: var(--val); }
+.execution-code .dt { color: var(--dt); }
+.execution-code .vr { color: var(--var); }
+.execution-code .vr2 { color: var(--var2); }
+
+/* Math Stage & Animations */
+.math-stage { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; z-index: 15; font-family: "JetBrains Mono", monospace; }
+.m-op-val { font-size: 28px; font-weight: 700; color: var(--val); opacity: 0; transform: scale(0.5) translateY(-20px); }
+.m-symb { font-size: 44px; color: var(--math-op); font-weight: 700; opacity: 0; transform: scale(0); }
+.math-stage.do-math .m-op-val { animation: mathDropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.math-stage.do-math .m-op-val:nth-child(3) { animation-delay: 0.15s; }
+.math-stage.do-math .m-symb { animation: mathSymPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 0.3s; }
+.math-success .m-symb { color: var(--val); text-shadow: 0 0 12px rgba(28,138,95,0.6); transition: all 0.3s ease; }
+.math-fail .m-symb { color: var(--barrier); text-shadow: 0 0 12px rgba(239,68,68,0.6); transition: all 0.3s ease; }
+
+@keyframes mathDropIn { to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes mathSymPulse { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+/* 3D Box */
+.box-scene { width: 60px; height: 60px; perspective: 400px; position: relative; z-index: 5; margin-top: 5px; opacity: 0; transform: scale(0); }
+.box-scene.popped { opacity: 1; transform: scale(1); animation: boxPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes boxPopIn { 0% { opacity: 0; transform: scale(0) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.box-3d { position: absolute; width: 46px; height: 46px; left: 7px; top: 7px; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(35deg); transition: transform 0.3s ease; }
+.box-face { position: absolute; width: 46px; height: 46px; border: 2px solid var(--accent); border-radius: 4px; background: transparent; transition: all 0.3s ease; }
+.box-floor { background: rgba(255,176,0,0.12); transform-origin: center; transform: rotateX(-90deg) translateZ(23px); }
+.box-back  { transform-origin: bottom center; transform: rotateY(180deg) translateZ(23px); }
+.box-left  { transform-origin: bottom center; transform: rotateY(-90deg) translateZ(23px); }
+.box-right { transform-origin: bottom center; transform: rotateY(90deg) translateZ(23px); }
+.math-result-chip { position: absolute; top: 18px; left: 50%; transform: translateX(-50%) translateZ(0); padding: 2px 8px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 14px; color: var(--val); background: var(--panel); border: 1.5px solid var(--val); border-radius: 6px; opacity: 0; z-index: 10; transition: transform 0.3s;}
+.math-result-chip.bumping { transform: translateX(-50%) translateZ(0) scale(1.3); color: var(--accent); border-color: var(--accent); }
+
+/* Placards */
+.board-placard { background: var(--panel); border: 1.5px solid var(--placard-border); border-radius: 9px; padding: 12px 14px; width: 320px; font-family: "JetBrains Mono", monospace; font-size: 13px; opacity: 0; transform: translateY(10px); z-index: 3; text-align: center; margin-top: auto;}
+.focus-slot.eval .board-placard, .focus-slot.stored .board-placard { opacity: 1; transform: translateY(0); animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s backwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* Tracker */
+.tracker-wrapper { border-top: 1px solid var(--rule); background: var(--paper); border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; overflow-y: auto; max-height: 200px; margin-top: auto; }
+.tracker-table { width: 100%; border-collapse: collapse; font-family: "JetBrains Mono", monospace; font-size: 12px; text-align: center; }
+.tracker-table th { background: var(--panel); color: var(--muted); padding: 8px; font-weight: 600; border-bottom: 1px solid var(--rule); text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; position: sticky; top: 0; z-index: 5;}
+.tracker-table td { padding: 6px 8px; color: var(--ink); border-bottom: 1px solid var(--rule); opacity: 0.3; transition: all 0.3s ease; }
+.tracker-table tbody tr { display: none; }
+.tracker-table tbody tr.revealed { display: table-row; }
+.tracker-table tr.active td { opacity: 1; background: rgba(255, 176, 0, 0.12); color: var(--accent-ink); font-weight: 700; animation: tablePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; border-bottom: 1px solid var(--accent);}
+@keyframes tablePop { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+.tracker-table tr.done td { opacity: 0.6; }
+.tracker-table tr:last-child td { border-bottom: none; }
+.badge-true { color: var(--val); background: rgba(28, 138, 95, 0.1); padding: 2px 6px; border-radius: 8px; }
+.badge-false { color: var(--barrier); background: rgba(239, 68, 68, 0.1); padding: 2px 6px; border-radius: 8px; }
+
+/* ---------- MEMORY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.stack-tray-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; align-items: center;}
+.tray-empty { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); text-align: center; padding: 24px 8px; transition: opacity 0.3s; width: 100%;}
+.memory-section { width: 100%; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--code-bg); padding: 16px 12px 12px; display: flex; flex-direction: column; gap: 10px; position: relative;}
+.memory-title { font-family: "JetBrains Mono"; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dt); font-weight: bold; position: absolute; top: -9px; left: 10px; background: var(--panel); padding: 0 6px; border: 1px solid var(--rule-strong); border-radius: 4px;}
+
+.stack-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+.stack-box-wrapper { display: none; opacity: 0; transform: translateY(10px); flex-direction: column; align-items: center; width: 80px; padding: 8px 4px; border: 2px dashed var(--rule-strong); background: var(--paper); border-radius: 8px; position: relative;}
+.stack-box-wrapper.stored { display: flex; opacity: 1; transform: translateY(0); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.stack-box-name { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--var); margin-bottom: 2px; text-align: center; line-height: 1.1;}
+
+/* 2D Array (Heap) Grid */
+.array-2d-grid { display: none; opacity: 0; margin-top: 10px; padding: 10px; background: var(--paper); border-radius: 8px; border: 1px solid var(--rule); }
+.array-2d-grid.stored { display: grid; opacity: 1; animation: boxPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); gap: 8px; justify-content: center;}
+.array-slot-3d { display: flex; flex-direction: column; align-items: center; transition: all 0.3s; }
+
+.array-idx-badge { 
+    margin-top: 6px; 
+    background: var(--ink); 
+    color: var(--paper); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 11px; 
+    font-family: "JetBrains Mono", monospace; 
+    font-weight: 700; 
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: all 0.3s; 
+}
+.array-slot-3d.highlight .array-idx-badge { background: var(--accent); color: var(--accent-ink); transform: scale(1.15); }
+.array-slot-3d.highlight .box-face { 
+    border-color: var(--accent); 
+    background: rgba(255, 176, 0, 0.25); 
+    box-shadow: 0 0 10px rgba(255, 176, 0, 0.4) inset;
+}
+.array-slot-3d.highlight .box-floor { background: rgba(255, 176, 0, 0.4); }
+
+.pointer-arrow { position: absolute; right: -15px; top: 50%; width: 20px; height: 2px; background: var(--val); display: none; }
+.pointer-arrow::after { content: ''; position: absolute; right: -4px; top: -4px; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 5px solid var(--val); }
+.has-ref .pointer-arrow { display: block; animation: stretchArr 0.5s ease-out; }
+@keyframes stretchArr { from { width: 0; } to { width: 20px; } }
+
+/* Props & Actor - Transition Based Movement */
+.spark { position: fixed; width: 6px; height: 6px; border-radius: 50%; z-index: 9999998; pointer-events: none; }
+.actor-wrapper { 
+    position: fixed; left: 0; top: 0; width: 60px; height: 80px; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+    opacity: 0; z-index: 999999; pointer-events: none; 
+    transform: translate3d(-200px, -200px, 0); transform-origin: bottom center; 
+}
+.actor-person { width: 48px; height: 66px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.4)); transition: transform 0.15s ease-out;}
+.actor-person .skin { fill: #f2c9a0; }
+.actor-person .shirt { fill: var(--dt); }
+.actor-person .outline { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: d 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.actor-payload { position: absolute; top: -20px; padding: 4px 12px; border-radius: 999px; border: 2px solid var(--val); background: var(--panel); color: var(--val); font-family: "JetBrains Mono", monospace; font-size: 15px; font-weight: 700; text-align: center; box-shadow: 0 5px 14px rgba(0,0,0,.15); opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+.actor-wrapper.walking .actor-person { animation: bodyBounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-l { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-r { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-l { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-r { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+@keyframes walkSwing { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+@keyframes bodyBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+
+/* ---------- CONSOLE ---------- */
+.console-body { background: var(--term-bg); padding: 12px 20px; font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.8; height: 160px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; }
+.term-line { color: var(--term-text); display: block; margin-bottom: 2px;}
+.term-line::before { content: "$ > "; color: var(--term-muted); }
+.term-input { color: var(--term-input); font-weight: bold; }
+.console-form { display: flex; align-items: center; margin-top: 2px; }
+.console-form::before { content: "$ > "; color: var(--term-muted); font-weight: bold; }
+.console-prompt-input { background: transparent; border: none; outline: none; color: var(--term-input); font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: bold; width: 100%; }
+
+/* ---------- TRANSPORT ---------- */
+.transport-bar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:12px 20px; border-top: 1px solid var(--rule); gap:12px; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 120px; font-weight: 600;}
+.transport-controls { display:flex; gap:8px; }
+.transport-bar button { font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:600; background:var(--panel); color:var(--ink); border:1px solid var(--rule); border-radius:6px; height: 36px; padding: 0 14px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor:pointer; transition: all 0.2s ease; }
+.transport-bar button:hover:not(:disabled) { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+.transport-bar button.primary { background: #111418; color: #ffffff; border-color: #111418; }
+.transport-bar button.primary:hover:not(:disabled) { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+
+/* Tutorial Content */
+.content-section { margin-top: 24px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 32px; line-height: 1.7; display: flex; flex-direction: column; gap: 16px;}
+.content-section h2 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 24px; margin-top: 16px; margin-bottom: 8px; border-bottom: 2px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.content-section h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: var(--ink); }
+.content-section code { background: var(--code-bg); color: var(--dt); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+.content-section p { margin: 0; color: var(--muted); font-size: 15px;}
+.content-section pre { background: var(--code-bg); color: var(--dt); padding: 16px; border-radius: 8px; font-family: "JetBrains Mono", monospace; overflow-x: auto; line-height: 1.5; font-size: 14px; border: 1px solid var(--rule); }
+.content-section ul { margin: 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; font-size: 15px;}
+.content-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: "IBM Plex Sans", sans-serif; font-size: 14px;}
+.content-table th, .content-table td { border: 1px solid var(--rule); padding: 10px 14px; text-align: left; }
+.content-table th { background: var(--panel); color: var(--ink); font-weight: 600; }
+.content-table td { color: var(--muted); }
+
+@media (max-width: 1200px) { .stage { grid-template-columns: 1fr; } .main-title { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 10px;} .transport-bar { flex-direction: column; align-items: flex-start; } .transport-controls { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL ACTOR -->
+<div id="actor" class="actor-wrapper">
+    <div class="actor-payload" id="actorPayload"></div>
+    <svg class="actor-person" viewBox="0 0 40 60">
+        <g class="legs"><path class="outline leg-l" fill="none" d="M16,40 L16,58" style="transform-origin: 16px 40px;"></path><path class="outline leg-r" fill="none" d="M24,40 L24,58" style="transform-origin: 24px 40px;"></path></g>
+        <g class="arms"><path class="skin outline arm-l" fill="none" d="M12,24 L5,36" style="transform-origin: 12px 24px;"></path><path class="skin outline arm-r" fill="none" d="M28,24 L35,36" style="transform-origin: 28px 24px;"></path></g>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline head" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,11 L19,11 M23,11 L25,11"></path>
+    </svg>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">2D Arrays & Scanner</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            <div class="speech-bubble" id="speechBubble"><p id="mascotCaption"></p></div>
+            <div class="top-controls">
+                <button class="theme-toggle icon-only-btn" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                </button>
+                <button class="theme-toggle icon-only-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE CODE & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Source</span><span class="panel-tag">Main.java</span></div>
+                <div class="code-body" id="sourceBox">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">import</span> java.util.Scanner;</div>
+                    <div class="code-line" id="line2"><span class="ln">2</span><span class="kw">public class</span> Main {</div>
+                    <div class="code-line" id="line3"><span class="ln">3</span>  <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    Scanner <span class="vr" id="src_sc">sc</span> = <span class="kw">new</span> Scanner(System.in);</div>
+                                       <div class="code-line" id="line5"><span class="ln">5</span>    System.out.print(<span class="str">"Rows: "</span>);</div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>    <span class="dt">    int </span> <span class="vr" id="src_r">r</span> = sc.nextInt(); <span class="cmt">// Row count</span></div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>    System.out.print(<span class="str">"Cols: "</span>);</div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>    <span class="dt">    int </span> <span class="vr" id="src_c">c</span> = sc.nextInt(); <span class="cmt">// Column count</span></div>
+                    
+                    <div class="code-line" id="line9"><span class="ln">9</span>    <span class="dt">    int</span>[][] <span class="vr" id="src_arr">arr</span> = <span class="kw">new</span> <span class="dt"> int</span>[<span class="vr">r</span>][<span class="vr">c</span>]; <span class="cmt">// Allocate 2D Array</span></div>
+                    
+                    <div class="code-line" id="line10"><span class="ln">10</span>    <span class="kw">    for</span>(<span class="dt">int </span> <span class="vr" id="src_i">i</span> = 0; <span class="vr" id="src_cond_i">i</span> &lt; <span class="vr">r</span>; <span class="vr" id="src_inc_i">i</span><span class="op">++</span>) {</div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>      <span class="kw">        for</span>(<span class="dt">int </span> <span class="vr2" id="src_j">j</span> = 0; <span class="vr2" id="src_cond_j">j</span> &lt; <span class="vr">c</span>; <span class="vr2" id="src_inc_j">j</span><span class="op">++</span>) {</div>
+                    <div class="code-line" id="line12"><span class="ln">12</span>        <span class="vr" id="src_arr_access">            arr</span>[<span class="vr">i</span>][<span class="vr2">j</span>] = sc.nextInt(); <span class="cmt">// Set grid val</span></div>
+                    <div class="code-line" id="line13"><span class="ln">13</span>      }</div>
+                    <div class="code-line" id="line14"><span class="ln">14</span>    }</div>
+                    <div class="code-line" id="line15"><span class="ln">15</span>  }</div>
+                    <div class="code-line" id="line16"><span class="ln">16</span>}</div>
+                </div>
+            </section>
+            
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">I/O</span></div>
+                <div class="console-body" id="consoleBox"></div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head"><span class="panel-label">Execution Focus</span><span class="panel-tag" id="focusTag">Standby</span></div>
+                <div class="focus-body" id="focusBody">
+                    <div class="focus-slot" id="focus_scanner">
+                        <div class="execution-code">Scanner <span class="vr">sc</span> = <span class="kw">new</span> Scanner(System.in);</div>
+                        <div class="board-placard">A Scanner object is created to read input from the keyboard.</div>
+                    </div>
+                    <div class="focus-slot" id="focus_r">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">r</span> = sc.nextInt();</div>
+                        <div class="box-scene" id="focusRScene" style="margin-top:20px;">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusRChip">?</div>
+                        </div>
+                        <div class="board-placard">Type the number of ROWS in the console prompt!</div>
+                    </div>
+                    <div class="focus-slot" id="focus_c">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">c</span> = sc.nextInt();</div>
+                        <div class="box-scene" id="focusCScene" style="margin-top:20px;">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusCChip">?</div>
+                        </div>
+                        <div class="board-placard">Type the number of COLUMNS in the console prompt!</div>
+                    </div>
+                    <div class="focus-slot" id="focus_arr_create">
+                        <div class="execution-code"><span class="dt">int</span>[][] <span class="vr">arr</span> = <span class="kw">new</span> <span class="dt">int</span>[<span class="vr" id="fac_r">r</span>][<span class="vr" id="fac_c">c</span>];</div>
+                        <div class="array-2d-grid" id="focusArrayScene" style="display:flex; opacity:1; margin-top: 20px; background: transparent; border:none;"></div>
+                        <div class="board-placard" style="margin-top:20px;">The <code>new</code> keyword allocates a 2D grid in memory based on our runtime dimensions!</div>
+                    </div>
+                    
+                    <div class="focus-slot" id="focus_cond_i">
+                        <div class="execution-code">Outer: <span class="vr">i</span> &lt; <span class="vr">r</span></div>
+                        <div class="math-stage" id="math_cond_i">
+                            <span class="m-op-val" id="mc_i_v1">0</span>
+                            <span class="m-symb">&lt;</span>
+                            <span class="m-op-val" id="mc_i_v2">2</span>
+                        </div>
+                        <div class="board-placard" style="margin-top:100px;">Evaluating OUTER loop condition to see if we have more rows to process.</div>
+                    </div>
+                    <div class="focus-slot" id="focus_cond_j">
+                        <div class="execution-code">Inner: <span class="vr2">j</span> &lt; <span class="vr">c</span></div>
+                        <div class="math-stage" id="math_cond_j">
+                            <span class="m-op-val" id="mc_j_v1">0</span>
+                            <span class="m-symb">&lt;</span>
+                            <span class="m-op-val" id="mc_j_v2">3</span>
+                        </div>
+                        <div class="board-placard" style="margin-top:100px;">Evaluating INNER loop condition for columns in the current row.</div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_assign">
+                        <div class="execution-code"><span class="vr">arr</span>[<span class="vr" id="fa_i">i</span>][<span class="vr2" id="fa_j">j</span>] = sc.nextInt();</div>
+                        <div class="board-placard" style="margin-top:120px;">Type the value for grid cell [<span id="placard_idx_i" style="font-weight:bold; color:var(--val);"></span>][<span id="placard_idx_j" style="font-weight:bold; color:var(--val);"></span>] in the console.</div>
+                    </div>
+                </div>
+
+                <!-- ITERATION TRACKER TABLE -->
+                <div class="tracker-wrapper">
+                    <table class="tracker-table" id="trackerTable">
+                        <thead><tr><th>Step</th><th>i</th><th>j</th><th>Input Value</th><th>Array Target</th></tr></thead>
+                        <tbody id="trackerBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 3: RIGHT STACK TRAY -->
+        <div class="col">
+            <section class="panel stack-tray-panel" id="stackMemoryPanel">
+                <div class="panel-head"><span class="panel-label">Memory</span><span class="panel-tag">Variables & Heap</span></div>
+                <div class="stack-tray-body" id="stackTrayBody">
+                    
+                    <div class="memory-section" id="memStack">
+                        <div class="memory-title">Stack Memory</div>
+                        <div class="tray-empty" id="stackEmpty">— empty —</div>
+                        <div class="stack-container">
+                            <div class="stack-box-wrapper" id="mem_sc">
+                                <div class="stack-box-name">sc</div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" style="opacity: 1; font-size:11px; top:8px; padding: 2px 4px;">ref</div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_r">
+                                <div class="stack-box-name">int r</div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" id="val_r" style="opacity: 1; font-size:12px; top:8px;"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_c">
+                                <div class="stack-box-name">int c</div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" id="val_c" style="opacity: 1; font-size:12px; top:8px;"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper has-ref" id="mem_arr">
+                                <div class="stack-box-name">arr[][]</div>
+                                <div class="pointer-arrow"></div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" style="opacity: 1; font-size:11px; top:8px; color:var(--kw); border-color:var(--kw); padding: 2px 4px;">ref</div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_i">
+                                <div class="stack-box-name">int i</div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" id="val_i" style="opacity: 1; font-size:12px; top:8px;"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_j">
+                                <div class="stack-box-name">int j</div>
+                                <div class="box-scene" style="opacity: 1; transform: scale(1); width:36px; height:36px;"><div class="math-result-chip" id="val_j" style="opacity: 1; font-size:12px; top:8px;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="memory-section" id="memHeap" style="margin-top: 10px; min-height: 200px; opacity:0; transition: opacity 0.5s; flex: 1;">
+                        <div class="memory-title">Heap Memory</div>
+                        <div class="array-2d-grid" id="heapArray" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="panel transport-bar">
+                <div class="step-status" id="status">Step 0 / X</div>
+                <div class="transport-controls">
+                    <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play Auto</span></button>
+                    <button id="prevBtn" onclick="prevStep()" disabled><span>◂</span><span>Prev</span></button>
+                    <button id="nextBtn" onclick="nextStep()"><span>Next Step</span><span>▸</span></button>
+                    <button onclick="resetAnimation()" title="Reset Environment"><span>↻</span></button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TUTORIAL CONTENT SECTION -->
+    <div class="content-section">
+        <h2>2D ARRAYS — DETAILED NOTES</h2>
+        
+        <h3>1. What is a 2D Array?</h3>
+        <p>A 2D array (Two-Dimensional Array) is an array used to store data in the form of rows and columns.</p>
+        <p>It is commonly used to represent:</p>
+        <ul>
+            <li>Tables</li>
+            <li>Matrices</li>
+            <li>Marks of students</li>
+            <li>Seating arrangements</li>
+            <li>Grids</li>
+            <li>Game boards</li>
+            <li>Maps</li>
+            <li>Excel-like data</li>
+        </ul>
+        <p><strong>Example representation:</strong></p>
+<pre>        Column
+        0   1   2
+      ┌───┬───┬───┐
+Row 0 │ 10│ 20│ 30│
+      ├───┼───┼───┤
+Row 1 │ 40│ 50│ 60│
+      ├───┼───┼───┤
+Row 2 │ 70│ 80│ 90│
+      └───┴───┴───┘</pre>
+        <p>This contains: 3 rows, 3 columns, and 9 elements.</p>
+
+        <h3>2. Why Do We Need 2D Arrays?</h3>
+        <p>A normal 1D array stores data in a single line.</p>
+        <p><strong>1D Array</strong></p>
+<pre>10  20  30  40  50</pre>
+        <p>A 2D array stores data in rows and columns.</p>
+        <p><strong>2D Array</strong></p>
+<pre>10  20  30
+40  50  60
+70  80  90</pre>
+        <p>Therefore:</p>
+        <ul>
+            <li><strong>1D Array</strong> → One-dimensional data</li>
+            <li><strong>2D Array</strong> → Row and column-based data</li>
+        </ul>
+
+        <h3>3. Syntax of 2D Array</h3>
+        <p>There are several ways to declare a 2D array.</p>
+        <ul>
+            <li><strong>Syntax 1:</strong> <code>int[][] arr;</code></li>
+            <li><strong>Syntax 2:</strong> <code>int arr[][];</code></li>
+            <li><strong>Syntax 3:</strong> <code>int[] arr[];</code></li>
+        </ul>
+        <p>All three are valid, but <code>int[][] arr;</code> is <strong>Recommended</strong> because it clearly represents an "Array of arrays".</p>
+
+        <h3>4. Creating a 2D Array</h3>
+        <p><strong>Syntax:</strong></p>
+        <pre>int[][] arr = new int[3][4];</pre>
+        <p>This creates: 3 rows, 4 columns. Total = 12 elements.</p>
+        <p><strong>Representation:</strong></p>
+<pre>          Columns
+          0   1   2   3
+        ┌───┬───┬───┬───┐
+Row 0   │ 0 │ 0 │ 0 │ 0 │
+        ├───┼───┼───┼───┤
+Row 1   │ 0 │ 0 │ 0 │ 0 │
+        ├───┼───┼───┼───┤
+Row 2   │ 0 │ 0 │ 0 │ 0 │
+        └───┴───┴───┴───┘</pre>
+        <p>For an int array, the default value is <code>0</code>.</p>
+
+        <h3>5. Rows and Columns</h3>
+        <p>Consider: <code>int[][] arr = new int[3][4];</code></p>
+        <ul>
+            <li>The first number represents rows: <strong>3 → rows</strong></li>
+            <li>The second number represents columns: <strong>4 → columns</strong></li>
+        </ul>
+        <p>Total elements: Rows × Columns (3 × 4 = 12).</p>
+
+        <h3>6. Indexing in 2D Array</h3>
+        <p>Java uses zero-based indexing.</p>
+        <p>For <code>int[][] arr = new int[3][4];</code></p>
+        <ul>
+            <li><strong>Row indexes:</strong> 0, 1, 2</li>
+            <li><strong>Column indexes:</strong> 0, 1, 2, 3</li>
+        </ul>
+        <p>Therefore, the valid positions are:</p>
+<pre>arr[0][0]  arr[0][1]  arr[0][2]  arr[0][3]
+arr[1][0]  arr[1][1]  arr[1][2]  arr[1][3]
+arr[2][0]  arr[2][1]  arr[2][2]  arr[2][3]</pre>
+
+        <h3>7. Accessing an Element</h3>
+        <p><strong>Syntax:</strong> <code>arr[row][column]</code></p>
+        <p>Example: <code>arr[1][2]</code> means Row 1, Column 2.</p>
+        <p>Consider:</p>
+<pre>       0   1   2
+     ┌───┬───┬───┐
+  0  │10 │20 │30 │
+     ├───┼───┼───┤
+  1  │40 │50 │60 │
+     ├───┼───┼───┤
+  2  │70 │80 │90 │
+     └───┴───┴───┘</pre>
+        <p>Then <code>arr[1][2]</code> gives <strong>60</strong>.</p>
+
+        <h3>8. Updating an Element</h3>
+        <p>An element can be changed using its index.</p>
+        <p><strong>Concept:</strong> <code>arr[row][column] = value;</code></p>
+        <p>For example, if position <code>[1][1]</code> is changed in the previous matrix to 100:</p>
+<pre>10 20  30
+40 100 60
+70 80  90</pre>
+
+        <h3>9. Initialization of 2D Array</h3>
+        <p>A 2D array can be initialized directly.</p>
+<pre>int[][] arr = {
+    {10, 20, 30},
+    {40, 50, 60},
+    {70, 80, 90}
+};</pre>
+
+        <h3>10. How Java Understands a 2D Array</h3>
+        <p><strong>An important concept:</strong> Java does not have a traditional built-in matrix type. A Java 2D array is actually an <strong>Array whose elements are themselves arrays.</strong></p>
+        <p>For <code>int[][] arr;</code> Think:</p>
+<pre>arr
+ │
+ ├── row 0 → int[]
+ ├── row 1 → int[]
+ └── row 2 → int[]</pre>
+        <p>This is why Java supports jagged arrays.</p>
+
+        <h3>11. length in 2D Arrays</h3>
+        <p>There are two important uses of length.</p>
+        <ul>
+            <li><strong>Number of rows:</strong> <code>arr.length</code></li>
+            <li><strong>Number of columns in a particular row:</strong> <code>arr[row].length</code></li>
+        </ul>
+        <p>For a 3x3 array, <code>arr.length = 3</code>, and <code>arr[0].length = 3</code>, <code>arr[1].length = 3</code>, etc.</p>
+
+        <h3>12. Important Difference: arr.length vs arr[0].length</h3>
+        <p>This is very important in Java.</p>
+        <ul>
+            <li><code>arr.length</code> means <strong>Number of rows</strong></li>
+            <li><code>arr[0].length</code> means <strong>Number of elements in row 0</strong></li>
+        </ul>
+        <p>For a 3x4 grid, <code>arr.length</code> → 3, and <code>arr[0].length</code> → 4.</p>
+
+        <h3>13. Traversing a 2D Array</h3>
+        <p>Traversal means visiting every element of an array. The most common method is using nested loops.</p>
+        <p>Conceptually:</p>
+        <ul>
+            <li>Outer loop → rows</li>
+            <li>Inner loop → columns</li>
+        </ul>
+<pre>for each row
+    for each column
+        process element</pre>
+
+        <h3>14. Row-wise Traversal</h3>
+        <p>Row-wise traversal visits left to right, then top to bottom.</p>
+<pre>10 → 20 → 30
+40 → 50 → 60
+70 → 80 → 90</pre>
+        <p>Order: <code>[0][0], [0][1], [0][2], [1][0], [1][1]...</code></p>
+
+        <h3>15. Column-wise Traversal</h3>
+        <p>Column-wise traversal visits top to bottom, then left to right.</p>
+<pre>10  20  30
+40  50  60
+70  80  90</pre>
+        <p>Order: <code>[0][0], [1][0], [2][0], [0][1], [1][1], [2][1]...</code></p>
+
+        <h3>16. Nested Loop Concept</h3>
+        <p>For a rectangular array (Rows = 3, Columns = 4). The outer loop generally represents rows, and the inner loop represents columns. Total iterations: 3 × 4 = 12.</p>
+
+        <h3>17. Input in a 2D Array</h3>
+        <p>When taking input, the number of rows and columns is generally known first.</p>
+        <p><strong>Conceptually:</strong></p>
+<pre>Read rows, Read columns
+Create array
+For every row:
+    For every column:
+        Read value</pre>
+
+        <h3>18. Output of a 2D Array</h3>
+        <p>A 2D array is generally displayed row by row. Each row is normally displayed on a separate line.</p>
+
+        <h3>19. Default Values in 2D Arrays</h3>
+        <p>When an array is created using <code>new</code>, Java automatically assigns default values:</p>
+        <ul>
+            <li><code>int</code>: 0</li>
+            <li><code>long</code>: 0</li>
+            <li><code>float</code>: 0.0</li>
+            <li><code>double</code>: 0.0</li>
+            <li><code>char</code>: '\u0000'</li>
+            <li><code>boolean</code>: false</li>
+            <li><code>Reference types</code>: null</li>
+        </ul>
+
+        <h3>20. Rectangular 2D Array</h3>
+        <p>A rectangular 2D array has the same number of columns in every row.</p>
+        <p>Example: <code>int[][] arr = new int[3][3];</code></p>
+
+        <h3>21. Jagged Array</h3>
+        <p>A jagged array is a 2D array where different rows can have different numbers of elements.</p>
+        <p>Example:</p>
+<pre>10 20
+30 40 50
+60
+70 80 90 100</pre>
+        <p>Row 0 → 2 elements, Row 1 → 3 elements, Row 2 → 1 element, Row 3 → 4 elements.</p>
+
+        <h3>22. Why Are Jagged Arrays Possible?</h3>
+        <p>Because a Java 2D array is actually an <strong>Array of arrays</strong>. Each row can refer to an array with a different size.</p>
+<pre>arr
+ │
+ ├── arr[0] → [10, 20]
+ ├── arr[1] → [30, 40, 50]
+ ├── arr[2] → [60]
+ └── arr[3] → [70, 80, 90, 100]</pre>
+
+        <h3>23. Creating a Jagged Array</h3>
+        <p>First create the rows: <code>int[][] arr = new int[3][];</code></p>
+        <p>At this stage: 3 row references, but the individual row sizes have not yet been specified. Then each row can have a different size.</p>
+
+        <h3>24. Partial Initialization</h3>
+        <p>Java allows the following to create a jagged array:</p>
+<pre>int[][] arr = new int[][] {
+    {10, 20},
+    {30, 40, 50},
+    {60}
+};</pre>
+
+        <h3>25. Empty Rows</h3>
+        <p>A row can contain zero elements.</p>
+<pre>Row 0 → 3 elements
+Row 1 → 0 elements
+Row 2 → 2 elements</pre>
+        <p>So the second row is empty.</p>
+
+        <h3>26. null Row</h3>
+        <p>Because each row is itself an array reference, a row can also be null. Trying to access the length of a null row causes a <code>NullPointerException</code>.</p>
+
+        <h3>27. 2D Array and Memory</h3>
+        <p>A 2D array is stored using references to arrays. Unlike languages where a matrix may be represented as one continuous block, Java's 2D array is an array of row arrays. This is especially important for jagged arrays.</p>
+
+        <h3>28. 2D Array Dimensions</h3>
+        <p>A 2D array can be described using: Rows × Columns. (e.g., 4 x 5 = 20 total elements).</p>
+
+        <h3>29. Matrix</h3>
+        <p>A 2D array is frequently used to represent a matrix.</p>
+
+        <h3>30. Square Matrix</h3>
+        <p>A matrix with <strong>Rows = Columns</strong> is called a square matrix (e.g., 2×2, 3×3).</p>
+
+        <h3>31. Rectangular Matrix</h3>
+        <p>A matrix where <strong>Rows ≠ Columns</strong> is called a rectangular matrix.</p>
+
+        <h3>32. Main Diagonal</h3>
+        <p>In a square matrix, the main diagonal consists of elements where <code>row index = column index</code> (i.e., <code>i == j</code>).</p>
+
+        <h3>33. Secondary Diagonal</h3>
+        <p>The secondary diagonal goes from top-right to bottom-left. For an n × n matrix, the condition is <code>i + j = n - 1</code>.</p>
+
+        <h3>34. Upper Triangular Matrix</h3>
+        <p>Elements above the main diagonal are called the upper triangular part. Condition: <code>i < j</code>.</p>
+
+        <h3>35. Lower Triangular Matrix</h3>
+        <p>Elements below the main diagonal are called the lower triangular part. Condition: <code>i > j</code>.</p>
+
+        <h3>36. Diagonal Elements</h3>
+        <p>For a square matrix, <code>i == j</code> represents diagonal elements.</p>
+
+        <h3>37. Transpose of a Matrix</h3>
+        <p>The transpose of a matrix changes rows to columns and columns to rows. Conceptually: <code>transpose[j][i] = original[i][j]</code>.</p>
+
+        <h3>38. Important Matrix Operations</h3>
+        <ul>
+            <li><strong>Addition:</strong> A + B (Requires same dimensions)</li>
+            <li><strong>Subtraction:</strong> A - B (Requires same dimensions)</li>
+            <li><strong>Multiplication:</strong> m × n and n × p results in m × p matrix</li>
+            <li><strong>Transpose:</strong> Rows ↔ Columns</li>
+        </ul>
+
+        <h3>39. Matrix Addition</h3>
+        <p>Concept: <code>C[i][j] = A[i][j] + B[i][j]</code></p>
+
+        <h3>40. Matrix Subtraction</h3>
+        <p>Concept: <code>C[i][j] = A[i][j] - B[i][j]</code></p>
+
+        <h3>41. Matrix Multiplication</h3>
+        <p>Important rule: <strong>Columns of first matrix = Rows of second matrix</strong>.</p>
+
+        <h3>42. 2D Array Searching</h3>
+        <p>Searching can be performed in a 2D array by checking every element using nested loops.</p>
+
+        <h3>43. Linear Search in 2D Array</h3>
+        <p>Worst-case time complexity: <strong>O(R × C)</strong>. For a square matrix of size n × n: <strong>O(n²)</strong>.</p>
+
+        <h3>44. Finding Minimum Element</h3>
+        <p>Assume the first element is minimum, visit every element, and update if the current element is smaller. Time complexity: O(R × C).</p>
+
+        <h3>45. Finding Maximum Element</h3>
+        <p>Assume the first element is maximum, visit every element, and update if the current element is larger. Time complexity: O(R × C).</p>
+
+        <h3>46. Sum of All Elements</h3>
+        <p>Every element needs to be visited to sum them up. Time complexity: O(R × C).</p>
+
+        <h3>47. Row Sum</h3>
+        <p>Each row can have its own sum calculated.</p>
+
+        <h3>48. Column Sum</h3>
+        <p>Each column can have its own sum calculated.</p>
+
+        <h3>49. Row-wise Maximum</h3>
+        <p>Each row can have its own maximum found.</p>
+
+        <h3>50. Column-wise Maximum</h3>
+        <p>Each column can have its own maximum found.</p>
+
+        <h3>51. Enhanced for Loop</h3>
+        <p>Java provides an enhanced for loop (for-each loop). For a 2D array, there are two levels:</p>
+<pre>for each row
+    for each element in row
+        process element</pre>
+
+        <h3>52. Normal for vs Enhanced for</h3>
+        <ul>
+            <li><strong>Normal for:</strong> Useful when you need Row index, Column index, Position-based operations, or Updating specific positions.</li>
+            <li><strong>Enhanced for:</strong> Useful when you only need values, don't need indexes, and simple traversal is required.</li>
+        </ul>
+
+        <h3>53. Accessing Rows</h3>
+        <p>Since every row is an array, you can access a complete row conceptually using: <code>arr[row]</code>.</p>
+
+        <h3>54. Accessing a Particular Element</h3>
+        <p>To access an individual element: <code>arr[row][column]</code>. Two indexes are required.</p>
+
+        <h3>55. 2D Array with Different Data Types</h3>
+        <p>A 2D array has one declared element type (e.g., <code>int[][]</code>, <code>double[][]</code>, <code>String[][]</code>).</p>
+
+        <h3>56. Character 2D Array</h3>
+        <p>A <code>char[][]</code> can represent character grids, word-search boards, game boards, or maps.</p>
+
+        <h3>57. String 2D Array</h3>
+        <p>A <code>String[][]</code> can represent textual data in rows and columns.</p>
+
+        <h3>58. Boolean 2D Array</h3>
+        <p>A <code>boolean[][]</code> stores true/false and can be used for visited grids, game states, permission matrices, etc.</p>
+
+        <h3>59. 2D Array as a Grid</h3>
+        <p>Many programming problems represent a grid using <code>int[][]</code> or <code>char[][]</code> (e.g., Maze, Sudoku, Chess board, Tic-Tac-Toe, Image pixels).</p>
+
+        <h3>60. 2D Array and Grid Coordinates</h3>
+        <p>Every element has coordinates: <code>(row, column)</code>. This is similar to coordinates on a map.</p>
+
+        <h3>61. Neighboring Cells</h3>
+        <p>For current = <code>(i, j)</code>, four common directions are:</p>
+        <ul>
+            <li>Up → <code>(i-1, j)</code></li>
+            <li>Down → <code>(i+1, j)</code></li>
+            <li>Left → <code>(i, j-1)</code></li>
+            <li>Right → <code>(i, j+1)</code></li>
+        </ul>
+
+        <h3>62. Boundary Checking</h3>
+        <p>Before accessing a neighboring cell, indexes must remain valid: <code>0 ≤ row < R</code> and <code>0 ≤ column < C</code>.</p>
+
+        <h3>63. Common 2D Array Exception</h3>
+        <p><code>ArrayIndexOutOfBoundsException</code>: Occurs when an invalid index is accessed.</p>
+
+        <h3>64. NullPointerException</h3>
+        <p>This can occur when a row is null. E.g., if <code>arr[1] = null</code>, then <code>arr[1].length</code> throws a NullPointerException.</p>
+
+        <h3>65. 2D Array Size</h3>
+        <p>For a rectangular array: <strong>Rows × Columns</strong>. But for a jagged array, it is the sum of the lengths of all individual row arrays.</p>
+
+        <h3>66. Time Complexity of Common Operations</h3>
+        <table class="content-table">
+            <thead>
+                <tr>
+                    <th>Operation</th>
+                    <th>Time Complexity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Access element</td><td>O(1)</td></tr>
+                <tr><td>Update element</td><td>O(1)</td></tr>
+                <tr><td>Traverse all elements</td><td>O(R × C)</td></tr>
+                <tr><td>Search</td><td>O(R × C)</td></tr>
+                <tr><td>Find minimum</td><td>O(R × C)</td></tr>
+                <tr><td>Find maximum</td><td>O(R × C)</td></tr>
+                <tr><td>Sum all elements</td><td>O(R × C)</td></tr>
+                <tr><td>Transpose</td><td>O(R × C)</td></tr>
+                <tr><td>Matrix addition</td><td>O(R × C)</td></tr>
+            </tbody>
+        </table>
+        <p>For an N × N matrix, <code>O(R × C)</code> becomes <code>O(N²)</code>.</p>
+
+        <h3>67. Space Complexity</h3>
+        <p>For a rectangular R × C array: <strong>O(R × C)</strong>. For an N × N matrix: <strong>O(N²)</strong>.</p>
+
+        <h3>68. Important Difference: Size vs length</h3>
+        <p>Java arrays do not use <code>size()</code>. Use <code>length</code>.</p>
+        <ul>
+            <li><code>arr.length</code> → number of rows</li>
+            <li><code>arr[i].length</code> → number of elements in row i</li>
+        </ul>
+
+        <h3>69. Can We Use Negative Index?</h3>
+        <p>No. Java array indexes start at 0. Negative indexes are invalid.</p>
+
+        <h3>70. Can a 2D Array Have Zero Rows?</h3>
+        <p>Yes. Conceptually: <code>new int[0][5]</code> creates an array with 0 rows (<code>arr.length = 0</code>).</p>
+
+        <h3>71. Can a Row Have Zero Columns?</h3>
+        <p>Yes, especially with jagged arrays. A row can have 0 elements. This is different from the row itself being null.</p>
+
+        <h3>72. Can Rows Have Different Sizes?</h3>
+        <p>Yes. This is one of the most important features of Java 2D arrays, making them a <strong>Jagged array</strong>.</p>
+
+        <h3>73. 2D Array vs 1D Array</h3>
+        <table class="content-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>1D Array</th>
+                    <th>2D Array</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Dimensions</td><td>1</td><td>2</td></tr>
+                <tr><td>Indexes</td><td>1</td><td>2</td></tr>
+                <tr><td>Representation</td><td>Line</td><td>Rows & columns</td></tr>
+                <tr><td>Example</td><td><code>int[]</code></td><td><code>int[][]</code></td></tr>
+                <tr><td>Access</td><td><code>arr[i]</code></td><td><code>arr[i][j]</code></td></tr>
+                <tr><td>Common use</td><td>List</td><td>Matrix/Grid</td></tr>
+            </tbody>
+        </table>
+
+        <h3>74. 2D Array vs Jagged Array</h3>
+        <p>A <strong>rectangular 2D array</strong> has the same length for every row. A <strong>jagged array</strong> has rows of different lengths.</p>
+
+        <h3>75. Important Interview Points</h3>
+        <ul>
+            <li><strong>Point 1:</strong> <code>int[][]</code> means Two-dimensional array.</li>
+            <li><strong>Point 2:</strong> <code>arr.length</code> means Number of rows.</li>
+            <li><strong>Point 3:</strong> <code>arr[i].length</code> means Number of elements in row i.</li>
+            <li><strong>Point 4:</strong> Java 2D arrays are Arrays of arrays.</li>
+            <li><strong>Point 5:</strong> Rows can have different lengths.</li>
+            <li><strong>Point 6:</strong> This is called a Jagged array.</li>
+            <li><strong>Point 7:</strong> Array indexing starts from 0.</li>
+            <li><strong>Point 8:</strong> Accessing an element: <code>arr[row][column]</code></li>
+            <li><strong>Point 9:</strong> Rectangular array elements: Rows × Columns</li>
+            <li><strong>Point 10:</strong> Traversal generally uses Nested loops.</li>
+        </ul>
+
+    </div>
+</div>
+
+<script>
+function toggleTheme() { document.body.classList.toggle("dark"); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } 
+    else { if (document.exitFullscreen) document.exitFullscreen(); }
+}
+
+// --- Dynamic Variables Setup ---
+let userRows = null;
+let userCols = null;
+let currentRows = 2;
+let currentCols = 3;
+let userEnteredVals = []; 
+
+// --- Animation Core ---
+const actor = document.getElementById('actor');
+const payload = document.getElementById('actorPayload');
+let currentStep = 0;
+let playing = false;
+let activeAnimations = [];
+let typingInterval = null; 
+const script = [];
+
+function killAllAnimations() { 
+    activeAnimations.forEach(a => { if(a.cancel) a.cancel(); }); 
+    activeAnimations = []; 
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(resolve, ms);
+        activeAnimations.push({ cancel: () => { clearTimeout(t); reject("cancelled"); } });
+    });
+}
+
+function getRect(id) {
+    const el = document.getElementById(id);
+    if (!el) return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 };
+    const r = el.getBoundingClientRect();
+    // Forces a layout calc if it hasn't rendered yet
+    if (r.width === 0 && r.height === 0) void el.offsetHeight;
+    return el.getBoundingClientRect();
+}
+
+// Helper to find exactly where the user typed in the console
+function getConsoleInputStart() {
+    const consoleRect = getRect('consoleBox');
+    // Default Fallback
+    let startX = consoleRect.left + (consoleRect.width / 2) - 30;
+    let startY = consoleRect.bottom - 60;
+    
+    const inputs = document.querySelectorAll('#consoleBox .term-input');
+    if (inputs.length > 0) {
+        // Grab the most recently answered line to start from
+        const rect = inputs[inputs.length - 1].getBoundingClientRect();
+        if (rect.width > 0 && rect.top > 0) {
+            startY = rect.top - 50; 
+            startX = rect.right + 10; 
+        }
+    }
+    return { startX, startY };
+}
+
+
+function setArms(state) {
+    const armL = actor.querySelector('.arm-l');
+    const armR = actor.querySelector('.arm-r');
+    if(state === 'carry') { armL.setAttribute('d', 'M12,24 L0,15'); armR.setAttribute('d', 'M28,24 L40,15'); } 
+    else if(state === 'throw') { armL.setAttribute('d', 'M12,24 L0,24'); armR.setAttribute('d', 'M28,24 L40,24'); } 
+    else { armL.setAttribute('d', 'M12,24 L5,36'); armR.setAttribute('d', 'M28,24 L35,36'); }
+}
+
+function setFacing(startX, endX) {
+    const scale = endX < startX ? -1 : 1;
+    actor.querySelector('.actor-person').style.transform = `scaleX(${scale}) rotate(0deg)`;
+}
+
+// ============================================================================
+// SOLID TRANSITION LOGIC
+// ============================================================================
+
+async function actorFadeIn(x, y) {
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    actor.style.opacity = "0";
+    
+    // Force paint
+    void actor.offsetWidth; 
+    
+    actor.style.transition = 'opacity 300ms ease';
+    actor.style.opacity = "1";
+    await wait(300);
+}
+
+async function actorFadeOut() {
+    actor.style.transition = 'opacity 400ms ease';
+    actor.style.opacity = "0";
+    await wait(400);
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(-200px, -200px, 0)`;
+}
+
+async function animWalk(startX, startY, endX, endY, duration = 1500) {
+    setFacing(startX, endX);
+    actor.className = "actor-wrapper walking";
+    
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+    
+    // Force paint
+    void actor.offsetWidth;
+    
+    actor.style.transition = `transform ${duration}ms linear`;
+    actor.style.transform = `translate3d(${endX}px, ${endY}px, 0)`;
+    
+    await wait(duration);
+    
+    actor.className = "actor-wrapper";
+    actor.style.transition = 'none';
+}
+
+function createSparks(x, y, color = 'var(--accent)') {
+    for(let i=0; i<8; i++) {
+        let s = document.createElement('div');
+        s.className = 'spark'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.backgroundColor = color;
+        document.body.appendChild(s);
+        let angle = Math.random() * Math.PI * 2; let dist = Math.random() * 40 + 10;
+        s.animate([ {transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0} ], {duration: 400 + Math.random()*200, easing: 'cubic-bezier(.25, .8, .25, 1)'});
+        setTimeout(()=>s.remove(), 600);
+    }
+}
+
+function typeText(text) {
+    const el = document.getElementById('mascotCaption');
+    el.textContent = ""; el.classList.add("typing-cursor");
+    let i = 0; if (typingInterval) clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if(i < text.length) el.textContent += text[i++];
+        else { clearInterval(typingInterval); el.classList.remove("typing-cursor"); }
+    }, 20);
+}
+
+function appendToConsole(htmlString) {
+    const c = document.getElementById('consoleBox');
+    const existingForm = c.querySelector('.console-form');
+    if(existingForm) existingForm.remove();
+    const line = document.createElement('div');
+    line.className = 'term-line'; line.innerHTML = htmlString;
+    c.appendChild(line); c.scrollTop = c.scrollHeight;
+}
+
+function clearConsole() { document.getElementById('consoleBox').innerHTML = ''; }
+
+async function promptUserForInput(labelText) {
+    return new Promise((resolve) => {
+        const c = document.getElementById('consoleBox');
+        const line = document.createElement('div');
+        line.className = 'term-line'; line.innerHTML = labelText;
+        c.appendChild(line);
+
+        const form = document.createElement('form'); form.className = 'console-form';
+        const input = document.createElement('input'); input.type = 'number'; input.className = 'console-prompt-input'; input.placeholder = 'Type value & press Enter...';
+        form.appendChild(input); c.appendChild(form);
+        c.scrollTop = c.scrollHeight; input.focus();
+
+        form.onsubmit = (e) => {
+            e.preventDefault(); 
+            const val = parseInt(input.value); 
+            if (isNaN(val)) return;
+            form.remove();
+            line.remove();
+            resolve(val);
+        };
+    });
+}
+
+// 2D Array Grid Builder
+function build2DArrayHTML(rows, cols, defaultVal="0", prefix="") {
+    let html = `<div style="display: grid; grid-template-columns: repeat(${cols}, auto); gap: 10px; justify-content: center;">`;
+    for(let i=0; i<rows; i++) {
+        for(let j=0; j<cols; j++) {
+            html += `
+            <div class="array-slot-3d" id="${prefix}arr_slot_${i}_${j}">
+                <div class="box-scene popped" style="margin-top:0;">
+                    <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                    <div class="math-result-chip" id="${prefix}arr_val_${i}_${j}" style="opacity: 1;">${defaultVal}</div>
+                </div>
+                <div class="array-idx-badge">[${i}][${j}]</div>
+            </div>`;
+        }
+    }
+    html += `</div>`;
+    return html;
+}
+
+function setTrackerRow(rowNum) {
+    const rows = document.querySelectorAll('#trackerBody tr');
+    rows.forEach((tr, i) => {
+        tr.classList.remove('active', 'done', 'revealed');
+        if (i <= rowNum) tr.classList.add('revealed');
+        if (i < rowNum) tr.classList.add('done');
+        else if (i === rowNum) tr.classList.add('active');
+    });
+}
+
+const copyGrid = (grid) => grid.map(row => [...row]);
+
+// --- Script Generation ---
+function buildScript() {
+    script.length = 0;
+    currentRows = userRows !== null ? userRows : 2;
+    currentCols = userCols !== null ? userCols : 3;
+    
+    for(let i=0; i<currentRows; i++) { if(!userEnteredVals[i]) userEnteredVals[i] = []; }
+    
+    // STATE ARRAYS TO PREVENT PRE-FILLING
+    let cLines = [];
+    let gState = (userRows !== null && userCols !== null) ? Array.from({length: currentRows}, () => Array(currentCols).fill("0")) : [];
+
+    script.push({ text: "Welcome! Today we will learn how to create 2D Arrays dynamically at runtime using nested loops and Scanner.", line: 0, tag: "Standby", state: { sc: false, r: null, c: null, arr: false, i: null, j: null, cLines: [...cLines], gState: copyGrid(gState) } });
+
+    script.push({
+        text: "Line 4: We instantiate a Scanner object to read from the keyboard. The reference 'sc' is saved on the Stack.",
+        line: 4, tag: "Init Scanner", state: { sc: true, r: null, c: null, arr: false, i: null, j: null, cLines: [...cLines], gState: copyGrid(gState) },
+        action: async () => {
+            const slot = document.getElementById('focus_scanner'); slot.classList.add('show');
+            const y = getRect('src_sc').top - 10; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_sc').right + 20;
+            
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 1200);
+            setArms('carry'); payload.textContent = "Scanner"; payload.style.opacity = "1"; await wait(600);
+
+            const memPanel = getRect('mem_sc'); 
+            const targetMemX = memPanel.left + (memPanel.width / 2) - 30; // 60px human width centered
+            const targetMemY = memPanel.top - 70; 
+            
+            await animWalk(targetX, y, targetMemX, targetMemY, 1800);
+            payload.style.opacity = "0"; setArms('relaxed');
+            document.getElementById('stackEmpty').style.display = 'none'; document.getElementById('mem_sc').classList.add('stored');
+            createSparks(targetMemX + 30, targetMemY + 70); await wait(600);
+
+            await animWalk(targetMemX, targetMemY, startX, y, 1500); await wait(500); await actorFadeOut();
+        }
+    });
+
+    script.push({
+        text: "Line 6: First, we ask the user for the number of ROWS. Type your row count in the console!",
+        line: 6, tag: "Read Rows", state: { sc: true, r: userRows, c: null, arr: false, i: null, j: null, cLines: [...cLines], gState: copyGrid(gState) },
+        action: async () => {
+            const slot = document.getElementById('focus_r'); slot.classList.add('show');
+            
+            if(userRows === null) {
+                userRows = await promptUserForInput("Rows: ");
+                buildScript(); buildTracker(); 
+                await renderStep(currentStep); // ADDED AWAIT
+                return; 
+            }
+            
+            // Wait allowing DOM/display elements to paint before we measure them!
+            await wait(100);
+
+            // Clear box for visual effect BEFORE human reaches it
+            document.getElementById('val_r').textContent = "?";
+            
+            // Append the line the user literally just typed, so the actor can grab it visually.
+            appendToConsole(`Rows: <span class="term-input">${currentRows}</span>`);
+            await wait(50); // Small pause to let console scroll/paint calculate
+
+            const { startX, startY } = getConsoleInputStart();
+            const targetRect = getRect('mem_r'); 
+            const targetX = targetRect.left + (targetRect.width / 2) - 30; 
+            const targetY = targetRect.top - 70; 
+            
+            await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = currentRows; payload.style.opacity = "1"; await wait(600);
+            await animWalk(startX, startY, targetX, targetY, 1800); payload.style.opacity = "0"; setArms('throw');
+            
+            document.getElementById('mem_r').classList.add('stored'); 
+            const chip = document.getElementById('val_r'); chip.textContent = currentRows; chip.classList.add('bumping');
+            document.getElementById('focusRScene').classList.add('popped'); document.getElementById('focusRChip').textContent = currentRows;
+            createSparks(targetRect.left + targetRect.width/2, targetRect.top + targetRect.height/2, "var(--val)"); 
+            
+            setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+            await wait(1000); await actorFadeOut();
+        }
+    });
+
+    if(userRows !== null) {
+        cLines.push(`Rows: <span class="term-input">${currentRows}</span>`);
+
+        script.push({
+            text: "Line 8: Next, we ask for the number of COLUMNS. Type your column count in the console!",
+            line: 8, tag: "Read Cols", state: { sc: true, r: currentRows, c: userCols, arr: false, i: null, j: null, cLines: [...cLines], gState: copyGrid(gState) },
+            action: async () => {
+                const slot = document.getElementById('focus_c'); slot.classList.add('show');
+                
+                if(userCols === null) {
+                    userCols = await promptUserForInput("Cols: ");
+                    buildScript(); buildTracker(); 
+                    await renderStep(currentStep); // ADDED AWAIT
+                    return; 
+                }
+
+                await wait(100);
+
+                document.getElementById('val_c').textContent = "?";
+                appendToConsole(`Cols: <span class="term-input">${currentCols}</span>`);
+                await wait(50);
+
+                const { startX, startY } = getConsoleInputStart();
+                const targetRect = getRect('mem_c'); 
+                const targetX = targetRect.left + (targetRect.width / 2) - 30; 
+                const targetY = targetRect.top - 70; 
+                
+                await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = currentCols; payload.style.opacity = "1"; await wait(600);
+                await animWalk(startX, startY, targetX, targetY, 1800); payload.style.opacity = "0"; setArms('throw');
+                
+                document.getElementById('mem_c').classList.add('stored'); 
+                const chip = document.getElementById('val_c'); chip.textContent = currentCols; chip.classList.add('bumping');
+                document.getElementById('focusCScene').classList.add('popped'); document.getElementById('focusCChip').textContent = currentCols;
+                createSparks(targetRect.left + targetRect.width/2, targetRect.top + targetRect.height/2, "var(--val)"); 
+                setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+                await wait(1000); await actorFadeOut();
+            }
+        });
+        
+        if(userCols !== null) {
+            cLines.push(`Cols: <span class="term-input">${currentCols}</span>`);
+            gState = Array.from({length: currentRows}, () => Array(currentCols).fill("0"));
+            
+            script.push({
+                text: `Line 9: new int[${currentRows}][${currentCols}] executes. Allocates a 2D grid of size ${currentRows}x${currentCols} on the Heap!`,
+                line: 9, tag: "Allocate Heap Grid", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: null, j: null, cLines: [...cLines], gState: copyGrid(gState) },
+                action: async () => {
+                    const slot = document.getElementById('focus_arr_create'); slot.classList.add('show');
+                    document.getElementById('fac_r').textContent = currentRows; document.getElementById('fac_c').textContent = currentCols;
+                    
+                    await wait(100); // Give 'memHeap' time to unhide cleanly
+                    
+                    const y = getRect('src_arr').top; const startX = getRect('mem_r').left - 30;
+                    await actorFadeIn(startX, y); setArms('carry'); payload.innerHTML = `${currentRows}x${currentCols}`; payload.style.opacity = "1"; await wait(600);
+
+                    const targetX = getRect('src_arr').right + 30; await animWalk(startX, y, targetX, y, 1200); await wait(400);
+
+                    const hRect = getRect('memHeap');
+                    const targetMemX = hRect.left + (hRect.width/2) - 30;
+                    const targetMemY = hRect.top + 20;
+                    
+                    const heapPanel = document.getElementById('memHeap'); heapPanel.style.opacity = "1"; 
+                    await animWalk(targetX, y, targetMemX, targetMemY, 1800);
+                    
+                    payload.style.opacity = "0"; setArms('throw'); await wait(300);
+
+                    const arrUI = document.getElementById('heapArray'); arrUI.innerHTML = build2DArrayHTML(currentRows, currentCols, "0", "heap_"); arrUI.classList.add('stored');
+                    createSparks(targetMemX + 30, targetMemY + 50, "var(--val)");
+
+                    const fArray = document.getElementById('focusArrayScene'); fArray.innerHTML = build2DArrayHTML(currentRows, currentCols, "0", "focus_");
+                    
+                    await wait(700); setArms('relaxed'); document.getElementById('mem_arr').classList.add('stored'); await wait(500); await actorFadeOut();
+                }
+            });
+
+            let trIdx = 0;
+
+            for(let i=0; i <= currentRows; i++) {
+                if(i < currentRows) {
+                    if(i===0) {
+                        script.push({ text: `Line 10: Outer loop starts. Initialize row counter 'i' to 0.`, line: 10, tag: "Outer Init", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: null, cLines: [...cLines], gState: copyGrid(gState), row: trIdx }, action: async () => { document.getElementById('mem_i').classList.add('stored'); document.getElementById('val_i').textContent = i; } });
+                    } else {
+                        script.push({
+                            text: `Line 10: Outer loop update. We increment row counter 'i' to ${i}.`, line: 10, tag: "Outer Update", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: null, cLines: [...cLines], gState: copyGrid(gState), row: trIdx },
+                            action: async () => {
+                                document.getElementById('val_i').textContent = i - 1;
+                                const startRect = getRect('src_inc_i'); const startX = startRect.right + 20; const startY = startRect.top - 10;
+                                await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = "+1"; payload.style.opacity = "1"; await wait(600);
+                                const targetRect = getRect('mem_i'); 
+                                const targetX = targetRect.left + (targetRect.width / 2) - 30; 
+                                const targetY = targetRect.top - 70;
+                                await animWalk(startX, startY, targetX, targetY, 1800); payload.style.opacity = "0"; setArms('throw');
+                                const el = document.getElementById('val_i'); el.textContent = i; el.classList.add('bumping'); createSparks(targetRect.left + targetRect.width/2, targetRect.top + targetRect.height/2, "var(--val)");
+                                setTimeout(() => { el.classList.remove('bumping'); setArms('relaxed'); }, 800); await wait(900); await actorFadeOut();
+                            }
+                        });
+                    }
+
+                    script.push({ text: `Line 10: Check outer condition: is i (${i}) < r (${currentRows})? Yes, process this row.`, line: 10, tag: "Outer Cond", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: null, cLines: [...cLines], gState: copyGrid(gState), row: trIdx }, action: async () => { const slot = document.getElementById('focus_cond_i'); slot.classList.add('show'); document.getElementById('mc_i_v1').textContent = i; document.getElementById('mc_i_v2').textContent = currentRows; await wait(400); slot.classList.add('eval'); const mathStage = document.getElementById('math_cond_i'); mathStage.classList.add('do-math'); await wait(800); mathStage.classList.add('math-success'); } });
+
+                    for(let j=0; j <= currentCols; j++) {
+                        if(j < currentCols) {
+                            if(j===0) {
+                                script.push({ text: `Line 11: Inner loop starts for row ${i}. Initialize col counter 'j' to 0.`, line: 11, tag: "Inner Init", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: j, cLines: [...cLines], gState: copyGrid(gState), row: trIdx }, action: async () => { document.getElementById('mem_j').classList.add('stored'); document.getElementById('val_j').textContent = j; } });
+                            } else {
+                                script.push({
+                                    text: `Line 11: Inner loop update. Increment col counter 'j' to ${j}.`, line: 11, tag: "Inner Update", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: j, cLines: [...cLines], gState: copyGrid(gState), row: trIdx },
+                                    action: async () => {
+                                        document.getElementById('val_j').textContent = j - 1;
+                                        const startRect = getRect('src_inc_j'); const startX = startRect.right + 20; const startY = startRect.top - 10;
+                                        await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = "+1"; payload.style.opacity = "1"; await wait(600);
+                                        const targetRect = getRect('mem_j'); 
+                                        const targetX = targetRect.left + (targetRect.width / 2) - 30; 
+                                        const targetY = targetRect.top - 70;
+                                        await animWalk(startX, startY, targetX, targetY, 1800); payload.style.opacity = "0"; setArms('throw');
+                                        const el = document.getElementById('val_j'); el.textContent = j; el.classList.add('bumping'); createSparks(targetRect.left + targetRect.width/2, targetRect.top + targetRect.height/2, "var(--var2)");
+                                        setTimeout(() => { el.classList.remove('bumping'); setArms('relaxed'); }, 800); await wait(900); await actorFadeOut();
+                                    }
+                                });
+                            }
+
+                            script.push({ text: `Line 11: Check inner condition: is j (${j}) < c (${currentCols})? Yes.`, line: 11, tag: "Inner Cond", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: j, cLines: [...cLines], gState: copyGrid(gState), row: trIdx }, action: async () => { const slot = document.getElementById('focus_cond_j'); slot.classList.add('show'); document.getElementById('mc_j_v1').textContent = j; document.getElementById('mc_j_v2').textContent = currentCols; await wait(400); slot.classList.add('eval'); const mathStage = document.getElementById('math_cond_j'); mathStage.classList.add('do-math'); await wait(800); mathStage.classList.add('math-success'); } });
+
+                            script.push({
+                                text: `Line 12: sc.nextInt() waits for input for arr[${i}][${j}]. Type it in the console!`, line: 12, tag: `Assign arr[${i}][${j}]`, 
+                                // VERY IMPORTANT: Pass state EXACTLY as it was BEFORE this assignment
+                                state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: j, cLines: [...cLines], gState: copyGrid(gState), row: trIdx },
+                                action: async () => {
+                                    const slot = document.getElementById('focus_assign'); slot.classList.add('show');
+                                    document.getElementById('fa_i').textContent = i; document.getElementById('fa_j').textContent = j;
+                                    document.getElementById('placard_idx_i').textContent = i; document.getElementById('placard_idx_j').textContent = j;
+
+                                    if(userEnteredVals[i][j] === undefined) {
+                                        const val = await promptUserForInput(`arr[${i}][${j}]: `);
+                                        userEnteredVals[i][j] = val;
+                                        buildScript(); buildTracker(); 
+                                        await renderStep(currentStep); // ADDED AWAIT
+                                        return; 
+                                    } 
+                                    
+                                    await wait(100);
+
+                                    // FORCE visual blanking before human starts
+                                    document.getElementById(`heap_arr_val_${i}_${j}`).textContent = "0";
+
+                                    const valToUse = userEnteredVals[i][j];
+                                    const rowElem = document.getElementById(`tr_row_${trIdx}`); if(rowElem) rowElem.children[3].textContent = valToUse;
+
+                                    // Manually insert into console ONLY for the animation sequence to prevent double prints!
+                                    appendToConsole(`arr[${i}][${j}]: <span class="term-input">${valToUse}</span>`);
+                                    await wait(50);
+
+                                    const { startX, startY } = getConsoleInputStart();
+                                    
+                                    await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = valToUse; payload.style.opacity = "1"; await wait(500);
+
+                                    const arrSlot = document.getElementById(`heap_arr_slot_${i}_${j}`); arrSlot.classList.add('highlight');
+                                    const targetRect = getRect(`heap_arr_slot_${i}_${j}`); 
+                                    const targetX = targetRect.left + (targetRect.width / 2) - 30; 
+                                    const targetY = targetRect.top - 70; 
+
+                                    await animWalk(startX, startY, targetX, targetY, 2000);
+                                    
+                                    setArms('throw'); payload.style.opacity = "0";
+                                    const chip = document.getElementById(`heap_arr_val_${i}_${j}`); chip.textContent = valToUse; chip.classList.add('bumping');
+                                    createSparks(targetRect.left + targetRect.width/2, targetRect.top + targetRect.height/2, "var(--val)");
+                                    
+                                    setTimeout(() => { chip.classList.remove('bumping'); arrSlot.classList.remove('highlight'); setArms('relaxed'); }, 800);
+                                    await wait(1000); await actorFadeOut();
+                                }
+                            });
+                            
+                            // AFTER the action, update the history states so Future Steps see it!
+                            if(userEnteredVals[i] && userEnteredVals[i][j] !== undefined) {
+                                cLines.push(`arr[${i}][${j}]: <span class="term-input">${userEnteredVals[i][j]}</span>`);
+                                gState[i][j] = userEnteredVals[i][j];
+                            }
+                            trIdx++;
+                        } else {
+                            script.push({ text: `Line 11: Check inner condition: is j (${j}) < c (${currentCols})? No. End of row ${i}.`, line: 11, tag: "Inner Loop End", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: j, cLines: [...cLines], gState: copyGrid(gState), row: trIdx-1 }, action: async () => { document.getElementById('val_j').textContent = j; const slot = document.getElementById('focus_cond_j'); slot.classList.add('show'); document.getElementById('mc_j_v1').textContent = j; document.getElementById('mc_j_v2').textContent = currentCols; await wait(400); slot.classList.add('eval'); const mathStage = document.getElementById('math_cond_j'); mathStage.classList.add('do-math'); await wait(800); mathStage.classList.add('math-fail'); } });
+                        }
+                    }
+                } else {
+                     script.push({ text: `Line 10: Check outer condition: is i (${i}) < r (${currentRows})? No. Outer loop terminates!`, line: 10, tag: "Outer Loop End", state: { sc: true, r: currentRows, c: currentCols, arr: true, i: i, j: null, cLines: [...cLines], gState: copyGrid(gState), row: trIdx }, action: async () => { document.getElementById('val_i').textContent = i; const slot = document.getElementById('focus_cond_i'); slot.classList.add('show'); document.getElementById('mc_i_v1').textContent = i; document.getElementById('mc_i_v2').textContent = currentRows; await wait(400); slot.classList.add('eval'); const mathStage = document.getElementById('math_cond_i'); mathStage.classList.add('do-math'); await wait(800); mathStage.classList.add('math-fail'); } });
+                }
+            }
+        }
+    }
+}
+
+function buildTracker() {
+    const tb = document.getElementById('trackerBody'); tb.innerHTML = '';
+    let trIdx = 0;
+    for(let i=0; i<currentRows; i++) {
+        for(let j=0; j<currentCols; j++) {
+            let val = (userEnteredVals[i] && userEnteredVals[i][j] !== undefined) ? userEnteredVals[i][j] : "?";
+            tb.innerHTML += `<tr id="tr_row_${trIdx}"><td>#${trIdx+1}</td><td>${i}</td><td>${j}</td><td>${val}</td><td><code>arr[${i}][${j}]</code></td></tr>`;
+            trIdx++;
+        }
+    }
+    tb.innerHTML += `<tr id="tr_row_${trIdx}"><td>#${trIdx+1}</td><td>${currentRows}</td><td><span class="muted">-</span></td><td><span class="muted">N/A</span></td><td><span style="color:var(--barrier); font-weight:bold;">Exit Loops</span></td></tr>`;
+}
+
+// 100% PRE-FILL PROOF DOM UPDATER
+function fastForwardToState(stepIdx) {
+    if(!script[stepIdx]) return;
+    const state = script[stepIdx].state;
+    
+    document.getElementById('mem_sc').classList.toggle('stored', state.sc);
+    document.getElementById('stackEmpty').style.display = state.sc ? 'none' : 'block';
+
+    if (state.r !== null) { document.getElementById('mem_r').classList.add('stored'); document.getElementById('val_r').textContent = state.r; } else document.getElementById('mem_r').classList.remove('stored');
+    if (state.c !== null) { document.getElementById('mem_c').classList.add('stored'); document.getElementById('val_c').textContent = state.c; } else document.getElementById('mem_c').classList.remove('stored');
+
+    const heapPanel = document.getElementById('memHeap');
+    if (state.arr) {
+        heapPanel.style.opacity = "1"; document.getElementById('mem_arr').classList.add('stored');
+        const arrUI = document.getElementById('heapArray');
+        arrUI.innerHTML = build2DArrayHTML(currentRows, currentCols, "0", "heap_"); arrUI.classList.add('stored');
+        
+        // ONLY populates up to the CURRENT historical state, completely hiding newly entered values!
+        for(let i = 0; i < currentRows; i++) {
+            for(let j = 0; j < currentCols; j++) {
+                const el = document.getElementById(`heap_arr_val_${i}_${j}`);
+                if(el && state.gState && state.gState[i] && state.gState[i][j] !== undefined) { 
+                    el.textContent = state.gState[i][j]; 
+                }
+            }
+        }
+    } else {
+        heapPanel.style.opacity = "0"; document.getElementById('mem_arr').classList.remove('stored'); document.getElementById('heapArray').classList.remove('stored');
+    }
+
+    if (state.i !== null) { document.getElementById('mem_i').classList.add('stored'); document.getElementById('val_i').textContent = state.i; } else document.getElementById('mem_i').classList.remove('stored');
+    if (state.j !== null) { document.getElementById('mem_j').classList.add('stored'); document.getElementById('val_j').textContent = state.j; } else document.getElementById('mem_j').classList.remove('stored');
+    
+    // STRICTLY rebuild console from state.cLines to prevent double printing
+    clearConsole();
+    if(state.cLines) {
+        state.cLines.forEach(line => appendToConsole(line));
+    }
+
+    if(state.row !== undefined) setTrackerRow(state.row); else setTrackerRow(-1);
+}
+
+function resetUI() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.focus-slot').forEach(el => { el.classList.remove('show', 'eval', 'stored'); el.style.opacity = "1"; });
+    document.querySelectorAll('.box-scene').forEach(el => el.classList.remove('popped'));
+    document.querySelectorAll('.math-stage').forEach(el => { el.classList.remove('do-math', 'math-success', 'math-fail'); });
+    document.querySelectorAll('.spark, .zap-fx, .throw-item').forEach(el => el.remove());
+    
+    actor.style.transition = "none"; 
+    actor.style.opacity = "0"; 
+    actor.style.transform = "translate3d(-200px, -200px, 0)"; 
+    actor.className = "actor-wrapper"; 
+    setArms('relaxed'); 
+    payload.style.opacity = "0";
+    
+    document.querySelectorAll('.array-slot-3d').forEach(el => el.classList.remove('highlight'));
+}
+
+async function renderStep(stepIndex) {
+    if (stepIndex >= script.length) return;
+    const step = script[stepIndex];
+    document.getElementById("status").textContent = `Step ${stepIndex} / ${script.length - 1}`;
+    document.getElementById("focusTag").textContent = step.tag;
+    document.getElementById("prevBtn").disabled = (stepIndex === 0);
+    document.getElementById("nextBtn").disabled = (stepIndex === script.length - 1);
+    
+    killAllAnimations(); resetUI(); fastForwardToState(stepIndex); typeText(step.text);
+    if (step.line > 0) document.getElementById("line" + step.line).classList.add("active");
+    if (step.action) { try { await step.action(); } catch(e) { } }
+}
+
+async function playAuto() {
+    playing = true; const btn = document.getElementById("playBtn"); btn.innerHTML = "<span>⏸</span><span>Pause</span>";
+    while (playing && currentStep < script.length) {
+        await renderStep(currentStep);
+        if (playing && currentStep < script.length - 1) { try { await wait(1500); currentStep++; } catch(e) { break; } }
+        else pause();
+    }
+}
+function pause() { playing = false; document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play Auto</span>"; }
+function togglePlay() { if (playing) pause(); else { if (currentStep >= script.length - 1) currentStep = 0; playAuto(); } }
+async function nextStep() { pause(); if (currentStep < script.length - 1) { currentStep++; await renderStep(currentStep); } }
+function prevStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(currentStep); } }
+function resetAnimation() { pause(); userRows = null; userCols = null; userEnteredVals = []; currentStep = 0; buildScript(); buildTracker(); renderStep(0); }
+
+window.onload = () => { buildScript(); buildTracker(); renderStep(0); };
+</script>
+</body>
+</html>

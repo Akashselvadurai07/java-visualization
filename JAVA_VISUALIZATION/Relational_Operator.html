@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Java Assignment Operators — Dynamic Throw & Synthesis</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page {
+    max-width: 1650px;
+    margin: 0 auto;
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 0.85fr;
+    gap: 16px;
+    flex-grow: 1;
+    position: relative; 
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--rule);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.panel-label, .panel-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    flex-wrap: wrap;
+}
+
+.main-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    margin: 0;
+    color: var(--ink);
+    padding-right: 16px;
+    border-right: 1px solid var(--rule);
+}
+
+.mascot-frame {
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mascot-avatar {
+    width: 100%;
+    height: 100%;
+    animation: mascotBob 3s ease-in-out infinite;
+}
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.mascot-frame.pop { animation: avatarPop .4s ease; }
+@keyframes avatarPop { 0% { transform:scale(.9); } 50% { transform:scale(1.05); } 100% { transform:scale(1); } }
+
+.speech-bubble {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 14px 18px;
+    transform-origin: left center;
+}
+
+.speech-bubble p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); min-height: 24px; }
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.theme-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    margin-left: auto;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ---------- COLUMN 1: SOURCE CODE ---------- */
+.code-body {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    padding: 16px 0; 
+    height: 440px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.code-line {
+    display: flex;
+    padding: 2px 20px; 
+    border-left: 4px solid transparent;
+    white-space: pre;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.spacer-line { margin-bottom: 35px; }
+
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 36px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); }
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+
+
+/* ---------- COLUMN 2: ACTIVE FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body {
+    padding: 50px 20px 20px; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+    align-items: stretch; 
+    position: relative;
+    min-height: 480px;
+}
+
+.focus-slot {
+    display: none;
+    width: 100%;
+    grid-template-columns: 1fr; 
+    align-items: start;
+    justify-items: center; 
+    gap: 30px;
+    padding: 24px;
+    border: 1.5px solid var(--accent);
+    background: var(--accent-wash);
+    border-radius: 16px;
+    height: auto; 
+}
+
+.focus-slot.show { display: grid; }
+
+.slot-visuals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    width: 100%;
+}
+
+/* Explicit Execution Code Badge */
+.execution-code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--code-bg);
+    border: 1px dashed var(--dt);
+    padding: 8px 18px;
+    border-radius: 8px;
+    margin-bottom: 50px; 
+    text-align: center;
+    position: relative;
+    z-index: 20;
+}
+.execution-code .dt { color: var(--dt); }
+.execution-code .vr { color: var(--var); }
+.execution-code .val { color: var(--val); }
+.execution-code .op { color: var(--math-op); }
+
+
+/* ---------- MATH SYNTHESIS ANIMATION ---------- */
+.math-stage {
+    position: absolute;
+    top: 70px; 
+    left: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-50%);
+    font-family: "JetBrains Mono", monospace;
+    z-index: 15;
+    margin-bottom: 20px;
+}
+
+.m-symb {
+    font-size: 54px;
+    color: var(--math-op);
+    font-weight: 700;
+    opacity: 0;
+    transform: scale(0);
+}
+
+@keyframes symPulse {
+    0%, 15% { transform: scale(0); opacity: 0; }
+    25% { transform: scale(1.3); opacity: 1; }
+    60% { transform: scale(1); opacity: 1; }
+    70%, 100% { transform: scale(0); opacity: 0; }
+}
+.focus-slot.eval .m-symb { animation: symPulse 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+
+/* ---------- 3D VARIABLE CONTAINER BOX ---------- */
+.box-scene {
+    width: 80px;
+    height: 90px;
+    perspective: 350px;
+    position: relative;
+    flex-shrink: 0;
+    z-index: 5;
+    margin-top: 25px; 
+}
+
+.box-3d {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    left: 13px;
+    top: 20px;
+    transform-style: preserve-3d;
+    transform: rotateX(-20deg) rotateY(35deg);
+    transition: transform 0.3s ease;
+}
+
+.box-face {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background: transparent;
+}
+
+.box-floor { background: rgba(255,176,0,0.12); transform-origin: center; transform: rotateX(-90deg) translateZ(27px) scale(1); }
+.box-back  { transform-origin: bottom center; transform: rotateY(180deg) translateZ(27px) scaleY(1); }
+.box-left  { transform-origin: bottom center; transform: rotateY(-90deg) translateZ(27px) scaleY(1); }
+.box-right { transform-origin: bottom center; transform: rotateY(90deg) translateZ(27px) scaleY(1); }
+
+.math-result-chip {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(0);
+    min-width: 65px;
+    padding: 4px 8px;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--val);
+    background: var(--panel);
+    border: 1.5px solid var(--val);
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    opacity: 0;
+    z-index: 10;
+    transform-style: preserve-3d;
+}
+
+@keyframes boxImpactMath {
+    0%, 40% { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px); }
+    45%     { transform: rotateX(-26deg) rotateY(35deg) translateY(8px) scaleY(0.85); background: rgba(255,176,0,0.4); }
+    55%     { transform: rotateX(-16deg) rotateY(35deg) translateY(-4px) scaleY(1.05); }
+    65%, 100% { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px) scaleY(1); background: transparent; }
+}
+@keyframes chipDropMath {
+    0%, 35% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(0.5); }
+    45% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.2); }
+    70%, 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.focus-slot.eval .box-3d { animation: boxImpactMath 2s linear forwards; }
+.focus-slot.eval .math-result-chip { animation: chipDropMath 2s linear forwards; }
+.focus-slot.stored .math-result-chip { opacity: 1; transform: translateX(-50%) scale(1); }
+
+@keyframes boxImpactDirect {
+    0%, 20% { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px); }
+    25%     { transform: rotateX(-26deg) rotateY(35deg) translateY(8px) scaleY(0.85); }
+    35%     { transform: rotateX(-16deg) rotateY(35deg) translateY(-4px) scaleY(1.05); }
+    45%, 100% { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px) scaleY(1); }
+}
+@keyframes chipDropDirect {
+    0%, 15% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(0.5); }
+    25% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.2); }
+    50%, 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.focus-slot.eval.base-assign .box-3d { animation: boxImpactDirect 2s linear forwards; }
+.focus-slot.eval.base-assign .math-result-chip { animation: chipDropDirect 2s linear forwards; }
+
+/* Placard below the box */
+.board-scene {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.board-placard {
+    background: var(--panel);
+    border: 1.5px solid var(--placard-border);
+    border-radius: 9px;
+    padding: 12px 14px;
+    width: 300px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    z-index: 3;
+}
+.focus-slot.eval .board-placard { animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.6s forwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+.bp-def { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: var(--ink); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--rule); line-height: 1.3; }
+.bp-line { display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; margin-bottom: 3px; }
+.bp-lbl { color: var(--muted); }
+.bp-val { color: var(--ink); font-weight: 600; text-align: right; font-size: 12px;}
+.bp-val.dt-color { color: var(--dt); text-transform: lowercase; font-weight: 700;}
+
+/* Bottom Info Section */
+.slot-info { display: flex; flex-direction: column; gap: 12px; min-width: 0; justify-content: center; align-items: center; width: 100%;}
+.slot-addr { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); }
+.slot-main { display: flex; align-items: baseline; gap: 10px; font-family: "JetBrains Mono", monospace; flex-wrap: wrap; }
+.slot-type { font-size: 17px; text-transform: uppercase; color: var(--dt); }
+.slot-name { font-size: 20px; font-weight: 600; color: var(--var); }
+
+.slot-assign {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.4s ease;
+}
+.slot-eq { color: var(--muted); font-size: 18px; }
+.slot-value { font-size: 20px; font-weight: 700; color: var(--val); }
+.slot-semi { color: var(--muted); font-size: 18px; }
+
+.focus-slot.eval .slot-assign, .focus-slot.stored .slot-assign { opacity: 1; transform: translateX(0); }
+.focus-slot.eval .slot-assign { transition-delay: 1.2s; }
+.focus-slot.eval.base-assign .slot-assign { transition-delay: 0.8s; }
+
+
+/* ---------- COLUMN 3: PERSISTENT RIGHT-SIDE STACK TRAY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; }
+.stack-tray-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 600px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+/* Highlighted Scrollbar */
+.stack-tray-body::-webkit-scrollbar { width: 8px; }
+.stack-tray-body::-webkit-scrollbar-track { background: var(--paper); border-radius: 4px; }
+.stack-tray-body::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 4px; }
+
+.tray-empty {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    padding: 24px 8px;
+}
+
+.mini-slot {
+    display: none;
+    opacity: 0;
+    transform: translateX(-60px); 
+    grid-template-columns: 55px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 12px;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mini-slot.stored {
+    display: grid;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mini-slot.active-mini {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+}
+
+.mini-icon {
+    width: 48px;
+    height: 40px;
+    border-radius: 6px;
+    background: rgba(255,176,0,0.15);
+    border: 1.5px solid var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-ink);
+}
+
+.mini-info { display: flex; flex-direction: column; gap: 2px; }
+.mini-name { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; color: var(--var); }
+.mini-type { font-family: "JetBrains Mono", monospace; font-size: 11px; text-transform: uppercase; color: var(--dt); }
+.mini-addr { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); }
+.mini-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--val);
+}
+
+/* =====================================================
+   GLOBAL HUMAN CARRIERS
+   ===================================================== */
+.value-carrier {
+    position:fixed;
+    left:0;
+    top:0;
+    width:150px;
+    height:72px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    z-index:99999;
+    pointer-events:none;
+    transform:translate3d(-300px,-300px,0);
+}
+
+.carrier-person {
+    width:35px;
+    height:50px;
+    flex:0 0 35px;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));
+}
+
+.carrier-person .skin { fill:#f2c9a0; }
+.carrier-person .shirt { fill:var(--dt); }
+.carrier-person .outline { stroke:var(--ink); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+.carrier-value {
+    min-width:36px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1.5px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:14px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 14px rgba(0,0,0,.12);
+}
+
+.value-carrier.active { opacity:1; }
+.value-carrier.walking .carrier-person { animation:walkBob .35s ease-in-out infinite alternate; }
+
+@keyframes walkBob {
+    from { transform:translateY(0) rotate(-2deg); }
+    to { transform:translateY(-3px) rotate(2deg); }
+}
+
+.value-carrier.printing .carrier-person { animation:humanThrow .45s ease-in-out infinite alternate; }
+
+@keyframes humanThrow {
+    0% { transform:translateY(0) rotate(-3deg); }
+    50% { transform:translateY(-5px) rotate(-8deg); }
+    100% { transform:translateY(2px) rotate(8deg); }
+}
+
+/* Flipped variation for Right-Side operand carrier */
+.value-carrier.flipped .carrier-person { transform: scaleX(-1); }
+.value-carrier.flipped.walking .carrier-person { animation: walkBobFlipped .35s ease-in-out infinite alternate; }
+@keyframes walkBobFlipped {
+    from { transform: scaleX(-1) translateY(0) rotate(-2deg); }
+    to { transform: scaleX(-1) translateY(-3px) rotate(2deg); }
+}
+.value-carrier.flipped .carrier-value { order: -1; }
+
+/* VALUE BEING THROWN TO CONSOLE */
+.throw-value {
+    position:fixed;
+    z-index:100000;
+    min-width:48px;
+    padding:5px 9px;
+    border-radius:999px;
+    border:2px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.18);
+    pointer-events:none;
+    opacity:0;
+}
+.throw-value.flying { opacity:1; }
+
+
+/* ---------- CONSOLE PANEL ---------- */
+.console-body {
+    background: var(--term-bg);
+    padding: 20px 24px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    line-height: 2;
+    height: 180px;
+    overflow-y: auto;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    scroll-behavior: smooth;
+}
+
+.term-line { color: var(--term-text); opacity: 0; transform: translateX(-6px); transition: all 0.35s ease; display: none;}
+.term-line.show { opacity: 1; transform: translateX(0); display: block;}
+.term-line::before { content: "$ println → "; color: var(--term-muted); }
+.term-line.receiving { animation:consoleReceive .6s cubic-bezier(.175,.885,.32,1.275); }
+
+@keyframes consoleReceive {
+    0% { transform:translateX(-20px) scale(.6); opacity:0; }
+    60% { transform:translateX(5px) scale(1.15); opacity:1; }
+    100% { transform:translateX(0) scale(1); opacity:1; }
+}
+
+/* ---------- TRANSPORT BAR ---------- */
+.transport-bar {
+    display:flex;
+    flex-direction:row; 
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-top: 1px solid var(--rule);
+    gap:12px;
+}
+
+.step-status {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--muted);
+    min-width: 120px;
+}
+
+.transport-controls {
+    display:flex;
+    gap:10px;
+}
+
+
+.transport-bar button {
+    font-family:"JetBrains Mono",monospace;
+    font-size:14px;
+    font-weight:600;
+    background:var(--panel); 
+    color:var(--ink);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    
+    height: 38px;
+    padding: 0 16px;
+    
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: center;
+    gap: 8px; 
+    
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+.transport-bar button:hover { border-color: var(--rule-strong); background: var(--paper); }
+
+.transport-bar button.primary { 
+    background: #111418; 
+    color: #ffffff; 
+    border-color: #111418; 
+}
+.transport-bar button.primary:hover { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+
+.transport-bar button.accent { 
+    border-color: var(--accent); 
+    color: var(--ink); 
+}
+.transport-bar button.accent:hover {
+    background: var(--accent-wash);
+}
+.transport-bar button.accent span:first-child { color: var(--accent-ink); }
+
+
+/* ---------- TUTORIAL CONTENT SECTION ---------- */
+.content-section {
+    margin-top: 24px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 40px;
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.7;
+}
+.content-section h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 8px;
+}
+.content-section h2:first-child {
+    margin-top: 0;
+}
+.content-section h3 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 18px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+.content-section pre {
+    background: var(--term-bg);
+    color: var(--term-text);
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+}
+.content-section code {
+    background: var(--code-bg);
+    color: var(--dt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+}
+.content-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+.content-section th, .content-section td {
+    border: 1px solid var(--rule);
+    padding: 12px;
+    text-align: left;
+}
+.content-section th {
+    background: var(--paper);
+    font-weight: 600;
+}
+
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1200px) {
+    .stage { grid-template-columns: 1fr; }
+    .main-title { border-right: none; padding-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 10px; width: 100%;}
+    .focus-slot { grid-template-columns: 1fr; }
+    .transport-bar { flex-direction: column; align-items: flex-start; }
+    .transport-controls { flex-wrap: wrap; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- GLOBAL HUMAN CARRIERS -->
+<div id="carrier1" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+<div id="carrier2" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+
+
+<div class="page">
+
+<section class="panel narrator-panel">
+    <div class="narrator-body">
+        <h1 class="main-title">Assignment Operators</h1>
+        <div class="mascot-frame" id="avatarContainer">
+            <img class="mascot-avatar" id="mascot" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+        </div>
+        <div class="speech-bubble" id="speechBubble">
+            <p id="mascotCaption"></p>
+        </div>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M9 18h6"></path><path d="M10 22h4"></path>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<div class="stage">
+    
+    <!-- COLUMN 1: SOURCE -->
+    <div class="col">
+        <section class="panel" style="display: flex; flex-direction: column;">
+            <div class="panel-head">
+                <span class="panel-label">Source</span>
+                <span class="panel-tag">AssignmentOps.java</span>
+            </div>
+            <div class="code-body">
+                <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span> AssignmentOps {</div>
+                <div class="code-line" id="line2"><span class="ln">2</span>    <span class="kw">public static void</span> main(String[] args) {</div>
+                <div class="code-line" id="line3"><span class="ln">3</span>        <span class="dt">        int </span><span class="vr">num</span> = <span class="val">10</span>;</div>                <div class="code-line" id="line5"><span class="ln">4</span>        <span class="vr">        num</span><span class="op">+=</span><span class="val">5</span>;</div>
+                <div class="code-line spacer-line" id="line6"><span class="ln">6</span>        System.out.println(num);</div><div class="code-line" id="line8"><span class="ln">7</span>        <span class="vr">        num</span><span class="op">-=</span><span class="val">3</span>;</div>
+                <div class="code-line spacer-line" id="line9"><span class="ln">8</span>        System.out.println(num);</div>
+                <div class="code-line" id="line11"><span class="ln">9</span>        <span class="vr">        num</span><span class="op">*=</span><span class="val">2</span>;</div>
+                <div class="code-line spacer-line" id="line12"><span class="ln">10</span>        System.out.println(num);</div>
+                
+                <div class="code-line" id="line14"><span class="ln">11</span>        <span class="vr">        num</span><span class="op">/=</span><span class="val">4</span>;</div>
+                <div class="code-line spacer-line" id="line15"><span class="ln">12</span>        System.out.println(num);</div>
+             
+                <div class="code-line" id="line17"><span class="ln">13</span>        <span class="vr">        num</span><span class="op">%=</span><span class="val">4</span>;</div>
+                <div class="code-line" id="line18"><span class="ln">14</span>        System.out.println(num);</div>
+                <div class="code-line" id="line19"><span class="ln">19</span>    }</div>
+                <div class="code-line" id="line20"><span class="ln">20</span>}</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout</span></div>
+            <div class="console-body">
+                <div class="term-line" id="out1">15</div>
+                <div class="term-line" id="out2">12</div>
+                <div class="term-line" id="out3">24</div>
+                <div class="term-line" id="out4">6</div>
+                <div class="term-line" id="out5">2</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+    <div class="col">
+        <section class="panel focus-panel">
+            <div class="panel-head">
+                <span class="panel-label">Current Execution Focus</span>
+                <span class="panel-tag" id="focusTag">Standby</span>
+            </div>
+            <div class="focus-body" id="focusBody">
+
+                <!-- 1. INT num = 10; -->
+                <div class="focus-slot base-assign" id="focus_num_init">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="dt">int </span><span class="vr">num</span> = <span class="val">10</span>;</div>
+                        <div class="math-stage">
+                        </div>
+
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">10</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">First Operand Assignment.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">int</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">10</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+                <!-- 2. num += 5; -->
+                <div class="focus-slot" id="focus_num_add">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="vr">num</span> <span class="op">+=</span> <span class="val">5</span>;</div>
+                        <div class="math-stage">
+                            <div class="m-symb">+</div>
+                        </div>
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">15</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Add and Assign (+=): num = num + 5</div>
+                                <div class="bp-line"><span class="bp-lbl">Calculating</span><span class="bp-val">10 + 5</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">15</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. num -= 3; -->
+                <div class="focus-slot" id="focus_num_sub">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="vr">num</span> <span class="op">-=</span> <span class="val">3</span>;</div>
+                        <div class="math-stage">
+                            <div class="m-symb">-</div>
+                        </div>
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">12</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Subtract and Assign (-=): num = num - 3</div>
+                                <div class="bp-line"><span class="bp-lbl">Calculating</span><span class="bp-val">15 - 3</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">12</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+                <!-- 4. num *= 2; -->
+                <div class="focus-slot" id="focus_num_mul">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="vr">num</span> <span class="op">*=</span> <span class="val">2</span>;</div>
+                        <div class="math-stage">
+                            <div class="m-symb">*</div>
+                        </div>
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">24</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Multiply and Assign (*=): num = num * 2</div>
+                                <div class="bp-line"><span class="bp-lbl">Calculating</span><span class="bp-val">12 * 2</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">24</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+                <!-- 5. num /= 4; -->
+                <div class="focus-slot" id="focus_num_div">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="vr">num</span> <span class="op">/=</span> <span class="val">4</span>;</div>
+                        <div class="math-stage">
+                            <div class="m-symb">/</div>
+                        </div>
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">6</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Divide and Assign (/=): num = num / 4</div>
+                                <div class="bp-line"><span class="bp-lbl">Calculating</span><span class="bp-val">24 / 4</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">6</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+                <!-- 6. num %= 4; -->
+                <div class="focus-slot" id="focus_num_mod">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="vr">num</span> <span class="op">%=</span> <span class="val">4</span>;</div>
+                        <div class="math-stage">
+                            <div class="m-symb">%</div>
+                        </div>
+                        <div class="box-scene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip">2</div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Modulo and Assign (%=): num = num % 4</div>
+                                <div class="bp-line"><span class="bp-lbl">Calculating Remainder</span><span class="bp-val">6 % 4</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe10</div>
+                        <div class="slot-main"><span class="slot-type">INT</span> <span class="slot-name">num</span><span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">2</span></span><span class="slot-semi">;</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- COLUMN 3: RIGHT-SIDE STACK TRAY -->
+    <div class="col">
+        <section class="panel stack-tray-panel">
+            <div class="panel-head">
+                <span class="panel-label">Stack Memory Tray</span>
+                <span class="panel-tag">Variables</span>
+            </div>
+            <div class="stack-tray-body" id="stackTrayBody">
+                <div class="tray-empty" id="trayEmpty">— no variables stored —</div>
+
+                <div class="mini-slot" id="mini_num">
+                    <div class="mini-icon">10</div>
+                    <div class="mini-info">
+                        <span class="mini-name">num</span>
+                        <span class="mini-type">int (4B)</span>
+                        <span class="mini-addr">0x7ffe10</span>
+                    </div>
+                    <div class="mini-badge">10</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- EXTRA COMPACT TRANSPORT BAR -->
+        <section class="panel transport-bar">
+            <div class="step-status" id="status">Step 0 / X</div>
+            <div class="transport-controls">
+                <button class="accent" onclick="previousStep()"><span>◂</span><span>Prev</span></button>
+                <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play</span></button>
+                <button onclick="nextStep()"><span>Next</span><span>▸</span></button>
+                <button onclick="resetAnimation()"><span>↻</span><span>Reset</span></button>
+                <button id="fsBtn" onclick="toggleFullScreen()"><span>⤢</span><span>Expand</span></button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- TUTORIAL CONTENT ADDED HERE -->
+<div class="content-section">
+    <h2>1. What are Assignment Operators?</h2>
+    <p>An assignment operator is used to assign a value to a variable. The most basic assignment operator is the equal sign (<code>=</code>), but Java provides compound assignment operators to perform an operation and assign the result in a single step.</p>
+
+    <h3>Simple Example:</h3>
+<pre><code>int x = 10;
+
+x += 5; // Equivalent to: x = x + 5;</code></pre>
+    <p>Here:</p>
+<pre>x += 5
+ │ │ │
+ │ │ └── The Value Added (5)
+ │ └──── Compound Assignment Operator
+ └────── The Target Variable (10)</pre>
+    <p>The <code>+=</code> operator tells Java to calculate <code>10 + 5</code> and store the result (15) directly back into <code>x</code>.</p>
+
+    <h2>2. Types of Assignment Operators</h2>
+    <p>Java provides several compound assignment operators based on standard math:</p>
+    <table>
+        <tr><th>Symbol</th><th>Operator</th><th>Equivalent Expression</th></tr>
+        <tr><td>=</td><td>Simple Assignment</td><td><code>a = b</code></td></tr>
+        <tr><td>+=</td><td>Add and Assign</td><td><code>a = a + b</code></td></tr>
+        <tr><td>-=</td><td>Subtract and Assign</td><td><code>a = a - b</code></td></tr>
+        <tr><td>*=</td><td>Multiply and Assign</td><td><code>a = a * b</code></td></tr>
+        <tr><td>/=</td><td>Divide and Assign</td><td><code>a = a / b</code></td></tr>
+        <tr><td>%=</td><td>Modulo and Assign</td><td><code>a = a % b</code></td></tr>
+    </table>
+
+    <h2>3. Add and Assign <code>+=</code></h2>
+    <p>Adds the right side to the left side and assigns the result to the left variable.</p>
+<pre><code>int score = 50;
+score += 10; // score becomes 60</code></pre>
+
+    <h2>4. Subtract and Assign <code>-=</code></h2>
+    <p>Subtracts the right side from the left side and assigns the result.</p>
+<pre><code>int health = 100;
+health -= 15; // health becomes 85</code></pre>
+
+    <h2>5. Multiply and Assign <code>*=</code></h2>
+    <p>Multiplies the variable by the right side value.</p>
+<pre><code>int price = 10;
+price *= 3; // price becomes 30</code></pre>
+
+    <h2>6. Divide <code>/=</code> and Modulo <code>%=</code></h2>
+    <p>Divides or finds the remainder, assigning back to the original variable.</p>
+<pre><code>int eggs = 26;
+int dozen = eggs / 12;  // Standard Division
+eggs %= 12;             // eggs becomes 2 (the remainder)</code></pre>
+
+</div>
+
+</div> <!-- End of .page wrapper -->
+
+<script>
+/* Theme Toggle */
+function toggleTheme() { document.body.classList.toggle("dark"); }
+
+/* Fullscreen Toggle */
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const fsBtn = document.getElementById("fsBtn");
+    if (document.fullscreenElement) {
+        fsBtn.innerHTML = "<span>⤡</span><span>Shrink</span>";
+    } else {
+        fsBtn.innerHTML = "<span>⤢</span><span>Expand</span>";
+    }
+});
+
+
+/* STEP SCRIPT ENGINE 
+   Every execution is broken into two clicks for the step-by-step transition:
+   1) 'eval' -> JS Carrier Animations play. Right tray is untouched.
+   2) 'stored' -> Carriers hidden. Right tray smoothly slides the new slot in.
+*/
+const script = [
+    { line: 0, focus: null, state: '', stored: [], memory: { num: 10 } },
+    
+    // int num = 10;
+    { line: 3, focus: 'num_init', state: 'eval', stored: [], memory: { num: 10 }, anim: 'sourceToEval', val: '10' },
+    { line: 3, focus: 'num_init', state: 'stored', stored: ['num'], memory: { num: 10 } },
+    
+    // num += 5;
+    { line: 5, focus: 'num_add', state: 'eval', stored: ['num'], memory: { num: 10 }, anim: 'stacksToEval', op1: 'num', op2: '5', val1: '10', val2: '5' },
+    { line: 5, focus: 'num_add', state: 'stored', stored: ['num'], memory: { num: 15 } },
+
+    // print(num) -> 15
+    { line: 6, focus: 'print_num1', state: 'eval', stored: ['num'], memory: { num: 15 }, anim: 'print', out: 1, var: 'num' },
+
+    // num -= 3;
+    { line: 8, focus: 'num_sub', state: 'eval', stored: ['num'], memory: { num: 15 }, anim: 'stacksToEval', op1: 'num', op2: '3', val1: '15', val2: '3' },
+    { line: 8, focus: 'num_sub', state: 'stored', stored: ['num'], memory: { num: 12 } },
+    
+    // print(num) -> 12
+    { line: 9, focus: 'print_num2', state: 'eval', stored: ['num'], memory: { num: 12 }, anim: 'print', out: 2, var: 'num' },
+
+    // num *= 2;
+    { line: 11, focus: 'num_mul', state: 'eval', stored: ['num'], memory: { num: 12 }, anim: 'stacksToEval', op1: 'num', op2: '2', val1: '12', val2: '2' },
+    { line: 11, focus: 'num_mul', state: 'stored', stored: ['num'], memory: { num: 24 } },
+
+    // print(num) -> 24
+    { line: 12, focus: 'print_num3', state: 'eval', stored: ['num'], memory: { num: 24 }, anim: 'print', out: 3, var: 'num' },
+
+    // num /= 4;
+    { line: 14, focus: 'num_div', state: 'eval', stored: ['num'], memory: { num: 24 }, anim: 'stacksToEval', op1: 'num', op2: '4', val1: '24', val2: '4' },
+    { line: 14, focus: 'num_div', state: 'stored', stored: ['num'], memory: { num: 6 } },
+
+    // print(num) -> 6
+    { line: 15, focus: 'print_num4', state: 'eval', stored: ['num'], memory: { num: 6 }, anim: 'print', out: 4, var: 'num' },
+
+    // num %= 4;
+    { line: 17, focus: 'num_mod', state: 'eval', stored: ['num'], memory: { num: 6 }, anim: 'stacksToEval', op1: 'num', op2: '4', val1: '6', val2: '4' },
+    { line: 17, focus: 'num_mod', state: 'stored', stored: ['num'], memory: { num: 2 } },
+
+    // print(num) -> 2
+    { line: 18, focus: 'print_num5', state: 'eval', stored: ['num'], memory: { num: 2 }, anim: 'print', out: 5, var: 'num' },
+    
+    { line: 19, focus: null, state: '', stored: ['num'], memory: { num: 2 } }
+];
+
+let currentStep = 0;
+let playing = false;
+let timer = null;
+let animationDelay = null;
+const totalSteps = script.length;
+
+const outs = {
+    1: document.getElementById("out1"),
+    2: document.getElementById("out2"),
+    3: document.getElementById("out3"),
+    4: document.getElementById("out4"),
+    5: document.getElementById("out5")
+};
+
+let typingTimeout = null;
+
+/* STOP CARRIERS */
+function hideValueCarriers() {
+    [1, 2].forEach(id => {
+        const carrier = document.getElementById("carrier" + id);
+        carrier.getAnimations().forEach(animation => animation.cancel());
+        carrier.classList.remove("active", "walking", "printing", "flipped");
+        carrier.style.opacity = "0";
+    });
+}
+
+/* ANIMATION LOGIC: Source -> Target Math Stage */
+function animateSourceToEval(step) {
+    const line = document.getElementById("line" + step.line);
+    const sourceVal = line.querySelector(".val");
+    const slot = document.getElementById("focus_" + step.focus);
+    const mathStage = slot.querySelector(".math-stage");
+    
+    const carrier = document.getElementById("carrier1");
+    const carrierVal = carrier.querySelector(".carrier-value");
+    
+    const sRect = sourceVal.getBoundingClientRect();
+    const tRect = mathStage.getBoundingClientRect();
+    
+    const startX = sRect.left + sRect.width/2 - 75; 
+    const startY = sRect.top + sRect.height/2 - 36; 
+    
+    const targetX = tRect.left + tRect.width/2 - 75;
+    const targetY = tRect.top + tRect.height/2 - 36;
+    
+    carrierVal.textContent = step.val;
+    carrier.className = "value-carrier active walking";
+    carrier.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    carrier.style.opacity = "1";
+    
+    const middleX = startX + (targetX - startX) * 0.4;
+    const middleY = Math.min(startY, targetY) - 50;
+    
+    carrier.animate([
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 },
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+        { transform: `translate3d(${middleX}px,${middleY}px,0)`, opacity:1 },
+        { transform: `translate3d(${targetX}px,${targetY}px,0)`, opacity:1 }
+    ], { duration: 1800, easing: "cubic-bezier(.22,.72,.28,1)", fill: "forwards" });
+    
+    setTimeout(() => {
+        carrier.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); // Trigger the box impact CSS!
+    }, 1800);
+}
+
+/* ANIMATION LOGIC: Stacks -> Evaluator (Two operators entering simultaneously) */
+function animateStacksToEval(step) {
+    const slot = document.getElementById("focus_" + step.focus);
+    const mathStage = slot.querySelector(".math-stage");
+    const mRect = mathStage.getBoundingClientRect();
+    
+    const targetY = mRect.top + mRect.height/2 - 36;
+    const targetLeftX = mRect.left + mRect.width/2 - 100 - 75; 
+    const targetRightX = mRect.left + mRect.width/2 + 100 - 75; 
+    
+    // ---- Carrier 1 (Left Operant) ----
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    c1Val.textContent = step.val1;
+    
+    const mini1 = document.getElementById("mini_" + step.op1);
+    const m1Rect = mini1.getBoundingClientRect();
+    const start1X = m1Rect.left - 75;
+    const start1Y = m1Rect.top - 36;
+    
+    c1.className = "value-carrier active walking";
+    c1.animate([
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${start1X - 50}px,${start1Y - 30}px,0)`, opacity:1 },
+        { transform: `translate3d(${targetLeftX}px,${targetY}px,0)`, opacity:1 }
+    ], { duration: 2000, easing: "ease-in-out", fill: "forwards" });
+    
+    // ---- Carrier 2 (Right Operant) ----
+    const c2 = document.getElementById("carrier2");
+    const c2Val = c2.querySelector(".carrier-value");
+    c2Val.textContent = step.val2;
+    
+    let start2X, start2Y;
+    if (!isNaN(step.op2)) {
+        // Fallback for literal code values if ever needed
+        const srcLine = document.getElementById("line" + step.line);
+        const v = srcLine.querySelector(".val");
+        const vRect = v.getBoundingClientRect();
+        start2X = vRect.left + vRect.width/2 - 75;
+        start2Y = vRect.top + vRect.height/2 - 36;
+    } else {
+        // Operand is from stack
+        const mini2 = document.getElementById("mini_" + step.op2);
+        const m2Rect = mini2.getBoundingClientRect();
+        start2X = m2Rect.left - 75;
+        start2Y = m2Rect.top - 36;
+    }
+    
+    // Add flipped class so this carrier faces left
+    c2.className = "value-carrier active walking flipped";
+    c2.animate([
+        { transform: `translate3d(${start2X}px,${start2Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start2X}px,${start2Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${start2X - 50}px,${start2Y - 30}px,0)`, opacity:1 },
+        { transform: `translate3d(${targetRightX}px,${targetY}px,0)`, opacity:1 }
+    ], { duration: 2000, easing: "ease-in-out", fill: "forwards" });
+    
+    setTimeout(() => {
+        c1.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        c2.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); // Trigger pulse and box impact!
+    }, 2000);
+}
+
+/* ANIMATION LOGIC: Throwing to Console */
+function animatePrint(step) {
+    const outLine = document.getElementById("out" + step.out);
+    const stackVar = document.getElementById("mini_" + step.var);
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    
+    const sRect = stackVar.getBoundingClientRect();
+    const oRect = outLine.getBoundingClientRect();
+    
+    const startX = sRect.left - 75;
+    const startY = sRect.top - 36;
+    
+    const endX = oRect.left - 60;
+    const endY = oRect.top + oRect.height/2 - 36;
+    
+    const val = stackVar.querySelector(".mini-badge").textContent;
+    c1Val.textContent = val;
+    
+    c1.className = "value-carrier active printing";
+    c1.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    c1.style.opacity = "1";
+    
+    setTimeout(() => {
+        const thrown = document.createElement("div");
+        thrown.className = "throw-value flying";
+        thrown.textContent = val;
+        document.body.appendChild(thrown);
+
+        const handX = startX + 70;
+        const handY = startY + 20;
+        thrown.style.left = `${handX}px`;
+        thrown.style.top = `${handY}px`;
+
+        const deltaX = endX - handX;
+        const deltaY = endY - handY;
+
+        thrown.animate([
+            { transform: "translate3d(0,0,0) scale(1)", opacity:1 },
+            { transform: `translate3d(${deltaX*.25}px,-100px,0) scale(1.2) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.55}px,-130px,0) scale(1.1) rotate(10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.82}px,-60px,0) scale(.95)`, opacity:1 },
+            { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(.7)`, opacity:0 }
+        ], { duration:2000, easing:"cubic-bezier(.22,.72,.28,1)", fill:"forwards" });
+
+        c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+            { transform: `translate3d(${startX-10}px,${startY-10}px,0) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 }
+        ], { duration:1000, easing:"ease-out", fill:"forwards" });
+
+        setTimeout(() => {
+            outLine.classList.add("show");
+            outLine.classList.remove("receiving");
+            void outLine.offsetWidth;
+            outLine.classList.add("receiving");
+            outLine.scrollIntoView({ behavior:"smooth", block:"nearest" });
+        },1800);
+
+        setTimeout(() => {
+            thrown.remove();
+            c1.classList.remove("active", "printing");
+            c1.style.opacity = "0";
+        },2200);
+
+    }, 500);
+}
+
+
+function renderStep() {
+    const stepData = script[currentStep];
+
+    const statusEl = document.getElementById("status");
+    if(statusEl) {
+        statusEl.textContent = `Step ${currentStep} / ${totalSteps - 1}` + (stepData.line ? ` — Line ${stepData.line}` : "");
+    }
+
+    // Highlight Code
+    document.querySelectorAll(".code-line").forEach(l => l.classList.remove("active"));
+    if (stepData.line > 0) {
+        const lineEl = document.getElementById("line" + stepData.line);
+        if (lineEl) {
+            lineEl.classList.add("active");
+            lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // Update dynamic memory states!
+    if (stepData.memory) {
+        for (let [vName, vVal] of Object.entries(stepData.memory)) {
+            const mini = document.getElementById("mini_" + vName);
+            if (mini) {
+                mini.querySelector(".mini-icon").textContent = vVal;
+                mini.querySelector(".mini-badge").textContent = vVal;
+            }
+        }
+    }
+
+    // Manage Focus Workspace
+    document.querySelectorAll(".focus-slot").forEach(s => {
+        if(s.id !== "focus_" + stepData.focus) {
+            s.classList.remove("show", "eval", "stored");
+        }
+    });
+    
+    if (stepData.focus) {
+        if (stepData.focus.startsWith("print_")) {
+            document.getElementById("focusTag").textContent = "console.log() Output";
+        } else {
+            const fSlot = document.getElementById("focus_" + stepData.focus);
+            if (fSlot) {
+                fSlot.classList.add("show");
+                if (stepData.state === 'eval') {
+                    fSlot.classList.remove("eval", "stored");
+                    void fSlot.offsetWidth; 
+                } else if (stepData.state === 'stored') {
+                    fSlot.classList.add("eval", "stored");
+                }
+            }
+            document.getElementById("focusTag").textContent = stepData.focus;
+        }
+    } else {
+        document.getElementById("focusTag").textContent = "Standby";
+    }
+
+    // Manage Persistent Tray (The Step-by-Step Transition)
+    document.getElementById("trayEmpty").style.display = stepData.stored.length > 0 ? "none" : "block";
+    document.querySelectorAll(".mini-slot").forEach(ms => {
+        const varKey = ms.id.replace("mini_", "");
+        if (stepData.stored.includes(varKey)) {
+            ms.classList.add("stored");
+            // Highlight it active if we are printing it, or if it was just stored
+            let isActive = (varKey === stepData.focus) || (stepData.focus && stepData.focus.includes(varKey) && stepData.focus.startsWith("print_")) || stepData.focus.includes(varKey);
+            
+            ms.classList.toggle("active-mini", isActive);
+            if (isActive) {
+                 ms.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } else {
+            ms.classList.remove("stored", "active-mini");
+        }
+    });
+
+    // Console Outputs (only show if it's the target line)
+    Object.keys(outs).forEach(k => outs[k].classList.remove("show"));
+    for (let i = 1; i <= stepData.out; i++) {
+        outs[i].classList.add("show");
+        if (i === stepData.out) outs[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    // Also keep previously generated outs visible
+    for (let i = 1; i < currentStep; i++) {
+        if (script[i].out) {
+            outs[script[i].out].classList.add("show");
+        }
+    }
+
+    setMascot(currentStep);
+
+    // Call dynamic JS animations based on step configuration
+    hideValueCarriers();
+    if(animationDelay) clearTimeout(animationDelay);
+    animationDelay = setTimeout(() => {
+        if(stepData.anim === "sourceToEval") animateSourceToEval(stepData);
+        if(stepData.anim === "stacksToEval") animateStacksToEval(stepData);
+        if(stepData.anim === "print") animatePrint(stepData);
+    }, 400);
+}
+
+const mascotCaptions = [
+    "Welcome! Let's examine how Java evaluates Assignment Operators.", 
+    "Click Next. Watch the human carry the value 10 to allocate the integer 'num'.", 
+    "Evaluation complete. 'num' transitions into the Stack Memory tray.", 
+    "Testing Add and Assign (+=). The current value of 'num' (10) and 5 are brought to the ALU.", 
+    "They are added, and the result (15) is assigned BACK into 'num' overwriting it!",
+    "Printing 'num' from the stack. Output is 15.", 
+    "Testing Subtract and Assign (-=). We take the new 'num' (15) and subtract 3.", 
+    "The result (12) overwrites the previous value in 'num'.",
+    "Printing 'num'. Output is 12.",
+    "Multiply and Assign (*=). The variable (12) is multiplied by 2.",
+    "The result (24) is assigned back to 'num'.",
+    "Printing 'num'. Output is 24.",
+    "Divide and Assign (/=). 24 is divided by 4.",
+    "The quotient (6) is assigned back to 'num'.",
+    "Printing 'num'. Output is 6.",
+    "Modulo and Assign (%=). What is the remainder of 6 divided by 4?",
+    "The remainder (2) is assigned back to 'num'.",
+    "Printing 'num'. Output is 2.",
+    "Execution complete! Compound assignment operators modify the variable in place."
+];
+
+function setMascot(step) {
+    const caption = document.getElementById("mascotCaption");
+    const avatar = document.getElementById("avatarContainer");
+    const bubble = document.getElementById("speechBubble");
+    
+    if (typingTimeout) clearInterval(typingTimeout);
+    
+    avatar.classList.remove("pop");
+    bubble.classList.remove("pop");
+    void avatar.offsetWidth; 
+    void bubble.offsetWidth;
+    avatar.classList.add("pop");
+    bubble.classList.add("pop");
+    
+    const fullText = mascotCaptions[step] || "...";
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+    
+    let i = 0;
+    typingTimeout = setInterval(() => {
+        if (i < fullText.length) {
+            caption.textContent += fullText.charAt(i);
+            i++;
+        } else {
+            clearInterval(typingTimeout);
+            caption.classList.remove("typing-cursor");
+        }
+    }, 30); 
+}
+
+function play() {
+    playing = true;
+    document.getElementById("playBtn").innerHTML = "<span>⏸</span><span>Pause</span>";
+    timer = setInterval(() => {
+        if (currentStep >= totalSteps - 1) { pause(); return; }
+        currentStep++;
+        renderStep();
+    }, 4500); 
+}
+
+function pause() {
+    playing = false;
+    document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play</span>";
+    if (timer) { clearInterval(timer); timer = null; }
+}
+
+function togglePlay() {
+    if (playing) { pause(); } else {
+        if (currentStep >= totalSteps - 1) { currentStep = 0; }
+        play();
+    }
+}
+
+function nextStep() {
+    pause();
+    if (currentStep < totalSteps - 1) { currentStep++; renderStep(); }
+}
+
+function previousStep() {
+    pause();
+    if (currentStep > 0) { currentStep--; renderStep(); }
+}
+
+function resetAnimation() {
+    pause();
+    currentStep = 0;
+    document.querySelectorAll(".term-line").forEach(line => {
+        line.classList.remove("show", "receiving");
+    });
+    renderStep();
+}
+
+// Initial Call
+renderStep();
+</script>
+
+</body>
+</html>

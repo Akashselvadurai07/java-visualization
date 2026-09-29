@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Strings: Immutability & Concat</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --var2: #10b981;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --barrier: #ef4444;
+    --orphan-bg: rgba(239, 68, 68, 0.1);
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+    --term-input: #eab308;
+
+    --scp-bg: rgba(16, 185, 129, 0.1);
+    --scp-border: #10b981;
+    --ref-color: #0284c7;
+    --ref-bg: #e0f2fe;
+    
+    --ref2-color: #9333ea;
+    --ref2-bg: #f3e8ff;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --var2: #10b981;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --barrier: #f87171;
+    --orphan-bg: rgba(248, 113, 113, 0.15);
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+    --term-input: #facc15;
+
+    --scp-bg: rgba(16, 185, 129, 0.15);
+    --scp-border: #059669;
+    --ref-color: #38bdf8;
+    --ref-bg: rgba(56, 189, 248, 0.15);
+    
+    --ref2-color: #c084fc;
+    --ref2-bg: rgba(192, 132, 252, 0.15);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1750px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage { display: grid; grid-template-columns: 1fr 1.15fr 0.95fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--rule); flex-shrink: 0;}
+.panel-label, .panel-tag { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; flex-direction: row; align-items: center;}
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap; flex: 1;}
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 28px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+
+.mascot-frame { width: 56px; height: 56px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 18px; transform-origin: left center; }
+.speech-bubble p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink); min-height: 22px; font-weight: 500;}
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Controls */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; padding-right: 20px;}
+.theme-toggle { width: auto; padding: 0 16px; height: 44px; border-radius: 22px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink); font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-only-btn { width: 44px; padding: 0; border-radius: 50%; }
+
+/* ---------- SOURCE CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.8; padding: 16px 0; height: 450px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+.code-line { display: flex; padding: 2px 20px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease, border-color 0.25s ease; position: relative; }
+.spacer-line { margin-bottom: 12px; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 32px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); font-weight: 600;}
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.vr2 { color: var(--var2); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.str { color: var(--val); font-weight: bold; transition: opacity 0.3s; }
+.cmt { color: var(--cmt); font-style: italic; }
+
+/* ---------- FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body { padding: 40px 20px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-height: 300px; }
+
+.focus-slot { display: none; width: 100%; max-width: 480px; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 34px; border: 1.5px solid var(--accent); background: var(--accent-wash); border-radius: 16px; position: relative; }
+.focus-slot.show { display: flex; }
+.execution-code { font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--code-bg); border: 1px dashed var(--dt); padding: 12px 24px; border-radius: 8px; text-align: center; z-index: 20; box-shadow: 0 8px 16px rgba(0,0,0,0.05);}
+.execution-code .kw { color: var(--kw); }
+.execution-code .op { color: var(--math-op); }
+.execution-code .val { color: var(--val); }
+.execution-code .dt { color: var(--dt); }
+.execution-code .vr { color: var(--var); }
+
+/* Box / Object Chips */
+.box-scene { width: 80px; height: 80px; perspective: 400px; position: relative; z-index: 5; margin-top: 10px; opacity: 0; transform: scale(0); }
+.box-scene.popped { opacity: 1; transform: scale(1); animation: boxPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes boxPopIn { 0% { opacity: 0; transform: scale(0) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.box-3d { position: absolute; width: 60px; height: 60px; left: 10px; top: 10px; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(35deg); transition: transform 0.3s ease; }
+.box-face { position: absolute; width: 60px; height: 60px; border: 2px solid var(--accent); border-radius: 6px; background: transparent; transition: all 0.3s ease; }
+.box-floor { background: rgba(255,176,0,0.12); transform-origin: center; transform: rotateX(-90deg) translateZ(30px); }
+.box-back  { transform-origin: bottom center; transform: rotateY(180deg) translateZ(30px); }
+.box-left  { transform-origin: bottom center; transform: rotateY(-90deg) translateZ(30px); }
+.box-right { transform-origin: bottom center; transform: rotateY(90deg) translateZ(30px); }
+.math-result-chip { position: absolute; top: 22px; left: 50%; transform: translateX(-50%) translateZ(0); padding: 4px 10px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 16px; color: var(--val); background: var(--panel); border: 2px solid var(--val); border-radius: 6px; opacity: 0; z-index: 10; transition: transform 0.3s;}
+.math-result-chip.bumping { transform: translateX(-50%) translateZ(0) scale(1.3); color: var(--accent); border-color: var(--accent); }
+
+/* Reference Tags */
+.ref-chip { padding: 2px 6px; font-size: 11px; font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--ref-color); background: var(--ref-bg); border: 1px solid var(--ref-color); border-radius: 4px; display: inline-block; white-space: nowrap;}
+.ref-chip.large { font-size: 14px; padding: 4px 10px; }
+.ref-chip.ref2 { color: var(--ref2-color); background: var(--ref2-bg); border-color: var(--ref2-color); }
+.ref-chip.orphan { color: var(--barrier); background: var(--orphan-bg); border-color: var(--barrier); }
+
+/* Placards */
+.board-placard { background: var(--panel); border: 1.5px solid var(--placard-border); border-radius: 9px; padding: 16px 20px; width: 100%; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.5; opacity: 0; transform: translateY(10px); z-index: 3; text-align: center;}
+.focus-slot.eval .board-placard, .focus-slot.stored .board-placard, .focus-slot.show .board-placard { opacity: 1; transform: translateY(0); animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s backwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* Ping Animation Effect */
+@keyframes pingGlow {
+    0% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+    30% { transform: scale(1.15); box-shadow: 0 0 25px var(--ping-color); z-index: 50; border-color: var(--ping-color);}
+    100% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+}
+.pinging { animation: pingGlow 0.6s ease; position: relative; }
+
+/* ---------- MEMORY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.stack-tray-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; align-items: center;}
+.tray-empty { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); text-align: center; padding: 24px 8px; transition: opacity 0.3s; width: 100%;}
+.memory-section { width: 100%; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--code-bg); padding: 16px 12px 12px; display: flex; flex-direction: column; gap: 10px; position: relative; transition: all 0.3s ease;}
+.memory-title { font-family: "JetBrains Mono"; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dt); font-weight: bold; position: absolute; top: -9px; left: 10px; background: var(--panel); padding: 0 6px; border: 1px solid var(--rule-strong); border-radius: 4px;}
+
+.stack-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+.stack-box-wrapper { display: none; opacity: 0; transform: translateY(10px); flex-direction: column; align-items: center; min-width: 70px; padding: 8px 6px; border: 2px dashed var(--rule-strong); background: var(--paper); border-radius: 8px; position: relative; transition: all 0.2s;}
+.stack-box-wrapper.stored { display: flex; opacity: 1; transform: translateY(0); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.stack-box-name { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--var); margin-bottom: 8px; text-align: center; line-height: 1.1;}
+.stack-box-value { display: flex; flex-direction: column; align-items: center; gap: 4px;}
+
+/* Heap / SCP Specifics */
+.heap-object { display: none; flex-direction: column; align-items: center; background: var(--panel); border: 2px solid var(--dt); border-radius: 8px; padding: 14px; min-width: 120px; opacity: 0; transform: scale(0.8); transition: all 0.2s;}
+.heap-object.stored { display: flex; opacity: 1; transform: scale(1); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.heap-obj-type { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: bold;}
+.heap-obj-val { font-family: "JetBrains Mono", monospace; font-size: 16px; font-weight: 700; color: var(--val); margin-bottom: 10px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+
+/* Props & Actor - Transition Based Movement */
+.spark { position: fixed; width: 6px; height: 6px; border-radius: 50%; z-index: 9999998; pointer-events: none; }
+.actor-wrapper { 
+    position: fixed; left: 0; top: 0; width: 60px; height: 80px; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+    opacity: 0; z-index: 999999; pointer-events: none; 
+    transform: translate3d(-200px, -200px, 0); transform-origin: bottom center; 
+}
+.actor-person { width: 48px; height: 66px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.4)); transition: transform 0.15s ease-out;}
+.actor-person .skin { fill: #f2c9a0; }
+.actor-person .shirt { fill: var(--dt); }
+.actor-person .outline { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: d 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.actor-payload { position: absolute; top: -20px; padding: 4px 12px; border-radius: 999px; border: 2px solid var(--val); background: var(--panel); color: var(--val); font-family: "JetBrains Mono", monospace; font-size: 15px; font-weight: 700; text-align: center; box-shadow: 0 5px 14px rgba(0,0,0,.15); opacity: 0; transition: opacity 0.2s; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;}
+.actor-wrapper.walking .actor-person { animation: bodyBounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-l { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-r { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-l { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-r { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+@keyframes walkSwing { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+@keyframes bodyBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+
+/* ---------- CONSOLE ---------- */
+.console-body { background: var(--term-bg); padding: 12px 20px; font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.8; height: 170px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; position: relative;}
+.term-line { color: var(--term-text); display: block; margin-bottom: 2px; position: relative; z-index: 2;}
+.term-line.sys::before { content: "> "; color: var(--term-muted); }
+.term-input { color: var(--term-input); font-weight: bold; }
+.console-form { display: flex; align-items: center; margin-top: 2px; }
+.console-form::before { content: "> "; color: var(--term-muted); font-weight: bold; }
+.console-prompt-input { background: transparent; border: none; outline: none; color: var(--term-input); font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: bold; width: 100%; }
+
+/* ---------- TRANSPORT ---------- */
+.transport-bar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:12px 20px; border-top: 1px solid var(--rule); gap:12px; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 120px; font-weight: 600;}
+.transport-controls { display:flex; gap:8px; }
+.transport-bar button { font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:600; background:var(--panel); color:var(--ink); border:1px solid var(--rule); border-radius:6px; height: 36px; padding: 0 14px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor:pointer; transition: all 0.2s ease; }
+.transport-bar button:hover:not(:disabled) { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+.transport-bar button.primary { background: #111418; color: #ffffff; border-color: #111418; }
+.transport-bar button.primary:hover:not(:disabled) { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+
+/* Tutorial Content */
+.content-section { margin-top: 24px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 32px; line-height: 1.7; display: flex; flex-direction: column; gap: 16px;}
+.content-section h2 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 24px; margin-top: 16px; margin-bottom: 8px; border-bottom: 2px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.content-section h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: var(--ink); }
+.content-section code { background: var(--code-bg); color: var(--dt); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+.content-section p { margin: 0; color: var(--muted); font-size: 15px;}
+.content-section pre { background: var(--code-bg); color: var(--dt); padding: 16px; border-radius: 8px; font-family: "JetBrains Mono", monospace; overflow-x: auto; line-height: 1.5; font-size: 14px; border: 1px solid var(--rule); }
+.content-section ul { margin: 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; font-size: 15px;}
+
+@media (max-width: 1200px) { .stage { grid-template-columns: 1fr; } .main-title { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 10px;} .transport-bar { flex-direction: column; align-items: flex-start; } .transport-controls { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL ACTOR -->
+<div id="actor" class="actor-wrapper">
+    <div class="actor-payload" id="actorPayload"></div>
+    <svg class="actor-person" viewBox="0 0 40 60">
+        <g class="legs"><path class="outline leg-l" fill="none" d="M16,40 L16,58" style="transform-origin: 16px 40px;"></path><path class="outline leg-r" fill="none" d="M24,40 L24,58" style="transform-origin: 24px 40px;"></path></g>
+        <g class="arms"><path class="skin outline arm-l" fill="none" d="M12,24 L5,36" style="transform-origin: 12px 24px;"></path><path class="skin outline arm-r" fill="none" d="M28,24 L35,36" style="transform-origin: 28px 24px;"></path></g>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline head" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,11 L19,11 M23,11 L25,11"></path>
+    </svg>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">String Immutability & Concat</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            <div class="speech-bubble" id="speechBubble"><p id="mascotCaption"></p></div>
+            <div class="top-controls">
+                <button class="theme-toggle icon-only-btn" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                </button>
+                <button class="theme-toggle icon-only-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE CODE & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Source</span><span class="panel-tag">Main.java</span></div>
+                <div class="code-body" id="sourceBox">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">import</span> java.util.Scanner;</div>
+                    <div class="code-line spacer-line" id="line_space1"><span class="ln"></span></div>
+                    <div class="code-line" id="line3"><span class="ln">3</span><span class="kw">class</span> Main {</div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>  <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line5"><span class="ln">5</span>    Scanner <span class="vr" id="src_sc">sc</span> = <span class="kw">new</span> Scanner(System.in);</div>
+                    <div class="code-line spacer-line" id="line_space2"><span class="ln"></span></div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>    System.out.print(<span class="str">"Enter a string: "</span>);</div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>    String <span class="vr" id="src_s1">s1</span> = sc.nextLine();</div>
+                    <div class="code-line spacer-line" id="line_space3"><span class="ln"></span></div>
+                    <div class="code-line" id="line10"><span class="ln">10</span>    System.out.print(<span class="str">"Enter another string: "</span>);</div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>    String <span class="vr" id="src_s2">s2</span> = sc.nextLine();</div>
+                    <div class="code-line spacer-line" id="line_space4"><span class="ln"></span></div>
+                    <div class="code-line" id="line13"><span class="ln">13</span>    <span class="vr">    s1</span>.concat(<span class="vr">s2</span>);</div>
+                    <div class="code-line spacer-line" id="line_space5"><span class="ln"></span></div>
+                    <div class="code-line" id="line15"><span class="ln">15</span>    System.out.println(<span class="str">"After concat: "</span> + <span class="vr">s1</span>);</div>
+                    <div class="code-line" id="line16"><span class="ln">16</span>  }</div>
+                    <div class="code-line" id="line17"><span class="ln">17</span>}</div>
+                </div>
+            </section>
+            
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">I/O</span></div>
+                <div class="console-body" id="consoleBox"></div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head"><span class="panel-label">Execution Focus</span><span class="panel-tag" id="focusTag">Standby</span></div>
+                <div class="focus-body" id="focusBody">
+                    
+                    <div class="focus-slot" id="focus_scanner">
+                        <div class="execution-code">Scanner <span class="vr">sc</span> = <span class="kw">new</span> Scanner(System.in);</div>
+                        <div class="board-placard">A Scanner object is created to read input from the keyboard.</div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_s1">
+                        <div class="execution-code">String <span class="vr">s1</span> = sc.nextLine();</div>
+                        <div class="box-scene" id="focusStrScene1">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusStrChip1">?</div>
+                        </div>
+                        <div class="board-placard">Type your first string!<br/><span style="color:var(--muted); font-size:12px; margin-top:8px; display:block;">Creates the first String object dynamically in the Heap.</span></div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_s2">
+                        <div class="execution-code">String <span class="vr">s2</span> = sc.nextLine();</div>
+                        <div class="box-scene" id="focusStrScene2">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusStrChip2">?</div>
+                        </div>
+                        <div class="board-placard">Type your second string!<br/><span style="color:var(--muted); font-size:12px; margin-top:8px; display:block;">Creates the second independent String object in the Heap.</span></div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_concat">
+                        <div class="execution-code"><span class="vr">s1</span>.concat(<span class="vr">s2</span>);</div>
+                        <div class="board-placard" style="border-color: var(--barrier);">
+                            <b>The Immutability Trap!</b> <br/><br/>
+                            <code>concat()</code> combines the two strings and creates a <b>brand new String object</b>. But because you didn't assign it to a variable (like <code>s1 = s1.concat(s2);</code>), the new object is orphaned and lost forever!
+                        </div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_print">
+                        <div class="execution-code">System.out.println(... + <span class="vr">s1</span>);</div>
+                        <div class="board-placard"><b>Outputting Original Value.</b> <br/><br/>Because Strings are immutable, <code>s1</code> still points to its original object. The concatenation had no effect on it!</div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 3: RIGHT STACK TRAY -->
+        <div class="col">
+            <section class="panel stack-tray-panel" id="stackMemoryPanel">
+                <div class="panel-head"><span class="panel-label">Memory</span><span class="panel-tag">Stack & Heap</span></div>
+                <div class="stack-tray-body" id="stackTrayBody">
+                    
+                    <div class="memory-section" id="memStack">
+                        <div class="memory-title">Stack Memory</div>
+                        <div class="tray-empty" id="stackEmpty">— empty —</div>
+                        <div class="stack-container">
+                            <div class="stack-box-wrapper" id="mem_sc">
+                                <div class="stack-box-name">sc</div>
+                                <div class="stack-box-value"><div class="ref-chip" id="val_sc">ref</div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_s1">
+                                <div class="stack-box-name">s1</div>
+                                <div class="stack-box-value"><div class="ref-chip" id="val_s1"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_s2">
+                                <div class="stack-box-name">s2</div>
+                                <div class="stack-box-value"><div class="ref-chip ref2" id="val_s2"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="memory-section" id="memHeap" style="min-height: 350px; opacity:1; transition: opacity 0.5s; flex: 1;">
+                        <div class="memory-title">Heap Memory</div>
+                        <div class="tray-empty" id="heapEmpty">— empty —</div>
+                        
+                        <div class="stack-container" id="mainHeapArea" style="margin-top: 15px; flex-direction: column; align-items: center; gap: 15px;">
+                            <div class="heap-object" id="obj_heap_1">
+                                <div class="heap-obj-type">String Object 1</div>
+                                <div class="heap-obj-val" id="heap_val_1">...</div>
+                                <div class="ref-chip large">0x222</div>
+                            </div>
+                            <div class="heap-object" id="obj_heap_2" style="border-color: var(--ref2-color);">
+                                <div class="heap-obj-type" style="color:var(--ref2-color);">String Object 2</div>
+                                <div class="heap-obj-val" id="heap_val_2">...</div>
+                                <div class="ref-chip large ref2">0x333</div>
+                            </div>
+                            <div class="heap-object" id="obj_heap_3" style="border-color: var(--barrier);">
+                                <div class="heap-obj-type" style="color:var(--barrier);">Orphaned String</div>
+                                <div class="heap-obj-val" id="heap_val_3" style="color:var(--barrier);">...</div>
+                                <div class="ref-chip large orphan">0x444</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="panel transport-bar">
+                <div class="step-status" id="status">Step 0 / X</div>
+                <div class="transport-controls">
+                    <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play Auto</span></button>
+                    <button id="prevBtn" onclick="prevStep()" disabled><span>◂</span><span>Prev</span></button>
+                    <button id="nextBtn" onclick="nextStep()"><span>Next Step</span><span>▸</span></button>
+                    <button onclick="resetAnimation()" title="Reset Environment"><span>↻</span></button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TUTORIAL CONTENT SECTION -->
+    <div class="content-section">
+        <h2>STRING IMMUTABILITY</h2>
+        
+        <h3>1. Strings Cannot Change</h3>
+        <p>In Java, <code>String</code> objects are <b>immutable</b>. Once a String is created in the Heap memory, its value can never be altered. Methods that seem to modify a string actually return a brand new String object.</p>
+        
+        <h3>2. The Concat Trap (<code>s1.concat(s2)</code>)</h3>
+        <p>When you call <code>s1.concat(s2)</code> on line 13, Java takes the values of <code>s1</code> and <code>s2</code> and creates a <i>third</i> String object in the heap. However, because you didn't assign the result back to a variable (like <code>s1 = s1.concat(s2);</code>), the reference to this new string is immediately lost. The new object becomes eligible for Garbage Collection.</p>
+
+        <h3>3. The Final Output</h3>
+        <p>Because the concatenation didn't change the original object, and you didn't reassign the <code>s1</code> variable, printing <code>s1</code> on line 15 outputs the exact same text you originally entered for <code>s1</code>.</p>
+    </div>
+</div>
+
+<script>
+function toggleTheme() { document.body.classList.toggle("dark"); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } 
+    else { if (document.exitFullscreen) document.exitFullscreen(); }
+}
+
+// --- Dynamic Variables Setup ---
+let userString1 = null;
+let userString2 = null;
+
+// --- Animation Core ---
+const actor = document.getElementById('actor');
+const payload = document.getElementById('actorPayload');
+let currentStep = 0;
+let playing = false;
+let activeAnimations = [];
+let typingInterval = null; 
+const script = [];
+
+function killAllAnimations() { 
+    activeAnimations.forEach(a => { if(a.cancel) a.cancel(); }); 
+    activeAnimations = []; 
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(resolve, ms);
+        activeAnimations.push({ cancel: () => { clearTimeout(t); reject("cancelled"); } });
+    });
+}
+
+function getRect(id) {
+    const el = document.getElementById(id);
+    if (!el) return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 };
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) void el.offsetHeight;
+    return el.getBoundingClientRect();
+}
+
+function getConsoleInputStart() {
+    const consoleRect = getRect('consoleBox');
+    let startX = consoleRect.left + (consoleRect.width / 2) - 30;
+    let startY = consoleRect.bottom - 60;
+    
+    const inputs = document.querySelectorAll('#consoleBox .term-input');
+    if (inputs.length > 0) {
+        const rect = inputs[inputs.length - 1].getBoundingClientRect();
+        if (rect.width > 0 && rect.top > 0) {
+            startY = rect.top - 50; 
+            startX = rect.right + 10; 
+        }
+    }
+    return { startX, startY };
+}
+
+function setArms(state) {
+    const armL = actor.querySelector('.arm-l');
+    const armR = actor.querySelector('.arm-r');
+    if(state === 'carry') { armL.setAttribute('d', 'M12,24 L0,15'); armR.setAttribute('d', 'M28,24 L40,15'); } 
+    else if(state === 'throw') { armL.setAttribute('d', 'M12,24 L0,24'); armR.setAttribute('d', 'M28,24 L40,24'); } 
+    else { armL.setAttribute('d', 'M12,24 L5,36'); armR.setAttribute('d', 'M28,24 L35,36'); }
+}
+
+function setFacing(startX, endX) {
+    const scale = endX < startX ? -1 : 1;
+    actor.querySelector('.actor-person').style.transform = `scaleX(${scale}) rotate(0deg)`;
+}
+
+async function actorFadeIn(x, y) {
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    actor.style.opacity = "0";
+    void actor.offsetWidth; 
+    actor.style.transition = 'opacity 300ms ease';
+    actor.style.opacity = "1";
+    await wait(300);
+}
+
+async function actorFadeOut() {
+    actor.style.transition = 'opacity 400ms ease';
+    actor.style.opacity = "0";
+    await wait(400);
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(-200px, -200px, 0)`;
+}
+
+async function animWalk(startX, startY, endX, endY, duration = 1500) {
+    setFacing(startX, endX);
+    actor.className = "actor-wrapper walking";
+    
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+    void actor.offsetWidth;
+    
+    actor.style.transition = `transform ${duration}ms linear`;
+    actor.style.transform = `translate3d(${endX}px, ${endY}px, 0)`;
+    
+    await wait(duration);
+    
+    actor.className = "actor-wrapper";
+    actor.style.transition = 'none';
+}
+
+function createSparks(x, y, color = 'var(--accent)') {
+    for(let i=0; i<8; i++) {
+        let s = document.createElement('div');
+        s.className = 'spark'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.backgroundColor = color;
+        document.body.appendChild(s);
+        let angle = Math.random() * Math.PI * 2; let dist = Math.random() * 40 + 10;
+        s.animate([ {transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0} ], {duration: 400 + Math.random()*200, easing: 'cubic-bezier(.25, .8, .25, 1)'});
+        setTimeout(()=>s.remove(), 600);
+    }
+}
+
+async function triggerPing(id, color = 'var(--accent)') {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.setProperty('--ping-color', color);
+    el.classList.add('pinging');
+    await wait(600);
+    el.classList.remove('pinging');
+}
+
+function typeText(text) {
+    const el = document.getElementById('mascotCaption');
+    el.textContent = ""; el.classList.add("typing-cursor");
+    let i = 0; if (typingInterval) clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if(i < text.length) el.textContent += text[i++];
+        else { clearInterval(typingInterval); el.classList.remove("typing-cursor"); }
+    }, 20);
+}
+
+function appendToConsole(htmlString) {
+    const c = document.getElementById('consoleBox');
+    const existingForm = c.querySelector('.console-form');
+    if(existingForm) existingForm.remove();
+    const line = document.createElement('div');
+    line.className = 'term-line sys'; line.innerHTML = htmlString;
+    c.appendChild(line); c.scrollTop = c.scrollHeight;
+}
+
+function clearConsole() { document.getElementById('consoleBox').innerHTML = ''; }
+
+async function promptUserForTextInput(labelText) {
+    return new Promise((resolve) => {
+        const c = document.getElementById('consoleBox');
+        const line = document.createElement('div');
+        line.className = 'term-line sys'; line.innerHTML = labelText;
+        c.appendChild(line);
+
+        const form = document.createElement('form'); form.className = 'console-form';
+        const input = document.createElement('input'); input.type = 'text'; input.className = 'console-prompt-input'; input.placeholder = 'Type string & press Enter...';
+        form.appendChild(input); c.appendChild(form);
+        c.scrollTop = c.scrollHeight; input.focus();
+
+        form.onsubmit = (e) => {
+            e.preventDefault(); 
+            const val = input.value.trim(); 
+            if (val === "") return;
+            form.remove();
+            line.remove();
+            resolve(val);
+        };
+    });
+}
+
+// --- Script Generation ---
+function buildScript() {
+    script.length = 0;
+    
+    // Step 0
+    script.push({ 
+        text: "Let's see what happens when you try to concatenate immutable Strings without reassigning the variable!", 
+        line: 0, tag: "Standby", 
+        state: { sc: false, s1: false, s2: false, heap1: false, heap2: false, heap3: false, cLines: [] } 
+    });
+
+    // Step 1: Scanner Setup
+    script.push({
+        text: "Line 5: First, we initialize the Scanner. The reference 'sc' is added to the Stack.",
+        line: 5, tag: "Init Scanner", 
+        state: { sc: true, s1: false, s2: false, heap1: false, heap2: false, heap3: false, cLines: [] },
+        action: async () => {
+            const slot = document.getElementById('focus_scanner'); slot.classList.add('show');
+            const y = getRect('src_sc').top - 10; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_sc').right + 20;
+            
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 1200);
+            setArms('carry'); payload.textContent = "Scanner"; payload.style.opacity = "1"; await wait(600);
+
+            const memPanel = getRect('mem_sc'); 
+            const targetMemX = memPanel.left + (memPanel.width / 2) - 30; 
+            const targetMemY = memPanel.top - 70; 
+            
+            await animWalk(targetX, y, targetMemX, targetMemY, 1800);
+            payload.style.opacity = "0"; setArms('relaxed');
+            document.getElementById('stackEmpty').style.display = 'none'; document.getElementById('mem_sc').classList.add('stored');
+            createSparks(targetMemX + 30, targetMemY + 70); await wait(400);
+            await triggerPing('mem_sc', 'var(--ref-color)');
+
+            await animWalk(targetMemX, targetMemY, startX, y, 1500); await wait(500); await actorFadeOut();
+        }
+    });
+
+    let cLines = [];
+    if (userString1 !== null) cLines.push(`Enter a string: <span class="term-input">${userString1}</span>`);
+
+    // Step 2: Scanner Input 1 (s1)
+    script.push({
+        text: "Lines 7-8: We wait for user input. Type a string to create our first object for s1 in the Heap!",
+        line: 8, tag: "Read Input 1", 
+        state: { sc: true, s1: userString1 !== null, s2: false, heap1: userString1 !== null, heap2: false, heap3: false, cLines: [...cLines] },
+        action: async () => {
+            const slot = document.getElementById('focus_s1'); slot.classList.add('show');
+            
+            if(userString1 === null) {
+                userString1 = await promptUserForTextInput("Enter a string: ");
+                buildScript(); 
+                await renderStep(currentStep); 
+                return; 
+            }
+            
+            await wait(100);
+            appendToConsole(`Enter a string: <span class="term-input">${userString1}</span>`);
+            await wait(50);
+
+            const { startX, startY } = getConsoleInputStart();
+            
+            await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = `"${userString1}"`; payload.style.opacity = "1"; await wait(600);
+
+            const heapRect = getRect('obj_heap_1'); 
+            const targetHeapX = heapRect.left + (heapRect.width / 2) - 30;
+            const targetHeapY = heapRect.top;
+            
+            document.getElementById('heapEmpty').style.display = 'none';
+            await animWalk(startX, startY, targetHeapX, targetHeapY, 1800);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('heap_val_1').textContent = `"${userString1}"`;
+            document.getElementById('obj_heap_1').classList.add('stored');
+            
+            const chip = document.getElementById('focusStrChip1'); chip.textContent = `"${userString1}"`; chip.classList.add('bumping');
+            document.getElementById('focusStrScene1').classList.add('popped');
+            createSparks(targetHeapX + 30, targetHeapY + 30, "var(--dt)"); 
+            await triggerPing('obj_heap_1', 'var(--ref-color)');
+            
+            setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+            await wait(300);
+
+            setArms('carry'); payload.textContent = '0x222'; payload.style.opacity = "1"; payload.style.color = "var(--ref-color)"; payload.style.borderColor = "var(--ref-color)"; await wait(400);
+
+            const stackRect = getRect('mem_s1');
+            const targetMemX = stackRect.left + (stackRect.width / 2) - 30;
+            const targetMemY = stackRect.top - 70;
+
+            await animWalk(targetHeapX, targetHeapY, targetMemX, targetMemY, 1500);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('mem_s1').classList.add('stored');
+            document.getElementById('val_s1').textContent = "0x222";
+            createSparks(targetMemX + 30, targetMemY + 70, "var(--ref-color)"); 
+            await triggerPing('mem_s1', 'var(--ref-color)');
+            
+            await wait(600); await actorFadeOut();
+            payload.style.color = "var(--val)"; payload.style.borderColor = "var(--val)";
+        }
+    });
+
+    if (userString2 !== null) cLines.push(`Enter another string: <span class="term-input">${userString2}</span>`);
+
+    // Step 3: s2 = sc.nextLine()
+    script.push({
+        text: "Lines 10-11: We prompt the user a SECOND time. A new Heap object (0x333) is created for s2.",
+        line: 11, tag: "Read Input 2", 
+        state: { sc: true, s1: true, s2: userString2 !== null, heap1: true, heap2: userString2 !== null, heap3: false, cLines: [...cLines] },
+        action: async () => {
+            const slot = document.getElementById('focus_s2'); slot.classList.add('show');
+            
+            if(userString2 === null) {
+                userString2 = await promptUserForTextInput("Enter another string: ");
+                buildScript(); 
+                await renderStep(currentStep); 
+                return; 
+            }
+            
+            await wait(100);
+            appendToConsole(`Enter another string: <span class="term-input">${userString2}</span>`);
+            await wait(50);
+
+            const { startX, startY } = getConsoleInputStart();
+            
+            await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = `"${userString2}"`; payload.style.opacity = "1"; await wait(600);
+
+            // Create heap2
+            const heap2Rect = getRect('obj_heap_2'); 
+            const targetHeapX = heap2Rect.left + (heap2Rect.width / 2) - 30;
+            const targetHeapY = heap2Rect.top;
+            
+            await animWalk(startX, startY, targetHeapX, targetHeapY, 1500);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('heap_val_2').textContent = `"${userString2}"`;
+            document.getElementById('obj_heap_2').classList.add('stored');
+            
+            const chip = document.getElementById('focusStrChip2'); chip.textContent = `"${userString2}"`; chip.classList.add('bumping');
+            document.getElementById('focusStrScene2').classList.add('popped');
+            
+            createSparks(targetHeapX + 30, targetHeapY + 30, "var(--ref2-color)"); 
+            await triggerPing('obj_heap_2', 'var(--ref2-color)');
+            
+            setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+            await wait(400);
+            
+            // Bring ref to stack
+            setArms('carry'); payload.textContent = '0x333'; payload.style.opacity = "1"; payload.style.color = "var(--ref2-color)"; payload.style.borderColor = "var(--ref2-color)"; await wait(400);
+
+            const stack3Rect = getRect('mem_s2');
+            const targetMemX = stack3Rect.left + (stack3Rect.width / 2) - 30;
+            const targetMemY = stack3Rect.top - 70;
+
+            await animWalk(targetHeapX, targetHeapY, targetMemX, targetMemY, 1500);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('mem_s2').classList.add('stored');
+            document.getElementById('val_s2').textContent = "0x333";
+            createSparks(targetMemX + 30, targetMemY + 70, "var(--ref2-color)"); 
+            await triggerPing('mem_s2', 'var(--ref2-color)');
+            
+            await wait(600); await actorFadeOut();
+            payload.style.color = "var(--val)"; payload.style.borderColor = "var(--val)";
+        }
+    });
+
+    if (userString2 !== null) {
+        // Step 4: concat
+        script.push({
+            text: "Line 13: The moment of truth. s1.concat(s2) runs. It builds a new String object, but NO VARIABLE points to it!",
+            line: 13, tag: "Concat Execution", 
+            state: { sc: true, s1: true, s2: true, heap1: true, heap2: true, heap3: true, cLines: [...cLines] },
+            action: async () => {
+                const slot = document.getElementById('focus_concat'); slot.classList.add('show');
+                
+                const h1Rect = getRect('obj_heap_1');
+                const h2Rect = getRect('obj_heap_2');
+                const h3Rect = getRect('obj_heap_3');
+                
+                const actorStartX = h1Rect.left - 40;
+                const actorStartY = h1Rect.top - 20;
+
+                await actorFadeIn(actorStartX, actorStartY);
+                await triggerPing('obj_heap_1', 'var(--ref-color)');
+                await triggerPing('obj_heap_2', 'var(--ref2-color)');
+                
+                setArms('carry'); payload.textContent = "Merging..."; payload.style.opacity = "1"; await wait(800);
+
+                const targetHeapX = h3Rect.left + (h3Rect.width / 2) - 30;
+                const targetHeapY = h3Rect.top;
+
+                await animWalk(actorStartX, actorStartY, targetHeapX, targetHeapY, 1500);
+                payload.style.opacity = "0"; setArms('throw');
+                
+                document.getElementById('heap_val_3').textContent = `"${userString1}${userString2}"`;
+                document.getElementById('obj_heap_3').classList.add('stored');
+                
+                createSparks(targetHeapX + 30, targetHeapY + 30, "var(--barrier)"); 
+                await triggerPing('obj_heap_3', 'var(--barrier)');
+                
+                await wait(800); await actorFadeOut();
+            }
+        });
+
+        // Step 5: Print
+        script.push({
+            text: "Line 15: We print s1. Because the string from the concat was never assigned, s1 is completely unchanged!",
+            line: 15, tag: "Console Out", 
+            state: { sc: true, s1: true, s2: true, heap1: true, heap2: true, heap3: true, cLines: [...cLines] },
+            action: async () => {
+                const slot = document.getElementById('focus_print'); slot.classList.add('show');
+                
+                const consoleStart = getConsoleInputStart();
+                await actorFadeIn(consoleStart.startX, consoleStart.startY);
+                
+                // Print s1
+                document.getElementById("line15").classList.add("active");
+                await triggerPing('mem_s1', 'var(--ref-color)');
+                await triggerPing('obj_heap_1', 'var(--ref-color)');
+                
+                setArms('carry'); payload.textContent = `"${userString1}"`; payload.style.opacity = "1"; await wait(400);
+                setArms('throw'); payload.style.opacity = "0"; 
+                appendToConsole("After concat: " + userString1);
+                await wait(800);
+                
+                await actorFadeOut();
+            }
+        });
+    }
+}
+
+function fastForwardToState(stepIdx) {
+    if(!script[stepIdx]) return;
+    const state = script[stepIdx].state;
+    
+    const toggleVar = (id, exists, val = null) => {
+        const el = document.getElementById('mem_' + id);
+        if(exists) { 
+            el.classList.add('stored'); 
+            const vEl = document.getElementById('val_' + id);
+            if (vEl && val !== null) vEl.textContent = val;
+        } else el.classList.remove('stored'); 
+    };
+
+    toggleVar('sc', state.sc, 'ref');
+    toggleVar('s1', state.s1, '0x222');
+    toggleVar('s2', state.s2, '0x333');
+    
+    document.getElementById('stackEmpty').style.display = (state.sc || state.s1 || state.s2) ? 'none' : 'block';
+    document.getElementById('heapEmpty').style.display = (state.heap1 || state.heap2 || state.heap3) ? 'none' : 'block';
+    
+    if (state.heap1) {
+        document.getElementById('obj_heap_1').classList.add('stored');
+        if(userString1) document.getElementById('heap_val_1').textContent = `"${userString1}"`;
+    } else document.getElementById('obj_heap_1').classList.remove('stored');
+
+    if (state.heap2) {
+        document.getElementById('obj_heap_2').classList.add('stored');
+        if(userString2) document.getElementById('heap_val_2').textContent = `"${userString2}"`;
+    } else document.getElementById('obj_heap_2').classList.remove('stored');
+
+    if (state.heap3) {
+        document.getElementById('obj_heap_3').classList.add('stored');
+        if(userString1 && userString2) document.getElementById('heap_val_3').textContent = `"${userString1}${userString2}"`;
+    } else document.getElementById('obj_heap_3').classList.remove('stored');
+
+
+    clearConsole();
+    if(state.cLines) state.cLines.forEach(line => appendToConsole(line));
+}
+
+function resetUI() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.focus-slot').forEach(el => { el.classList.remove('show', 'eval', 'stored'); el.style.opacity = "1"; });
+    document.querySelectorAll('.box-scene').forEach(el => el.classList.remove('popped'));
+    document.querySelectorAll('.spark, .zap-fx, .throw-item').forEach(el => el.remove());
+    document.querySelectorAll('.pinging').forEach(el => el.classList.remove('pinging'));
+    
+    actor.style.transition = "none"; 
+    actor.style.opacity = "0"; 
+    actor.style.transform = "translate3d(-200px, -200px, 0)"; 
+    actor.className = "actor-wrapper"; 
+    setArms('relaxed'); 
+    payload.style.opacity = "0";
+}
+
+async function renderStep(stepIndex) {
+    if (stepIndex >= script.length) return;
+    const step = script[stepIndex];
+    document.getElementById("status").textContent = `Step ${stepIndex} / ${script.length - 1}`;
+    document.getElementById("focusTag").textContent = step.tag;
+    document.getElementById("prevBtn").disabled = (stepIndex === 0);
+    // Corrected condition: Disable next button if it's the very last generated step.
+    document.getElementById("nextBtn").disabled = (stepIndex === script.length - 1); 
+    
+    killAllAnimations(); resetUI(); fastForwardToState(stepIndex); typeText(step.text);
+    if (step.line > 0) document.getElementById("line" + step.line).classList.add("active");
+    if (step.action) { try { await step.action(); } catch(e) { } }
+}
+
+async function playAuto() {
+    playing = true; const btn = document.getElementById("playBtn"); btn.innerHTML = "<span>⏸</span><span>Pause</span>";
+    while (playing && currentStep < script.length) {
+        await renderStep(currentStep);
+        if (playing && currentStep < script.length - 1) { 
+            try { await wait(2500); currentStep++; } catch(e) { break; } 
+        }
+        else pause();
+    }
+}
+function pause() { playing = false; document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play Auto</span>"; }
+function togglePlay() { if (playing) pause(); else { if (currentStep >= script.length - 1) currentStep = 0; playAuto(); } }
+async function nextStep() { pause(); if (currentStep < script.length - 1) { currentStep++; await renderStep(currentStep); } }
+function prevStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(currentStep); } }
+function resetAnimation() { pause(); userString1 = null; userString2 = null; currentStep = 0; buildScript(); renderStep(0); }
+
+window.onload = () => { buildScript(); renderStep(0); };
+</script>
+</body>
+</html>

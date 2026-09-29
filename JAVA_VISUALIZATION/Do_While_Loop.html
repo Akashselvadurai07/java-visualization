@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Control Flow: The Do-While Loop</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --barrier: #ef4444;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --barrier: #f87171;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1650px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage { display: grid; grid-template-columns: 1fr 1.15fr 0.85fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--rule); }
+.panel-label, .panel-tag { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap; }
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 32px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+
+.mascot-frame { width: 68px; height: 68px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; transform-origin: left center; }
+.speech-bubble p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); min-height: 24px; font-weight: 500;}
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Controls */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.theme-toggle { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--rule-strong); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.expand-btn { width: auto; padding: 0 16px; border-radius: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; color: var(--ink); }
+.expand-btn svg { margin-right: 8px; width: 20px; height: 20px; }
+
+/* ---------- COLUMN 1: SOURCE CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 15px; line-height: 1.8; padding: 16px 0; height: 470px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+.code-line { display: flex; padding: 2px 20px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease, border-color 0.25s ease; position: relative; }
+.spacer-line { margin-bottom: 20px; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 36px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); font-weight: 600;}
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.str { color: var(--val); transition: opacity 0.3s; }
+
+/* ---------- COLUMN 2: FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body { padding: 40px 20px 20px; flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; min-height: 300px; }
+
+.focus-slot { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: flex-start; gap: 30px; padding: 24px; border: 1.5px solid var(--accent); background: var(--accent-wash); border-radius: 16px; position: relative; }
+.focus-slot.show { display: flex; }
+
+.execution-code { font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--code-bg); border: 1px dashed var(--dt); padding: 10px 20px; border-radius: 8px; text-align: center; margin-bottom: 30px; z-index: 20; }
+.execution-code .kw { color: var(--kw); }
+.execution-code .op { color: var(--math-op); }
+.execution-code .val { color: var(--val); }
+
+/* Math Stage & Animations */
+.math-stage { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; z-index: 15; font-family: "JetBrains Mono", monospace; }
+.m-op-val { font-size: 28px; font-weight: 700; color: var(--val); opacity: 0; transform: scale(0.5) translateY(-20px); }
+.m-symb { font-size: 44px; color: var(--math-op); font-weight: 700; opacity: 0; transform: scale(0); }
+
+.math-stage.do-math .m-op-val { animation: mathDropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.math-stage.do-math .m-op-val:nth-child(3) { animation-delay: 0.15s; }
+.math-stage.do-math .m-symb { animation: mathSymPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 0.3s; }
+
+.math-success .m-symb { color: var(--val); text-shadow: 0 0 12px rgba(28,138,95,0.6); transition: all 0.3s ease; }
+.math-fail .m-symb { color: var(--barrier); text-shadow: 0 0 12px rgba(239,68,68,0.6); transition: all 0.3s ease; }
+
+@keyframes mathDropIn { to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes mathSymPulse { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+/* 3D Box */
+.box-scene { width: 100px; height: 100px; perspective: 400px; position: relative; z-index: 5; margin-top: 10px; opacity: 0; transform: scale(0); }
+.box-scene.popped { opacity: 1; transform: scale(1); animation: boxPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes boxPopIn { 0% { opacity: 0; transform: scale(0) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+.box-3d { position: absolute; width: 64px; height: 64px; left: 18px; top: 18px; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(35deg); transition: transform 0.3s ease; }
+.box-face { position: absolute; width: 64px; height: 64px; border: 2px solid var(--accent); border-radius: 4px; background: transparent; }
+.box-floor { background: rgba(255,176,0,0.12); transform-origin: center; transform: rotateX(-90deg) translateZ(32px); }
+.box-back  { transform-origin: bottom center; transform: rotateY(180deg) translateZ(32px); }
+.box-left  { transform-origin: bottom center; transform: rotateY(-90deg) translateZ(32px); }
+.box-right { transform-origin: bottom center; transform: rotateY(90deg) translateZ(32px); }
+.math-result-chip { position: absolute; top: 32px; left: 50%; transform: translateX(-50%) translateZ(0); padding: 4px 10px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 18px; color: var(--val); background: var(--panel); border: 1.5px solid var(--val); border-radius: 6px; opacity: 0; z-index: 10; transition: transform 0.3s;}
+.math-result-chip.bumping { transform: translateX(-50%) translateZ(0) scale(1.3); color: var(--accent); border-color: var(--accent); }
+
+/* Bottom Placards */
+.board-placard { background: var(--panel); border: 1.5px solid var(--placard-border); border-radius: 9px; padding: 12px 14px; width: 300px; font-family: "JetBrains Mono", monospace; font-size: 13px; opacity: 0; transform: translateY(10px); z-index: 3; text-align: center;}
+.focus-slot.eval .board-placard, .focus-slot.stored .board-placard { opacity: 1; transform: translateY(0); animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s backwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+
+/* ---------- ITERATION TRACKER TABLE ---------- */
+.tracker-wrapper { border-top: 1px solid var(--rule); background: var(--paper); border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; overflow: hidden; margin-top: auto; padding-bottom: 15px; }
+.tracker-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; font-family: "JetBrains Mono", monospace; font-size: 13px; text-align: center; padding: 0 15px; }
+.tracker-table th { background: transparent; color: var(--muted); padding: 8px 10px; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; border-bottom: 2px dashed var(--rule); }
+
+.tracker-table td { 
+    padding: 10px; 
+    color: var(--ink); 
+    opacity: 0.3; 
+    transition: all 0.3s ease; 
+    background: var(--panel); 
+    border-top: 1px solid var(--rule); 
+    border-bottom: 1px solid var(--rule); 
+}
+.tracker-table td:first-child { border-left: 1px solid var(--rule); border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.tracker-table td:last-child { border-right: 1px solid var(--rule); border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+/* Hide rows by default */
+.tracker-table tbody tr { display: none; }
+.tracker-table tbody tr.revealed { display: table-row; }
+
+/* Active Row Highlight & Staggered Cell Glow Animation */
+.tracker-table tr.active td { 
+    background: rgba(255, 176, 0, 0.08); 
+    color: var(--accent-ink); 
+    font-weight: 700; 
+    border-top-color: var(--accent);
+    border-bottom-color: var(--accent);
+    opacity: 0; /* Starter for animation */
+    animation: cellSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.tracker-table tr.active td:first-child { border-left-color: var(--accent); }
+.tracker-table tr.active td:last-child { border-right-color: var(--accent); box-shadow: 4px 0 12px rgba(255, 176, 0, 0.1); }
+
+/* Staggered animation delays for the cells */
+.tracker-table tr.active td:nth-child(1) { animation-delay: 0.0s; }
+.tracker-table tr.active td:nth-child(2) { animation-delay: 0.05s; }
+.tracker-table tr.active td:nth-child(3) { animation-delay: 0.1s; }
+.tracker-table tr.active td:nth-child(4) { animation-delay: 0.15s; }
+
+@keyframes cellSlideUp {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Done state rows */
+.tracker-table tr.done td { 
+    opacity: 0.5; 
+    background: transparent; 
+    border-color: transparent; 
+}
+.tracker-table tr.done td:first-child { border-left-color: transparent; }
+.tracker-table tr.done td:last-child { border-right-color: transparent; box-shadow: none; }
+
+/* Dynamic Status Badges */
+.badge { padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; display: inline-block; letter-spacing: 0.05em; text-transform: uppercase; box-shadow: inset 0 0 0 1.5px currentColor; background: transparent; }
+.badge-true { color: var(--val); background: rgba(28, 138, 95, 0.1); }
+.badge-false { color: var(--barrier); background: rgba(239, 68, 68, 0.1); }
+
+.cond-badge { opacity: 0; transform: scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
+.cond-badge.show { opacity: 1; transform: scale(1); }
+
+/* Continuous glow for the True badge when row is active */
+.tracker-table tr.active .badge-true.show {
+    animation: badgePulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
+}
+@keyframes badgePulse {
+    0%, 100% { box-shadow: inset 0 0 0 1.5px currentColor, 0 0 0 rgba(28, 138, 95, 0); }
+    50% { box-shadow: inset 0 0 0 1.5px currentColor, 0 0 12px rgba(28, 138, 95, 0.4); }
+}
+
+.badge-exit { background: var(--barrier); color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border-radius: 6px; padding: 6px 12px; font-size: 12px; letter-spacing: 1px; border: none; margin-left: 6px;}
+
+/* Action Execution Pop Animation */
+.action-text { display: inline-block; transition: all 0.3s ease; }
+
+.action-pop {
+    position: relative;
+    z-index: 5;
+    color: var(--val) !important;
+    font-weight: 900 !important;
+    animation: textPopAction 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+@keyframes textPopAction {
+    0% { transform: scale(1); text-shadow: 0 0 0 rgba(28, 138, 95, 0); }
+    50% { transform: scale(1.25); text-shadow: 0 0 12px rgba(28, 138, 95, 0.8); }
+    100% { transform: scale(1); text-shadow: 0 0 5px rgba(28, 138, 95, 0.3); }
+}
+/* ------------------------------------------- */
+
+
+/* ---------- COLUMN 3: STACK TRAY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; }
+.stack-tray-body { padding: 24px; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; align-items: center;}
+.tray-empty { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); text-align: center; padding: 24px 8px; transition: opacity 0.3s; width: 100%;}
+
+.stack-box-wrapper { display: none; opacity: 0; transform: translateY(20px); flex-direction: column; align-items: center; width: 100%; padding: 20px 10px 30px; border: 2px dashed var(--rule-strong); background: var(--paper); border-radius: 12px; }
+.stack-box-wrapper.stored { display: flex; opacity: 1; transform: translateY(0); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.stack-box-name { font-family: "JetBrains Mono", monospace; font-size: 15px; font-weight: 700; color: var(--var); margin-bottom: 6px; }
+
+/* History Array Log */
+.history-log { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-height: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 10px; }
+.history-log span { text-decoration: line-through; }
+
+/* ---------- GLOBAL SCENE PROPS ---------- */
+.blocked-sticker { position: fixed; color: #ef4444; border: 3px solid #ef4444; border-radius: 8px; padding: 2px 8px; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; background: rgba(239, 68, 68, 0.1); backdrop-filter: blur(2px); transform: rotate(-10deg) scale(0); opacity: 0; z-index: 50; pointer-events: none; }
+.blocked-sticker.active { animation: stampStamp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes stampStamp { 0% { opacity: 0; transform: rotate(-10deg) scale(2); } 100% { opacity: 1; transform: rotate(-10deg) scale(1); } }
+
+.spark { position: fixed; width: 6px; height: 6px; border-radius: 50%; z-index: 99998; pointer-events: none; }
+.zap-fx { position: fixed; color: var(--barrier); font-weight: 900; font-size: 28px; z-index: 99998; pointer-events: none; text-shadow: 0 0 15px var(--barrier); font-style: italic; }
+
+.throw-item { position: fixed; z-index: 100000; pointer-events: none; opacity: 0; margin:0; white-space: nowrap; }
+
+/* ---------- ADVANCED ACTOR ---------- */
+.actor-wrapper { position: fixed; left: 0; top: 0; width: 60px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; opacity: 0; z-index: 99999; pointer-events: none; transform: translate3d(-200px, -200px, 0); transform-origin: bottom center; }
+.actor-person { width: 45px; height: 60px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.3)); transition: transform 0.15s ease-out;}
+.actor-person .skin { fill: #f2c9a0; }
+.actor-person .shirt { fill: var(--dt); }
+.actor-person .outline { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: d 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+
+.actor-payload { position: absolute; top: -15px; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--val); background: var(--panel); color: var(--val); font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; text-align: center; box-shadow: 0 5px 14px rgba(0,0,0,.15); opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+
+/* Walk Cycle */
+.actor-wrapper.walking .actor-person { animation: bodyBounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-l { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-r { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-l { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-r { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+
+@keyframes walkSwing { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+@keyframes bodyBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-4px); } }
+
+.actor-wrapper.thinking .actor-person { animation: thinkBob 1s infinite alternate ease-in-out; }
+@keyframes thinkBob { from { transform: rotate(-3deg); } to { transform: rotate(5deg) translateY(-2px); } }
+
+.actor-wrapper.celebrating .actor-person { animation: celebrateHop .4s ease-in-out infinite alternate; }
+@keyframes celebrateHop { 0% { transform: translateY(0) scaleY(1); } 100% { transform: translateY(-15px) scaleY(1.1); } }
+
+/* ---------- CONSOLE PANEL ---------- */
+.console-body { background: var(--term-bg); padding: 20px 24px; font-family: "JetBrains Mono", monospace; font-size: 15px; line-height: 2; height: 180px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; }
+.term-line { color: var(--term-text); opacity: 0; transform: translateX(-6px); display: none;}
+.term-line.show { opacity: 1; transform: translateX(0); display: block;}
+.term-line::before { content: "$ > "; color: var(--term-muted); }
+.term-line.receiving { animation: consoleReceive .6s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes consoleReceive { 0% { transform:translateX(-20px) scale(.6); opacity:0; } 60% { transform:translateX(5px) scale(1.15); opacity:1; } 100% { transform:translateX(0) scale(1); opacity:1; } }
+
+/* ---------- TRANSPORT BAR ---------- */
+.transport-bar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:16px 20px; border-top: 1px solid var(--rule); gap:12px; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 120px; font-weight: 600;}
+.transport-controls { display:flex; gap:10px; }
+.transport-bar button { font-family:"JetBrains Mono",monospace; font-size:14px; font-weight:600; background:var(--panel); color:var(--ink); border:1px solid var(--rule); border-radius:6px; height: 38px; padding: 0 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor:pointer; transition: all 0.2s ease; }
+.transport-bar button:hover:not(:disabled) { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+.transport-bar button.primary { background: #111418; color: #ffffff; border-color: #111418; }
+.transport-bar button.primary:hover:not(:disabled) { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+
+/* ---------- TUTORIAL CONTENT SECTION ---------- */
+.content-section { margin-top: 24px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 40px; line-height: 1.7; display: flex; flex-direction: column; gap: 20px;}
+.content-section h2 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 26px; margin-top: 20px; margin-bottom: 8px; border-bottom: 2px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.content-section h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 20px; margin-top: 16px; margin-bottom: 8px; color: var(--ink); }
+.content-section pre { background: var(--term-bg); color: var(--term-text); padding: 16px 20px; border-radius: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; border: 1px solid var(--rule); overflow-x: auto;}
+.content-section code { background: var(--code-bg); color: var(--dt); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+.content-section ul { padding-left: 20px; margin: 0; }
+.content-section li { margin-bottom: 12px; color: var(--muted); }
+.content-section p { margin: 0; color: var(--muted); }
+.highlight-box { background: var(--accent-wash); padding: 16px 20px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 10px 0; }
+
+@media (max-width: 1200px) { .stage { grid-template-columns: 1fr; } .main-title { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 10px;} .transport-bar { flex-direction: column; align-items: flex-start; } .transport-controls { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL PROPS FOR SOURCE CODE OVERLAYS -->
+<div class="blocked-sticker" id="global_barrier_1">BLOCKED</div>
+
+<!-- GLOBAL ACTOR -->
+<div id="actor" class="actor-wrapper">
+    <div class="actor-payload" id="actorPayload"></div>
+    <svg class="actor-person" viewBox="0 0 40 60">
+        <g class="legs">
+            <path class="outline leg-l" fill="none" d="M16,40 L16,58" style="transform-origin: 16px 40px;"></path>
+            <path class="outline leg-r" fill="none" d="M24,40 L24,58" style="transform-origin: 24px 40px;"></path>
+        </g>
+        <g class="arms">
+            <path class="skin outline arm-l" fill="none" d="M12,24 L5,36" style="transform-origin: 12px 24px;"></path>
+            <path class="skin outline arm-r" fill="none" d="M28,24 L35,36" style="transform-origin: 28px 24px;"></path>
+        </g>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline head" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,11 L19,11 M23,11 L25,11"></path>
+    </svg>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">Control Flow: Do-While</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            <div class="speech-bubble" id="speechBubble"><p id="mascotCaption"></p></div>
+            <div class="top-controls">
+                <button class="expand-btn theme-toggle" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    <span>Expand</span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Source</span><span class="panel-tag">Main.java</span></div>
+                <div class="code-body" id="sourceBox">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span> Main {</div>
+                    <div class="code-line" id="line2"><span class="ln">2</span>  <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line3"><span class="ln">3</span></div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    <span class="dt">int </span> <span class="vr" id="src_init_i">i</span> = <span class="val" id="val_init">1</span>;</div>
+                    <div class="code-line" id="line5"><span class="ln">5</span>    <span class="kw" id="kw_do">do</span> {</div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>      System.out.println(<span class="vr" id="src_print_i">i</span>);</div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>      <span class="vr" id="src_inc">i</span><span class="op">++</span>;</div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>    } <span class="kw">while</span>(<span class="vr" id="src_cond">i</span> <= <span class="val" id="val_max">3</span>);</div>
+                    <div class="code-line" id="line9"><span class="ln" id="ln_9">9</span>  }</div>
+                    <div class="code-line" id="line10"><span class="ln">10</span>}</div>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout</span></div>
+                <div class="console-body" id="consoleBox">
+                    <div class="term-line" id="out1">1</div>
+                    <div class="term-line" id="out2">2</div>
+                    <div class="term-line" id="out3">3</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head"><span class="panel-label">Execution Focus</span><span class="panel-tag" id="focusTag">Standby</span></div>
+                <div class="focus-body" id="focusBody">
+
+                    <!-- SLOT: Init -->
+                    <div class="focus-slot" id="focus_init">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">i</span> = <span class="val">1</span>;</div>
+                        <div class="box-scene" id="focusBoxScene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusBoxChip">1</div>
+                        </div>
+                        <div class="board-placard" style="margin-top: 100px;">Loop variable <b>i</b> created and set to 1.</div>
+                    </div>
+
+                    <!-- SLOT: Print -->
+                    <div class="focus-slot" id="focus_print">
+                        <div class="execution-code">System.out.println(<span class="vr">i</span>);</div>
+                        <div class="board-placard" style="margin-top: 150px;">Executing the loop body...</div>
+                    </div>
+
+                    <!-- SLOT: Increment -->
+                    <div class="focus-slot" id="focus_inc">
+                        <div class="execution-code"><span class="vr">i</span><span class="op">++</span></div>
+                        <div class="board-placard" style="margin-top: 150px;">Incrementing the counter by 1 before checking the condition.</div>
+                    </div>
+
+                    <!-- SLOT: Condition -->
+                    <div class="focus-slot" id="focus_cond">
+                        <div class="execution-code"><span class="vr">i</span> <= <span class="val">3</span></div>
+                        <div class="math-stage" id="math_cond">
+                            <span class="m-op-val" id="mc_v1">1</span>
+                            <span class="m-symb"><=</span>
+                            <span class="m-op-val">3</span>
+                        </div>
+                        <div class="board-placard" style="margin-top: 100px;">Evaluating loop continuation condition...</div>
+                    </div>
+
+                </div>
+
+                <!-- ITERATION TRACKER TABLE -->
+                <div class="tracker-wrapper">
+                    <table class="tracker-table" id="trackerTable">
+                        <thead>
+                            <tr>
+                                <th>Iter</th>
+                                <th>i Value (Start)</th>
+                                <th>Action Executed</th>
+                                <th>Condition Checked</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="tr_i1"><td>#1</td><td>1</td><td><span class="action-text">Print 1</span></td><td><span class="cond-badge badge badge-true">2 <= 3</span></td></tr>
+                            <tr id="tr_i2"><td>#2</td><td>2</td><td><span class="action-text">Print 2</span></td><td><span class="cond-badge badge badge-true">3 <= 3</span></td></tr>
+                            <tr id="tr_i3"><td>#3</td><td>3</td><td><span class="action-text">Print 3</span></td><td><span class="cond-badge badge badge-false">4 <= 3</span> <span class="cond-badge badge badge-exit">EXIT</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- COLUMN 3: RIGHT STACK TRAY -->
+        <div class="col">
+            <section class="panel stack-tray-panel" id="stackMemoryPanel">
+                <div class="panel-head"><span class="panel-label">Stack Memory</span><span class="panel-tag">Variables</span></div>
+                <div class="stack-tray-body" id="stackTrayBody">
+                    <div class="tray-empty" id="trayEmpty">— no variables stored —</div>
+                    
+                    <!-- 3D BOX IN STACK MEMORY WITH HISTORY LOG -->
+                    <div class="stack-box-wrapper" id="mini_i">
+                        <div class="stack-box-name">int i</div>
+                        <!-- HISTORY LOG: Maintains track of all previous iterations -->
+                        <div class="history-log" id="i_history"></div>
+                        
+                        <div class="box-scene" style="opacity: 1; transform: scale(1); margin-top: 0;">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div>
+                                <div class="box-face box-left"></div>
+                                <div class="box-face box-right"></div>
+                                <div class="box-face box-floor"></div>
+                            </div>
+                            <div class="math-result-chip" id="mini_i_val" style="opacity: 1; transform: translateX(-50%) translateZ(0);">1</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="panel transport-bar">
+                <div class="step-status" id="status">Step 0 / X</div>
+                <div class="transport-controls">
+                    <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play Auto</span></button>
+                    <button id="prevBtn" onclick="prevStep()" disabled><span>◂</span><span>Prev</span></button>
+                    <button id="nextBtn" onclick="nextStep()"><span>Next Step</span><span>▸</span></button>
+                    <button onclick="resetAnimation()" title="Reset Environment"><span>↻</span></button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TUTORIAL CONTENT SECTION -->
+    <div class="content-section">
+        <h2>Anatomy of a Do-While Loop</h2>
+        <p>A <code>do-while</code> loop is unique: it guarantees that the body of the loop will execute <strong>at least once</strong>. The condition is checked at the very end of the loop, not at the beginning.</p>
+
+        <h3>The Do-While Loop Structure</h3>
+        <pre><code>// initialization
+do {
+    // block of code to be executed
+    // update
+} while (condition);</code></pre>
+        <ul>
+            <li><b>Initialization (e.g., <code>int i = 1;</code>)</b>: Setup variables before the loop begins.</li>
+            <li><b>Execution (e.g., <code>System.out.println(i);</code>)</b>: Unlike other loops, the program enters the <code>do</code> block immediately without checking any condition.</li>
+            <li><b>Update (e.g., <code>i++</code>)</b>: Ensure you change the loop counter inside the block, just like a standard while loop.</li>
+            <li><b>Condition (e.g., <code>while(i <= 3);</code>)</b>: Evaluated after the block finishes. If true, execution jumps back up to the <code>do</code> keyword. If false, it simply continues down.</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <strong>The Lifecycle</strong>
+            <p>The standard execution path is: <code>Initialize -> [Body -> Update -> Condition] -> [Body -> Update -> Condition] -> [Body -> Update -> Condition (False) -> Exit]</code>.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTheme() { document.body.classList.toggle("dark"); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) { document.exitFullscreen(); }
+    }
+}
+
+// --- Animation State & Core Selectors ---
+const actor = document.getElementById('actor');
+const payload = document.getElementById('actorPayload');
+let currentStep = 0;
+let playing = false;
+let activeAnimations = [];
+let typingInterval = null; 
+
+// --- Helper Functions for Advanced Animation ---
+function killAllAnimations() {
+    activeAnimations.forEach(a => { if(a.cancel) a.cancel(); });
+    activeAnimations = [];
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(resolve, ms);
+        activeAnimations.push({ cancel: () => { clearTimeout(t); reject("cancelled"); } });
+    });
+}
+
+function getRect(id) {
+    const el = document.getElementById(id);
+    return el ? el.getBoundingClientRect() : { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 };
+}
+
+function getActorTarget(elemId) {
+    const rect = getRect(elemId);
+    return { y: rect.bottom - 12 };
+}
+
+function setArms(state) {
+    const armL = actor.querySelector('.arm-l');
+    const armR = actor.querySelector('.arm-r');
+    if(state === 'carry') {
+        armL.setAttribute('d', 'M12,24 L0,15'); 
+        armR.setAttribute('d', 'M28,24 L40,15'); 
+    } else if(state === 'throw') {
+        armL.setAttribute('d', 'M12,24 L0,24'); 
+        armR.setAttribute('d', 'M28,24 L40,24'); 
+    } else {
+        armL.setAttribute('d', 'M12,24 L5,36'); 
+        armR.setAttribute('d', 'M28,24 L35,36'); 
+    }
+}
+
+function setFacing(startX, endX) {
+    const scale = endX < startX ? -1 : 1;
+    actor.querySelector('.actor-person').style.transform = `scaleX(${scale}) rotate(0deg)`;
+}
+
+async function actorFadeIn(x, y) {
+    const person = actor.querySelector('.actor-person');
+    if (person) {
+        person.style.transform = `scaleX(1) rotate(0deg)`;
+    }
+    actor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    
+    const a = actor.animate([{opacity: 0}, {opacity: 1}], {duration: 300, fill: 'forwards'});
+    activeAnimations.push(a);
+    await a.finished.catch(e=>{});
+    actor.style.opacity = "1";
+}
+
+async function actorFadeOut() {
+    const a = actor.animate([{opacity: 1}, {opacity: 0}], {duration: 300, fill: 'forwards'});
+    activeAnimations.push(a);
+    await a.finished.catch(e=>{});
+    actor.style.opacity = "0";
+}
+
+async function animWalk(startX, startY, endX, endY, duration = 900) {
+    setFacing(startX, endX);
+    actor.className = "actor-wrapper walking";
+    const a = actor.animate([ 
+        { transform: `translate3d(${startX}px, ${startY}px, 0)` }, 
+        { transform: `translate3d(${endX}px, ${endY}px, 0)` } 
+    ], { duration, fill: "forwards", easing: "linear" });
+    activeAnimations.push(a);
+    await a.finished.catch(e=>{});
+    actor.className = "actor-wrapper";
+}
+
+async function animThink(duration = 1000) {
+    actor.className = "actor-wrapper thinking";
+    await wait(duration);
+    actor.className = "actor-wrapper";
+}
+
+async function animJumpParabola(startX, startY, endX, endY, peakHeight, flips, duration = 700) {
+    actor.className = "actor-wrapper";
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+    
+    const pre = actor.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scaleY(1)` }, 
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scaleY(0.7) scaleX(1.2)` }
+    ], { duration: 150, fill: "forwards" });
+    activeAnimations.push(pre); await pre.finished.catch(e=>{});
+
+    const midX = startX + (endX - startX) / 2;
+    const peakY = Math.min(startY, endY) - peakHeight;
+    const rotateEnd = flips * 360 * (endX < startX ? -1 : 1);
+
+    const a = actor.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) rotate(0deg) scale(1)` },
+        { transform: `translate3d(${midX}px, ${peakY}px, 0) rotate(${rotateEnd / 2}deg) scale(1.1)`, offset: 0.5 },
+        { transform: `translate3d(${endX}px, ${endY}px, 0) rotate(${rotateEnd}deg) scale(1)` }
+    ], { duration, fill: "forwards", easing: "cubic-bezier(.3, .8, .4, 1)" });
+    activeAnimations.push(a); await a.finished.catch(e=>{});
+
+    const post = actor.animate([
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scaleY(0.6) scaleX(1.3)` }, 
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scale(1)` }
+    ], { duration: 250, fill: "forwards", easing: "ease-out" });
+    activeAnimations.push(post); await post.finished.catch(e=>{});
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+}
+
+function pasteSticker(id, anchorId, offsetX = 10, offsetY = -5) {
+    const sticker = document.getElementById(id);
+    const rect = getRect(anchorId);
+    sticker.style.top = (rect.top + offsetY) + 'px';
+    sticker.style.left = (rect.right + offsetX) + 'px';
+    return sticker;
+}
+
+function createSparks(x, y, color = 'var(--barrier)') {
+    for(let i=0; i<10; i++) {
+        let s = document.createElement('div');
+        s.className = 'spark';
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        s.style.backgroundColor = color;
+        document.body.appendChild(s);
+        let angle = Math.random() * Math.PI * 2;
+        let dist = Math.random() * 50 + 20;
+        s.animate([ 
+            {transform: 'translate(0,0) scale(1)', opacity: 1}, 
+            {transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0}
+        ], {duration: 400 + Math.random()*300, easing: 'cubic-bezier(.25, .8, .25, 1)'});
+        setTimeout(()=>s.remove(), 700);
+    }
+}
+
+async function throwElement(htmlString, startX, startY, endX, endY, duration = 800) {
+    const thrown = document.createElement("div");
+    thrown.className = "throw-item";
+    thrown.innerHTML = htmlString;
+    document.body.appendChild(thrown);
+
+    const a = thrown.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scale(1) rotate(0deg)`, opacity: 1 },
+        { transform: `translate3d(${startX + (endX-startX)*0.4}px, ${startY - 120}px, 0) scale(1.3) rotate(-20deg)`, opacity: 1, offset: 0.5 },
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scale(0.7) rotate(10deg)`, opacity: 0 }
+    ], { duration, easing: "ease-in-out", fill: "forwards" });
+    activeAnimations.push(a);
+    await a.finished.catch(e=>{});
+    thrown.remove();
+}
+
+function typeText(text) {
+    const el = document.getElementById('mascotCaption');
+    el.textContent = ""; 
+    el.classList.add("typing-cursor");
+    let i = 0;
+    if (typingInterval) clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if(i < text.length) {
+            el.textContent += text[i++];
+        } else { 
+            clearInterval(typingInterval); 
+            el.classList.remove("typing-cursor"); 
+        }
+    }, 20);
+}
+
+function setTrackerRow(rowNum, phase) {
+    for(let i=1; i<=3; i++) { // Max 3 rows for this do-while example
+        const tr = document.getElementById('tr_i' + i);
+        if(tr) {
+            tr.classList.remove('active', 'done', 'revealed');
+            
+            // Only reveal rows up to the current iteration
+            if (i <= rowNum) {
+                tr.classList.add('revealed');
+            }
+            
+            if (i < rowNum) {
+                tr.classList.add('done');
+            } else if (i === rowNum) {
+                // Ensure staggered animation plays by removing/adding element from flow
+                tr.classList.remove('active');
+                void tr.offsetWidth; // trigger reflow
+                tr.classList.add('active');
+            }
+
+            // Handle badge visibility
+            const badges = tr.querySelectorAll('.cond-badge');
+            if (i < rowNum || (i === rowNum && phase === 'cond')) {
+                badges.forEach(b => b.classList.add('show'));
+            } else {
+                badges.forEach(b => b.classList.remove('show'));
+            }
+        }
+    }
+}
+
+// --- Dynamic Script Generator (Adapted for Do-While) ---
+
+function createPrintStep(iValue) {
+    return {
+        text: `Line 6: We enter the 'do' block immediately. The human fetches 'i' from Stack Memory, throws it to the console, and executes the print block.`,
+        line: 6,
+        tag: "Execute Body First",
+        action: async () => {
+            const slot = document.getElementById('focus_print');
+            slot.classList.add('show');
+            const y = getActorTarget('src_print_i').y;
+            const conPos = getRect('consoleBox');
+
+            const startX = getRect('sourceBox').left + 45;
+            const targetX = getRect('src_print_i').right + 15;
+
+            const memPanel = getRect('stackMemoryPanel');
+            const stackX = memPanel.left + 80;
+            const stackY = memPanel.top + 130;
+
+            // 1. Appear at source code, but walk immediately to stack memory box
+            await actorFadeIn(startX, y);
+            await animWalk(startX, y, stackX, stackY, 1000);
+
+            // 2. Pick up the value from the memory box
+            const pickup = actor.querySelector('.actor-person').animate(
+                [ { transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' } ], { duration: 300 }
+            );
+            activeAnimations.push(pickup);
+            setArms('carry');
+            payload.textContent = iValue.toString();
+            payload.style.opacity = "1";
+            await wait(400);
+
+            // 3. Walk back to the print statement
+            await animWalk(stackX, stackY, targetX, y, 1000);
+
+            // 4. Throw to console
+            const windup = actor.querySelector('.actor-person').animate([ { transform: 'rotate(0deg)' }, { transform: 'rotate(30deg) scaleX(1.1)' }, { transform: 'rotate(-40deg) scaleX(0.9)' } ], { duration: 400, fill: 'forwards' });
+            activeAnimations.push(windup);
+            await wait(250);
+
+            payload.style.opacity = "0";
+            setArms('throw');
+            await throwElement(`<div style='background:var(--val); color:var(--panel); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px; box-shadow:0 0 12px var(--val);'>${iValue}</div>`, targetX, y - 40, conPos.left + 50, conPos.top - 30 + (iValue * 20), 700);
+
+            windup.cancel();
+            actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+            setArms('relaxed');
+
+            const outLine = document.getElementById('out'+iValue);
+            if(outLine) outLine.classList.add('show', 'receiving');
+
+            const bounce = actor.querySelector('.actor-person').animate([ { transform: 'translateY(0)' }, { transform: 'translateY(-15px)' }, { transform: 'translateY(0)' } ], { duration: 250 });
+            activeAnimations.push(bounce);
+
+            // 5. Update and pop the Iteration Table Action cell to highlight execution
+            const tr = document.getElementById('tr_i' + iValue);
+            if (tr) {
+                const actionCell = tr.querySelectorAll('td')[2]; // Column index 2 for Action
+                if (actionCell) {
+                    const span = actionCell.querySelector('.action-text');
+                    if (span) {
+                        span.classList.add('action-pop');
+                        const cellRect = span.getBoundingClientRect();
+                        createSparks(cellRect.left + cellRect.width / 2, cellRect.top + cellRect.height / 2, 'var(--val)');
+                    }
+                }
+            }
+
+            await wait(400);
+
+            await animWalk(targetX, y, startX, y, 700);
+            await actorFadeOut();
+        }
+    };
+}
+
+function createIncStep(iValue) {
+    const nextVal = iValue + 1;
+    return {
+        text: `Line 7: In a do-while loop, we update the variable inside the block. Variable 'i' is incremented to ${nextVal}.`,
+        line: 7,
+        tag: "Update Statement",
+        action: async () => {
+            const slot = document.getElementById('focus_inc');
+            slot.classList.add('show');
+            const y = getActorTarget('src_inc').y;
+            const startX = getRect('sourceBox').left + 45;
+            const targetX = getRect('src_inc').right + 15;
+
+            // 1. Walk to source code 'i++'
+            await actorFadeIn(startX, y);
+            await animWalk(startX, y, targetX, y, 700);
+            
+            // 2. Pick up +1
+            const pickup = actor.querySelector('.actor-person').animate(
+                [ { transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' } ], { duration: 300 }
+            );
+            activeAnimations.push(pickup);
+            setArms('carry');
+            payload.innerHTML = "<span style='color:var(--val)'>+1</span>";
+            payload.style.opacity = "1";
+            await wait(400);
+
+            // 3. Walk to Stack Memory
+            const memPanel = getRect('stackMemoryPanel');
+            const stackTargetX = memPanel.left + 80;
+            const stackTargetY = memPanel.top + 130;
+
+            await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+            // 4. Update the memory box
+            payload.style.opacity = "0";
+            setArms('relaxed');
+            
+            // Push old value to History Log
+            const hist = document.getElementById('i_history');
+            const oldSpan = document.createElement('span');
+            oldSpan.textContent = iValue;
+            hist.appendChild(oldSpan);
+            oldSpan.animate([{opacity:0, transform:'scale(0)'}, {opacity:1, transform:'scale(1)'}], {duration: 300});
+
+            // Bump the memory values visually immediately
+            const chip = document.getElementById('focusBoxChip');
+            chip.textContent = nextVal.toString();
+            chip.classList.add('bumping');
+            
+            const mini = document.getElementById('mini_i_val');
+            mini.textContent = nextVal.toString();
+            mini.classList.add('bumping'); 
+
+            // Awesome spark effect on impact in the stack memory
+            createSparks(stackTargetX, stackTargetY, 'var(--val)');
+            
+            setTimeout(() => { chip.classList.remove('bumping'); mini.classList.remove('bumping'); }, 300);
+            await wait(600);
+
+            // 5. Walk back to the source code
+            await animWalk(stackTargetX, stackTargetY, startX, y, 1200);
+            await actorFadeOut();
+        }
+    };
+}
+
+function createCondTrueStep(iterI) {
+    const checkVal = iterI + 1; // Evaluates the newly incremented value
+    return {
+        text: `Line 8: The condition is evaluated AFTER the block. Is ${checkVal} <= 3? Yes! The loop jumps back up to 'do'.`,
+        line: 8,
+        tag: `Condition Check (${checkVal} <= 3)`,
+        action: async () => {
+            const slot = document.getElementById('focus_cond');
+            slot.classList.add('show');
+            const y = getActorTarget('src_cond').y;
+            const startX = getRect('sourceBox').left + 45; 
+            const targetX = getRect('src_cond').right + 15;
+
+            document.getElementById('mc_v1').textContent = checkVal.toString();
+            
+            await actorFadeIn(startX, y);
+            await animWalk(startX, y, targetX, y, 700);
+            
+            setArms('carry');
+            payload.textContent = checkVal.toString();
+            payload.style.opacity = "1";
+            actor.querySelector('.actor-person').animate([ { transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' } ], { duration: 300 });
+            await wait(500);
+
+            slot.classList.add('eval');
+            const mathStage = document.getElementById('math_cond');
+            mathStage.classList.add('do-math');
+            await wait(800);
+            mathStage.classList.add('math-success');
+            
+            // Pop the specific cond badge in the tracker table
+            const tr = document.getElementById('tr_i' + iterI);
+            if(tr) {
+                tr.querySelectorAll('.cond-badge').forEach(b => b.classList.add('show'));
+            }
+
+            await wait(600);
+
+            // Jump back to the top of the loop (`do`)
+            const doY = getActorTarget('kw_do').y;
+            await animJumpParabola(targetX, y, startX + 10, doY, 50, -1, 800);
+            await animWalk(startX + 10, doY, startX, doY, 600);
+            
+            await actorFadeOut();
+        }
+    };
+}
+
+function createCondFailStep(iterI) {
+    const checkVal = iterI + 1;
+    return {
+        text: `Line 8: Condition evaluated AFTER the block. Is ${checkVal} <= 3? No, this is FALSE. The loop terminates!`,
+        line: 8,
+        tag: `Condition Fails (${checkVal} <= 3)`,
+        action: async () => {
+            const slot = document.getElementById('focus_cond');
+            slot.classList.add('show');
+            const y = getActorTarget('src_cond').y;
+            const startX = getRect('sourceBox').left + 45; 
+            const targetX = getRect('src_cond').right + 15;
+            
+            document.getElementById('mc_v1').textContent = checkVal.toString();
+            
+            await actorFadeIn(startX, y);
+            await animWalk(startX, y, targetX, y, 700);
+            
+            slot.classList.add('eval');
+            const mathStage = document.getElementById('math_cond');
+            mathStage.classList.add('do-math');
+            await wait(800);
+            
+            mathStage.classList.add('math-fail');
+            const sticker = pasteSticker('global_barrier_1', 'src_cond', 30, -5);
+            sticker.classList.add('active');
+            const bRect = sticker.getBoundingClientRect();
+            createSparks(bRect.left + 30, bRect.top + 15, 'var(--barrier)');
+            
+            // Pop the specific cond badge in the tracker table
+            const tr = document.getElementById('tr_i' + iterI);
+            if(tr) {
+                tr.querySelectorAll('.cond-badge').forEach(b => b.classList.add('show'));
+            }
+
+            await wait(600);
+            
+            // Exit loop jump
+            const exitY = getActorTarget('ln_9').y;
+            await animJumpParabola(targetX, y, startX + 10, exitY, 50, 1, 800);
+            await animWalk(startX + 10, exitY, startX, exitY, 600);
+            
+            await actorFadeOut();
+        }
+    };
+}
+
+const script = [];
+
+script.push({
+    text: "A do-while loop executes a block of code FIRST, and evaluates the condition LAST. Let's see it in action.",
+    line: 0,
+    tag: "Standby",
+    state: { i: null, out: [], row: 0, phase: 'init' }
+});
+
+script.push({
+    text: "Line 4: Initialization happens BEFORE the loop starts. We allocate 'i' and set it to 1 in Stack Memory.",
+    line: 4,
+    tag: "Initialization",
+    state: { i: null, out: [], row: 0, phase: 'init' },
+    action: async () => {
+        const slot = document.getElementById('focus_init');
+        slot.classList.add('show');
+        const y = getActorTarget('val_init').y;
+        const startX = getRect('sourceBox').left + 45; 
+        const targetX = getRect('val_init').left - 20;
+
+        await actorFadeIn(startX, y);
+        await animWalk(startX, y, targetX, y, 700);
+
+        const pickup = actor.querySelector('.actor-person').animate(
+            [ { transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' } ], { duration: 300 }
+        );
+        activeAnimations.push(pickup);
+        setArms('carry');
+        payload.textContent = "i=1";
+        payload.style.opacity = "1";
+        await wait(400);
+
+        const memPanel = getRect('stackMemoryPanel');
+        const stackTargetX = memPanel.left + 80;
+        const stackTargetY = memPanel.top + 130;
+
+        await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+        payload.style.opacity = "0";
+        setArms('relaxed');
+        document.getElementById('trayEmpty').style.display = 'none';
+        document.getElementById('mini_i').classList.add('stored');
+        
+        document.getElementById('focusBoxScene').classList.add('popped');
+        document.getElementById('focusBoxChip').style.opacity = "1";
+        slot.classList.add('stored');
+
+        createSparks(stackTargetX, stackTargetY, 'var(--accent)');
+        await wait(600);
+
+        await animWalk(stackTargetX, stackTargetY, startX, y, 1200);
+        await actorFadeOut();
+    }
+});
+
+let printedList = [];
+// Loop through 3 iterations (do-while)
+for(let i=1; i<=3; i++) {
+    script.push(Object.assign(createPrintStep(i),{ state: { i: i, out: [...printedList], row: i, phase: 'print' } }));
+    printedList.push(i);
+    script.push(Object.assign(createIncStep(i),  { state: { i: i+1, out: [...printedList], row: i, phase: 'inc' } })); 
+    
+    if (i < 3) {
+        script.push(Object.assign(createCondTrueStep(i), { state: { i: i+1, out: [...printedList], row: i, phase: 'cond' } }));
+    } else {
+        script.push(Object.assign(createCondFailStep(i), { state: { i: i+1, out: [...printedList], row: i, phase: 'cond' } }));
+    }
+}
+
+// --- Engine Core ---
+function resetUI() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.focus-slot').forEach(el => { el.classList.remove('show', 'eval', 'stored'); el.style.opacity = "1"; });
+    
+    const boxScene = document.getElementById('focusBoxScene');
+    if (boxScene) boxScene.classList.remove('popped');
+    
+    document.querySelectorAll('.math-stage').forEach(el => {
+        el.classList.remove('do-math', 'math-success', 'math-fail');
+    });
+
+    document.querySelectorAll('.blocked-sticker').forEach(el => {
+        el.classList.remove('active');
+        el.style.opacity = ''; 
+    });
+
+    document.querySelectorAll('.action-pop').forEach(el => el.classList.remove('action-pop'));
+    document.querySelectorAll('.cond-badge.show').forEach(el => el.classList.remove('show'));
+    
+    for(let o=1; o<=3; o++) {
+        const outEl = document.getElementById('out'+o);
+        if(outEl) outEl.classList.remove('show', 'receiving');
+    }
+    
+    document.querySelectorAll('.spark, .zap-fx, .throw-item').forEach(el => el.remove());
+    
+    actor.style.opacity = "0";
+    actor.className = "actor-wrapper";
+    const person = actor.querySelector('.actor-person');
+    if (person) {
+        person.style.transform = `scaleX(1) rotate(0deg)`;
+    }
+    setArms('relaxed');
+    payload.style.opacity = "0";
+}
+
+function fastForwardToState(stepIdx) {
+    const state = script[stepIdx].state;
+    
+    // Memory initialization state
+    const hist = document.getElementById('i_history');
+    hist.innerHTML = '';
+    
+    if (state.i !== null) {
+        document.getElementById('trayEmpty').style.display = 'none';
+        document.getElementById('mini_i').classList.add('stored');
+        document.getElementById('focusBoxScene').classList.add('popped');
+        document.getElementById('focusBoxChip').style.opacity = "1";
+        document.getElementById('focusBoxChip').textContent = state.i.toString();
+        document.getElementById('mini_i_val').textContent = state.i.toString();
+        
+        // Rebuild History Log
+        // Note: For do-while, we log history based on current expected state.
+        for(let prev = 1; prev < state.i; prev++) {
+            const s = document.createElement('span');
+            s.textContent = prev;
+            hist.appendChild(s);
+        }
+    } else {
+        document.getElementById('trayEmpty').style.display = 'block';
+        document.getElementById('mini_i').classList.remove('stored');
+        document.getElementById('focusBoxScene').classList.remove('popped');
+        document.getElementById('focusBoxChip').style.opacity = "0";
+    }
+    
+    // Console visibility state
+    for(let out=1; out<=3; out++) {
+        const el = document.getElementById('out'+out);
+        if (el) {
+            if (state.out.includes(out)) {
+                el.classList.add('show');
+            } else {
+                el.classList.remove('show');
+            }
+        }
+    }
+
+    // Tracker Table Syncing
+    setTrackerRow(state.row, state.phase);
+}
+
+async function renderStep(stepIndex) {
+    if (stepIndex >= script.length) return;
+    const step = script[stepIndex];
+    
+    document.getElementById("status").textContent = `Step ${stepIndex} / ${script.length - 1}`;
+    document.getElementById("focusTag").textContent = step.tag;
+    document.getElementById("prevBtn").disabled = (stepIndex === 0);
+    document.getElementById("nextBtn").disabled = (stepIndex === script.length - 1);
+    
+    killAllAnimations();
+    resetUI();
+    fastForwardToState(stepIndex);
+    
+    typeText(step.text);
+    
+    if (step.line > 0) document.getElementById("line" + step.line).classList.add("active");
+    
+    if (step.action) {
+        try { await step.action(); } catch(e) { /* Caught cancellation */ }
+    }
+}
+
+async function playAuto() {
+    playing = true;
+    const btn = document.getElementById("playBtn");
+    btn.innerHTML = "<span>⏸</span><span>Pause</span>";
+    
+    while (playing && currentStep < script.length) {
+        await renderStep(currentStep);
+        if (playing && currentStep < script.length - 1) {
+            try { await wait(800); currentStep++; } catch(e) { break; }
+        } else {
+            pause();
+        }
+    }
+}
+
+function pause() {
+    playing = false;
+    document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play Auto</span>";
+}
+
+function togglePlay() {
+    if (playing) pause();
+    else {
+        if (currentStep >= script.length - 1) currentStep = 0;
+        playAuto();
+    }
+}
+
+function nextStep() {
+    pause();
+    if (currentStep < script.length - 1) {
+        currentStep++;
+        renderStep(currentStep);
+    }
+}
+
+function prevStep() {
+    pause();
+    if (currentStep > 0) {
+        currentStep--;
+        renderStep(currentStep);
+    }
+}
+
+function resetAnimation() {
+    pause();
+    currentStep = 0;
+    renderStep(0);
+}
+
+// Initial state
+window.onload = () => { renderStep(0); };
+</script>
+</body>
+</html>

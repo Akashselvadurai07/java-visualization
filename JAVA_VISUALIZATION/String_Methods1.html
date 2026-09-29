@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Strings: Methods & Manipulations</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --var2: #10b981;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --barrier: #ef4444;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+    --term-input: #eab308;
+
+    --scp-bg: rgba(16, 185, 129, 0.1);
+    --scp-border: #10b981;
+    --ref-color: #0284c7;
+    --ref-bg: #e0f2fe;
+    
+    --ref2-color: #9333ea;
+    --ref2-bg: #f3e8ff;
+    
+    --ref3-color: #ea580c;
+    --ref3-bg: #ffedd5;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --var2: #10b981;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --barrier: #f87171;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+    --term-input: #facc15;
+
+    --scp-bg: rgba(16, 185, 129, 0.15);
+    --scp-border: #059669;
+    --ref-color: #38bdf8;
+    --ref-bg: rgba(56, 189, 248, 0.15);
+    
+    --ref2-color: #c084fc;
+    --ref2-bg: rgba(192, 132, 252, 0.15);
+    
+    --ref3-color: #fb923c;
+    --ref3-bg: rgba(251, 146, 60, 0.15);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1750px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage { display: grid; grid-template-columns: 1fr 1.15fr 0.95fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--rule); flex-shrink: 0;}
+.panel-label, .panel-tag { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; flex-direction: row; align-items: center;}
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap; flex: 1;}
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 28px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+
+.mascot-frame { width: 56px; height: 56px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 18px; transform-origin: left center; }
+.speech-bubble p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink); min-height: 22px; font-weight: 500;}
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Controls */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; padding-right: 20px;}
+.theme-toggle { width: auto; padding: 0 16px; height: 44px; border-radius: 22px; border: 1px solid var(--rule-strong); background: transparent; color: var(--ink); font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-only-btn { width: 44px; padding: 0; border-radius: 50%; }
+
+/* ---------- SOURCE CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.6; padding: 16px 0; height: 450px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+.code-line { display: flex; padding: 2px 20px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease, border-color 0.25s ease; position: relative; }
+.spacer-line { margin-bottom: 8px; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 32px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); font-weight: 600;}
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.vr2 { color: var(--var2); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.str { color: var(--val); font-weight: bold; transition: opacity 0.3s; }
+.cmt { color: var(--cmt); font-style: italic; }
+
+/* ---------- FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body { padding: 40px 20px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-height: 300px; }
+
+.focus-slot { display: none; width: 100%; max-width: 520px; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 34px; border: 1.5px solid var(--accent); background: var(--accent-wash); border-radius: 16px; position: relative; }
+.focus-slot.show { display: flex; }
+.execution-code { font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--code-bg); border: 1px dashed var(--dt); padding: 12px 24px; border-radius: 8px; text-align: center; z-index: 20; box-shadow: 0 8px 16px rgba(0,0,0,0.05);}
+.execution-code .kw { color: var(--kw); }
+.execution-code .op { color: var(--math-op); }
+.execution-code .val { color: var(--val); }
+.execution-code .dt { color: var(--dt); }
+.execution-code .vr { color: var(--var); }
+
+/* --- STRING VISUALIZATION --- */
+.string-viz-container { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; margin: 15px 0; min-height: 70px;}
+.string-viz-row { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.char-col { display: flex; flex-direction: column; align-items: center; transition: all 0.4s ease; }
+.char-idx { font-family: "Space Grotesk", sans-serif; font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px; transition: color 0.3s;}
+.char-box { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk", sans-serif; font-size: 22px; font-weight: 700; color: #000; border-radius: 2px; border: 2px solid transparent; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+/* Visualization Animation States */
+.char-col.dimmed { opacity: 0.2; transform: scale(0.9); filter: grayscale(50%); }
+.char-col.highlight .char-box { transform: scale(1.15) translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); border-color: #000; z-index: 2;}
+.char-col.highlight .char-idx { color: var(--accent); }
+
+.char-col.error .char-box { background-color: #ef4444 !important; color: #fff; border-color: #7f1d1d;}
+.char-col.error .char-idx { color: #ef4444; }
+
+.char-col.matched .char-box { border-color: #16a34a; box-shadow: 0 0 15px rgba(22, 163, 74, 0.5);}
+.char-col.mismatched .char-box { border-color: #ef4444; background-color: #fca5a5 !important; }
+
+/* Box / Object Chips (For initial generation) */
+.box-scene { width: 80px; height: 80px; perspective: 400px; position: relative; z-index: 5; margin-top: 10px; opacity: 0; transform: scale(0); }
+.box-scene.popped { opacity: 1; transform: scale(1); animation: boxPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes boxPopIn { 0% { opacity: 0; transform: scale(0) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.box-3d { position: absolute; width: 60px; height: 60px; left: 10px; top: 10px; transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(35deg); transition: transform 0.3s ease; }
+.box-face { position: absolute; width: 60px; height: 60px; border: 2px solid var(--accent); border-radius: 6px; background: transparent; transition: all 0.3s ease; }
+.box-floor { background: rgba(255,176,0,0.12); transform-origin: center; transform: rotateX(-90deg) translateZ(30px); }
+.box-back  { transform-origin: bottom center; transform: rotateY(180deg) translateZ(30px); }
+.box-left  { transform-origin: bottom center; transform: rotateY(-90deg) translateZ(30px); }
+.box-right { transform-origin: bottom center; transform: rotateY(90deg) translateZ(30px); }
+.math-result-chip { position: absolute; top: 22px; left: 50%; transform: translateX(-50%) translateZ(0); padding: 4px 10px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 16px; color: var(--val); background: var(--panel); border: 2px solid var(--val); border-radius: 6px; opacity: 0; z-index: 10; transition: transform 0.3s;}
+.math-result-chip.bumping { transform: translateX(-50%) translateZ(0) scale(1.3); color: var(--accent); border-color: var(--accent); }
+
+/* Reference Tags */
+.ref-chip { padding: 2px 6px; font-size: 11px; font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--ref-color); background: var(--ref-bg); border: 1px solid var(--ref-color); border-radius: 4px; display: inline-block; white-space: nowrap;}
+.ref-chip.large { font-size: 14px; padding: 4px 10px; }
+.ref-chip.ref2 { color: var(--ref2-color); background: var(--ref2-bg); border-color: var(--ref2-color); }
+.ref-chip.ref3 { color: var(--ref3-color); background: var(--ref3-bg); border-color: var(--ref3-color); }
+
+/* Placards */
+.board-placard { background: var(--panel); border: 1.5px solid var(--placard-border); border-radius: 9px; padding: 16px 20px; width: 100%; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.5; opacity: 0; transform: translateY(10px); z-index: 3; text-align: center;}
+.focus-slot.eval .board-placard, .focus-slot.stored .board-placard, .focus-slot.show .board-placard { opacity: 1; transform: translateY(0); animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s backwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* Ping Animation Effect */
+@keyframes pingGlow {
+    0% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+    30% { transform: scale(1.15); box-shadow: 0 0 25px var(--ping-color); z-index: 50; border-color: var(--ping-color);}
+    100% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+}
+.pinging { animation: pingGlow 0.6s ease; position: relative; }
+
+/* ---------- MEMORY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.stack-tray-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; align-items: center;}
+.tray-empty { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); text-align: center; padding: 24px 8px; transition: opacity 0.3s; width: 100%;}
+.memory-section { width: 100%; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--code-bg); padding: 16px 12px 12px; display: flex; flex-direction: column; gap: 10px; position: relative; transition: all 0.3s ease;}
+.memory-title { font-family: "JetBrains Mono"; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dt); font-weight: bold; position: absolute; top: -9px; left: 10px; background: var(--panel); padding: 0 6px; border: 1px solid var(--rule-strong); border-radius: 4px;}
+
+.stack-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+.stack-box-wrapper { display: none; opacity: 0; transform: translateY(10px); flex-direction: column; align-items: center; min-width: 60px; padding: 8px 6px; border: 2px dashed var(--rule-strong); background: var(--paper); border-radius: 8px; position: relative; transition: all 0.2s;}
+.stack-box-wrapper.stored { display: flex; opacity: 1; transform: translateY(0); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.stack-box-name { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--var); margin-bottom: 8px; text-align: center; line-height: 1.1;}
+.stack-box-value { display: flex; flex-direction: column; align-items: center; gap: 4px;}
+
+/* Heap / SCP Specifics */
+.heap-object { display: none; flex-direction: column; align-items: center; background: var(--panel); border: 2px solid var(--dt); border-radius: 8px; padding: 10px; min-width: 100px; opacity: 0; transform: scale(0.8); transition: all 0.2s;}
+.heap-object.stored { display: flex; opacity: 1; transform: scale(1); animation: boxPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.heap-obj-type { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: bold;}
+.heap-obj-val { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; color: var(--val); margin-bottom: 8px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+
+/* Props & Actor - Transition Based Movement */
+.spark { position: fixed; width: 6px; height: 6px; border-radius: 50%; z-index: 9999998; pointer-events: none; }
+.actor-wrapper { 
+    position: fixed; left: 0; top: 0; width: 60px; height: 80px; 
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+    opacity: 0; z-index: 999999; pointer-events: none; 
+    transform: translate3d(-200px, -200px, 0); transform-origin: bottom center; 
+}
+.actor-person { width: 48px; height: 66px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.4)); transition: transform 0.15s ease-out;}
+.actor-person .skin { fill: #f2c9a0; }
+.actor-person .shirt { fill: var(--dt); }
+.actor-person .outline { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: d 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.actor-payload { position: absolute; top: -20px; padding: 4px 12px; border-radius: 999px; border: 2px solid var(--val); background: var(--panel); color: var(--val); font-family: "JetBrains Mono", monospace; font-size: 15px; font-weight: 700; text-align: center; box-shadow: 0 5px 14px rgba(0,0,0,.15); opacity: 0; transition: opacity 0.2s; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;}
+.actor-wrapper.walking .actor-person { animation: bodyBounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-l { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-r { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-l { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-r { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+@keyframes walkSwing { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+@keyframes bodyBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+
+/* ---------- CONSOLE ---------- */
+.console-body { background: var(--term-bg); padding: 12px 20px; font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.8; height: 170px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; position: relative;}
+.term-line { color: var(--term-text); display: block; margin-bottom: 2px; position: relative; z-index: 2;}
+.term-line.sys::before { content: "> "; color: var(--term-muted); }
+.term-input { color: var(--term-input); font-weight: bold; }
+.console-form { display: flex; align-items: center; margin-top: 2px; }
+.console-form::before { content: "> "; color: var(--term-muted); font-weight: bold; }
+.console-prompt-input { background: transparent; border: none; outline: none; color: var(--term-input); font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: bold; width: 100%; }
+
+/* ---------- TRANSPORT ---------- */
+.transport-bar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:16px 20px; border-top: 1px solid var(--rule); gap:12px; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px;}
+
+.transport-controls { display:flex; gap:8px; align-items: stretch; flex-wrap: wrap;}
+
+.transport-bar button { 
+    font-family:"JetBrains Mono",monospace; 
+    font-size:13px; 
+    font-weight:700; 
+    background:var(--panel); 
+    color:var(--ink); 
+    border:1px solid var(--rule); 
+    border-radius:8px; 
+    min-height: 40px; 
+    padding: 6px 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    cursor:pointer; 
+    transition: all 0.2s ease; 
+    line-height: 1.2;
+}
+
+.transport-bar button.btn-stacked { padding: 4px 12px; }
+.transport-bar button.btn-stacked .text { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.transport-bar button.btn-icon { padding: 4px 14px; font-size: 16px; font-weight: bold;}
+
+.transport-bar button:hover:not(:disabled) { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button:disabled { opacity: 0.4; cursor: not-allowed; color: var(--muted); }
+
+.transport-bar button.primary { background: #14181f; color: #ffffff; border-color: #14181f; }
+.transport-bar button.primary:hover:not(:disabled) { background: #222831; }
+.transport-bar button.primary .icon { color: var(--accent); font-size: 16px; display: flex; align-items: center;}
+
+/* Tutorial Content */
+.content-section { margin-top: 24px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 32px; line-height: 1.7; display: flex; flex-direction: column; gap: 16px;}
+.content-section h2 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 24px; margin-top: 16px; margin-bottom: 8px; border-bottom: 2px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.content-section h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: var(--ink); }
+.content-section code { background: var(--code-bg); color: var(--dt); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.95em;}
+.content-section p { margin: 0; color: var(--muted); font-size: 15px;}
+.content-section pre { background: var(--code-bg); color: var(--dt); padding: 16px; border-radius: 8px; font-family: "JetBrains Mono", monospace; overflow-x: auto; line-height: 1.5; font-size: 14px; border: 1px solid var(--rule); }
+.content-section ul { margin: 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; font-size: 15px;}
+.content-section .note { background: var(--accent-wash); padding: 12px 16px; border-left: 4px solid var(--accent); border-radius: 4px; color: var(--ink); }
+
+@media (max-width: 1200px) { .stage { grid-template-columns: 1fr; } .main-title { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 10px;} .transport-bar { flex-direction: column; align-items: flex-start; } .transport-controls { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL ACTOR -->
+<div id="actor" class="actor-wrapper">
+    <div class="actor-payload" id="actorPayload"></div>
+    <svg class="actor-person" viewBox="0 0 40 60">
+        <g class="legs"><path class="outline leg-l" fill="none" d="M16,40 L16,58" style="transform-origin: 16px 40px;"></path><path class="outline leg-r" fill="none" d="M24,40 L24,58" style="transform-origin: 24px 40px;"></path></g>
+        <g class="arms"><path class="skin outline arm-l" fill="none" d="M12,24 L5,36" style="transform-origin: 12px 24px;"></path><path class="skin outline arm-r" fill="none" d="M28,24 L35,36" style="transform-origin: 28px 24px;"></path></g>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline head" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,11 L19,11 M23,11 L25,11"></path>
+    </svg>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">String Methods Deep Dive</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            <div class="speech-bubble" id="speechBubble"><p id="mascotCaption"></p></div>
+            <div class="top-controls">
+                <button class="theme-toggle icon-only-btn" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                </button>
+                <button class="theme-toggle icon-only-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE CODE & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Source</span><span class="panel-tag">Main.java</span></div>
+                <div class="code-body" id="sourceBox">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">import</span> java.util.Scanner;</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line3"><span class="ln">3</span><span class="kw">class</span> Main {</div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>        Scanner <span class="vr" id="src_sc">sc</span> = <span class="kw">new</span> Scanner(System.in);</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>        System.out.print(<span class="str">"Enter String: "</span>);</div>
+                    <div class="code-line" id="line9"><span class="ln">9</span>        String <span class="vr" id="src_s1">s</span> = sc.nextLine();</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>        System.out.println(<span class="str">"Original: "</span> + <span class="vr">s</span>);</div>
+                    <div class="code-line" id="line12"><span class="ln">12</span>        System.out.println(<span class="str">"Length: "</span> + <span class="vr">s</span>.length());</div>
+                    <div class="code-line" id="line13"><span class="ln">13</span>        System.out.println(<span class="str">"CharAt(2): "</span> + <span class="vr">s</span>.charAt(2));</div>
+                    <div class="code-line" id="line14"><span class="ln">14</span>        System.out.println(<span class="str">"Substring(5): "</span> + <span class="vr">s</span>.substring(5));</div>
+                    <div class="code-line" id="line15"><span class="ln">15</span>        System.out.println(<span class="str">"Substring(0,4): "</span> + <span class="vr">s</span>.substring(0, 4));</div>
+                    <div class="code-line" id="line16"><span class="ln">16</span>        System.out.println(<span class="str">"UpperCase: "</span> + <span class="vr">s</span>.toUpperCase());</div>
+                    <div class="code-line" id="line17"><span class="ln">17</span>        System.out.println(<span class="str">"LowerCase: "</span> + <span class="vr">s</span>.toLowerCase());</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line19"><span class="ln">19</span>        System.out.print(<span class="str">"Enter another String: "</span>);</div>
+                    <div class="code-line" id="line20"><span class="ln">20</span>        String <span class="vr" id="src_s2">s2</span> = sc.nextLine();</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line22"><span class="ln">22</span>        System.out.println(<span class="str">"Equals: "</span> + <span class="vr">s</span>.equals(<span class="vr">s2</span>));</div>
+                    <div class="code-line" id="line23"><span class="ln">23</span>        System.out.println(<span class="str">"IgnoreCase: "</span> + <span class="vr">s</span>.equalsIgnoreCase(<span class="vr">s2</span>));</div>
+                    <div class="code-line" id="line24"><span class="ln">24</span>        System.out.println(<span class="str">"CompareTo: "</span> + <span class="vr">s</span>.compareTo(<span class="vr">s2</span>));</div>
+                    <div class="code-line" id="line25"><span class="ln">25</span>        System.out.println(<span class="str">"Concat: "</span> + <span class="vr">s</span>.concat(<span class="vr">s2</span>));</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line27"><span class="ln">27</span>        System.out.print(<span class="str">"Enter search word: "</span>);</div>
+                    <div class="code-line" id="line28"><span class="ln">28</span>        String <span class="vr" id="src_s3">search</span> = sc.nextLine();</div>
+                    <div class="code-line spacer-line"><span class="ln"></span></div>
+                    <div class="code-line" id="line30"><span class="ln">30</span>        System.out.println(<span class="str">"Contains: "</span> + <span class="vr">s</span>.contains(<span class="vr">search</span>));</div>
+                    <div class="code-line" id="line31"><span class="ln">31</span>    }</div>
+                    <div class="code-line" id="line32"><span class="ln">32</span>}</div>
+                </div>
+            </section>
+            
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">I/O</span></div>
+                <div class="console-body" id="consoleBox"></div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head"><span class="panel-label">Execution Focus</span><span class="panel-tag" id="focusTag">Standby</span></div>
+                <div class="focus-body" id="focusBody">
+                    
+                    <div class="focus-slot" id="focus_generic">
+                        <div class="execution-code" id="focus_method_code">...</div>
+                        <div id="focus_string_viz" class="string-viz-container"></div>
+                        <div class="board-placard" id="focus_method_desc">Tracing execution...</div>
+                    </div>
+
+                    <div class="focus-slot" id="focus_input">
+                        <div class="execution-code" id="focus_input_code">String ... = sc.nextLine();</div>
+                        <div class="box-scene" id="focusStrScene">
+                            <div class="box-3d"><div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div></div>
+                            <div class="math-result-chip" id="focusStrChip">?</div>
+                        </div>
+                        <div class="board-placard" id="focus_input_desc">Awaiting user input in the console...</div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 3: RIGHT STACK TRAY -->
+        <div class="col">
+            <section class="panel stack-tray-panel" id="stackMemoryPanel">
+                <div class="panel-head"><span class="panel-label">Memory</span><span class="panel-tag">Stack & Heap</span></div>
+                <div class="stack-tray-body" id="stackTrayBody">
+                    
+                    <div class="memory-section" id="memStack">
+                        <div class="memory-title">Stack Memory</div>
+                        <div class="tray-empty" id="stackEmpty">— empty —</div>
+                        <div class="stack-container">
+                            <div class="stack-box-wrapper" id="mem_sc">
+                                <div class="stack-box-name">sc</div>
+                                <div class="stack-box-value"><div class="ref-chip" id="val_sc">ref</div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_s1">
+                                <div class="stack-box-name">s</div>
+                                <div class="stack-box-value"><div class="ref-chip" id="val_s1"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_s2">
+                                <div class="stack-box-name">s2</div>
+                                <div class="stack-box-value"><div class="ref-chip ref2" id="val_s2"></div></div>
+                            </div>
+                            <div class="stack-box-wrapper" id="mem_s3">
+                                <div class="stack-box-name">search</div>
+                                <div class="stack-box-value"><div class="ref-chip ref3" id="val_s3"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="memory-section" id="memHeap" style="min-height: 250px; opacity:1; transition: opacity 0.5s; flex: 1;">
+                        <div class="memory-title">Heap Memory</div>
+                        <div class="tray-empty" id="heapEmpty">— empty —</div>
+                        
+                        <div class="stack-container" id="mainHeapArea" style="margin-top: 15px; flex-direction: column; align-items: center; gap: 15px;">
+                            <div class="heap-object" id="obj_heap_1">
+                                <div class="heap-obj-type">String Obj 1</div>
+                                <div class="heap-obj-val" id="heap_val_1">...</div>
+                                <div class="ref-chip large">0x222</div>
+                            </div>
+                            <div class="heap-object" id="obj_heap_2" style="border-color: var(--ref2-color);">
+                                <div class="heap-obj-type" style="color:var(--ref2-color);">String Obj 2</div>
+                                <div class="heap-obj-val" id="heap_val_2">...</div>
+                                <div class="ref-chip large ref2">0x333</div>
+                            </div>
+                            <div class="heap-object" id="obj_heap_3" style="border-color: var(--ref3-color);">
+                                <div class="heap-obj-type" style="color:var(--ref3-color);">String Obj 3</div>
+                                <div class="heap-obj-val" id="heap_val_3">...</div>
+                                <div class="ref-chip large ref3">0x444</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="panel transport-bar">
+                <div class="step-status" id="status">Step 0 / X</div>
+                <div class="transport-controls">
+                    <button class="primary btn-stacked" id="playBtn" onclick="togglePlay()">
+                        <span class="icon">▶</span>
+                        <span class="text"><span>Play</span><span>Auto</span></span>
+                    </button>
+                    <button id="prevBtn" onclick="prevStep()" disabled>
+                        <span class="icon">◂</span><span>Prev</span>
+                    </button>
+                    <button class="btn-stacked" id="nextBtn" onclick="nextStep()">
+                        <span class="text"><span>Next</span><span>Step</span></span>
+                        <span class="icon">▸</span>
+                    </button>
+                    <button class="btn-icon" onclick="resetAnimation()" title="Reset Environment">
+                        <span class="icon">↻</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TUTORIAL CONTENT SECTION -->
+    <div class="content-section">
+        <h2>Java String Methods Explained</h2>
+        <p>Strings in Java come with a powerful set of built-in methods that allow you to manipulate, analyze, and compare text. Because Strings are objects, you call these methods using the dot (<code>.</code>) operator (e.g., <code>s.length()</code>).</p>
+
+        <h3>1. Finding the Size: <code>length()</code></h3>
+        <p>The <code>length()</code> method counts the total number of characters in the String, including spaces and special characters.</p>
+        <ul>
+            <li><b>Syntax:</b> <code>s.length()</code></li>
+            <li><b>Returns:</b> An integer (<code>int</code>).</li>
+        </ul>
+        <pre><code>String s = "Hello World";
+System.out.println(s.length()); // Output: 11</code></pre>
+
+        <h3>2. Accessing Characters: <code>charAt()</code></h3>
+        <p>The <code>charAt(index)</code> method returns the single character located at the specified index.</p>
+        <div class="note"><b>Note:</b> String indexing in Java always starts at <code>0</code>.</div>
+        <ul>
+            <li><b>Syntax:</b> <code>s.charAt(int index)</code></li>
+            <li><b>Returns:</b> A character (<code>char</code>).</li>
+        </ul>
+        <pre><code>String s = "Java";
+// J(0) a(1) v(2) a(3)
+System.out.println(s.charAt(2)); // Output: v</code></pre>
+
+        <h3>3. Extracting Parts of a String: <code>substring()</code></h3>
+        <p>The <code>substring()</code> method extracts a smaller chunk (a sub-string) from the original string. It has two variations:</p>
+        
+        <p><b>Variation A: Start to End</b></p>
+        <ul>
+            <li><b>Syntax:</b> <code>s.substring(beginIndex)</code></li>
+            <li><b>Action:</b> Takes everything from <code>beginIndex</code> all the way to the end of the string.</li>
+            <li><b>Example:</b> <code>"Programming".substring(3)</code> → <code>"gramming"</code></li>
+        </ul>
+
+        <p><b>Variation B: Start to Specific End</b></p>
+        <ul>
+            <li><b>Syntax:</b> <code>s.substring(beginIndex, endIndex)</code></li>
+            <li><b>Action:</b> Takes characters starting from <code>beginIndex</code> up to, <b>but not including</b>, the <code>endIndex</code>.</li>
+            <li><b>Example:</b> <code>"Programming".substring(0, 4)</code> → <code>"Prog"</code></li>
+        </ul>
+
+        <h3>4. Changing Case: <code>toUpperCase()</code> & <code>toLowerCase()</code></h3>
+        <p>These methods convert all the characters in a String to either fully uppercase or fully lowercase letters.</p>
+        <div class="note"><b>Important Concept:</b> Because Strings are <b>immutable</b>, these methods do <i>not</i> change the original String. Instead, they create and return a brand new String object.</div>
+        <pre><code>String s = "Java";
+System.out.println(s.toUpperCase()); // Output: JAVA
+System.out.println(s.toLowerCase()); // Output: java</code></pre>
+
+        <h3>5. Comparing Strings: <code>equals()</code> & <code>equalsIgnoreCase()</code></h3>
+        <p>Never use <code>==</code> to compare the actual text of two Strings. Always use these methods!</p>
+        <ul>
+            <li><code>equals(String str)</code>: Checks if two strings have the exact same characters in the exact same case.
+                <br><code>"Java".equals("JAVA")</code> → <code>false</code>
+            </li>
+            <li><code>equalsIgnoreCase(String str)</code>: Checks if the contents are the same, completely ignoring whether letters are uppercase or lowercase.
+                <br><code>"Java".equalsIgnoreCase("JAVA")</code> → <code>true</code>
+            </li>
+        </ul>
+
+        <h3>6. Dictionary Order: <code>compareTo()</code></h3>
+        <p>While <code>equals()</code> just tells you if strings are identical (true/false), <code>compareTo()</code> tells you which string comes first alphabetically (lexicographically).</p>
+        <ul>
+            <li><b>Returns <code>0</code></b>: If both strings are exactly equal.</li>
+            <li><b>Returns a negative number</b>: If the first string comes <i>before</i> the second string in the dictionary.</li>
+            <li><b>Returns a positive number</b>: If the first string comes <i>after</i> the second string in the dictionary.</li>
+        </ul>
+
+        <h3>7. Joining Strings: <code>concat()</code></h3>
+        <p>The <code>concat()</code> method attaches one string to the very end of another.</p>
+        <ul>
+            <li><b>Syntax:</b> <code>s1.concat(s2)</code></li>
+        </ul>
+        <pre><code>String s1 = "Hello ";
+String s2 = "World";
+System.out.println(s1.concat(s2)); // Output: Hello World</code></pre>
+        <div class="note">Using <code>concat()</code> does the exact same thing as using the <code>+</code> operator (<code>s1 + s2</code>).</div>
+
+        <h3>8. Searching Text: <code>contains()</code></h3>
+        <p>The <code>contains()</code> method checks if a specific sequence of characters (a word, a letter, or a phrase) exists anywhere inside the String.</p>
+        <ul>
+            <li><b>Syntax:</b> <code>s.contains(searchString)</code></li>
+            <li><b>Returns:</b> <code>true</code> if found, <code>false</code> if not found.</li>
+        </ul>
+        <pre><code>String s = "Learn Java Programming";
+System.out.println(s.contains("Java")); // Output: true
+System.out.println(s.contains("Python")); // Output: false</code></pre>
+    </div>
+</div>
+
+<script>
+function toggleTheme() { document.body.classList.toggle("dark"); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { console.log(err); }); } 
+    else { if (document.exitFullscreen) document.exitFullscreen(); }
+}
+
+// --- Dynamic Variables Setup ---
+let userString1 = null; // for 's'
+let userString2 = null; // for 's2'
+let userSearch = null;  // for 'search'
+
+// --- Animation Core ---
+const actor = document.getElementById('actor');
+const payload = document.getElementById('actorPayload');
+let currentStep = 0;
+let playing = false;
+let activeAnimations = [];
+let typingInterval = null; 
+const script = [];
+
+function killAllAnimations() { 
+    activeAnimations.forEach(a => { if(a.cancel) a.cancel(); }); 
+    activeAnimations = []; 
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(resolve, ms);
+        activeAnimations.push({ cancel: () => { clearTimeout(t); reject("cancelled"); } });
+    });
+}
+
+function getRect(id) {
+    const el = document.getElementById(id);
+    if (!el) return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 };
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) void el.offsetHeight;
+    return el.getBoundingClientRect();
+}
+
+function getConsoleInputStart() {
+    const consoleRect = getRect('consoleBox');
+    let startX = consoleRect.left + (consoleRect.width / 2) - 30;
+    let startY = consoleRect.bottom - 60;
+    
+    const inputs = document.querySelectorAll('#consoleBox .term-input');
+    if (inputs.length > 0) {
+        const rect = inputs[inputs.length - 1].getBoundingClientRect();
+        if (rect.width > 0 && rect.top > 0) {
+            startY = rect.top - 50; 
+            startX = rect.right + 10; 
+        }
+    }
+    return { startX, startY };
+}
+
+function setArms(state) {
+    const armL = actor.querySelector('.arm-l');
+    const armR = actor.querySelector('.arm-r');
+    if(state === 'carry') { armL.setAttribute('d', 'M12,24 L0,15'); armR.setAttribute('d', 'M28,24 L40,15'); } 
+    else if(state === 'throw') { armL.setAttribute('d', 'M12,24 L0,24'); armR.setAttribute('d', 'M28,24 L40,24'); } 
+    else { armL.setAttribute('d', 'M12,24 L5,36'); armR.setAttribute('d', 'M28,24 L35,36'); }
+}
+
+function setFacing(startX, endX) {
+    const scale = endX < startX ? -1 : 1;
+    actor.querySelector('.actor-person').style.transform = `scaleX(${scale}) rotate(0deg)`;
+}
+
+async function actorFadeIn(x, y) {
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    actor.style.opacity = "0";
+    void actor.offsetWidth; 
+    actor.style.transition = 'opacity 300ms ease';
+    actor.style.opacity = "1";
+    await wait(300);
+}
+
+async function actorFadeOut() {
+    actor.style.transition = 'opacity 400ms ease';
+    actor.style.opacity = "0";
+    await wait(400);
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(-200px, -200px, 0)`;
+}
+
+async function animWalk(startX, startY, endX, endY, duration = 1500) {
+    setFacing(startX, endX);
+    actor.className = "actor-wrapper walking";
+    
+    actor.style.transition = 'none';
+    actor.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+    void actor.offsetWidth;
+    
+    actor.style.transition = `transform ${duration}ms linear`;
+    actor.style.transform = `translate3d(${endX}px, ${endY}px, 0)`;
+    
+    await wait(duration);
+    
+    actor.className = "actor-wrapper";
+    actor.style.transition = 'none';
+}
+
+function createSparks(x, y, color = 'var(--accent)') {
+    for(let i=0; i<8; i++) {
+        let s = document.createElement('div');
+        s.className = 'spark'; s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.backgroundColor = color;
+        document.body.appendChild(s);
+        let angle = Math.random() * Math.PI * 2; let dist = Math.random() * 40 + 10;
+        s.animate([ {transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0} ], {duration: 400 + Math.random()*200, easing: 'cubic-bezier(.25, .8, .25, 1)'});
+        setTimeout(()=>s.remove(), 600);
+    }
+}
+
+async function triggerPing(id, color = 'var(--accent)') {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.setProperty('--ping-color', color);
+    el.classList.add('pinging');
+    await wait(600);
+    el.classList.remove('pinging');
+}
+
+function typeText(text) {
+    const el = document.getElementById('mascotCaption');
+    el.textContent = ""; el.classList.add("typing-cursor");
+    let i = 0; if (typingInterval) clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if(i < text.length) el.textContent += text[i++];
+        else { clearInterval(typingInterval); el.classList.remove("typing-cursor"); }
+    }, 20);
+}
+
+function appendToConsole(htmlString) {
+    const c = document.getElementById('consoleBox');
+    const existingForm = c.querySelector('.console-form');
+    if(existingForm) existingForm.remove();
+    const line = document.createElement('div');
+    line.className = 'term-line sys'; line.innerHTML = htmlString;
+    c.appendChild(line); c.scrollTop = c.scrollHeight;
+}
+
+function clearConsole() { document.getElementById('consoleBox').innerHTML = ''; }
+
+async function promptUserForTextInput(labelText) {
+    return new Promise((resolve) => {
+        const c = document.getElementById('consoleBox');
+        const line = document.createElement('div');
+        line.className = 'term-line sys'; line.innerHTML = labelText;
+        c.appendChild(line);
+
+        const form = document.createElement('form'); form.className = 'console-form';
+        const input = document.createElement('input'); input.type = 'text'; input.className = 'console-prompt-input'; input.placeholder = 'Type string & press Enter...';
+        form.appendChild(input); c.appendChild(form);
+        c.scrollTop = c.scrollHeight; input.focus();
+
+        form.onsubmit = (e) => {
+            e.preventDefault(); 
+            const val = input.value; 
+            if (val === "") return;
+            form.remove();
+            line.remove();
+            resolve(val);
+        };
+    });
+}
+
+// --- HTML Generators for String Array Visualization ---
+function getStringGridHTML(str, prefix) {
+    if (str === null || str === undefined) return "";
+    // Using EXACT bright colors mapped to index positions based on the user's reference image
+    const colors = ['#fff500', '#ffaa00', '#92d050', '#00b0f0']; 
+    let html = `<div class="string-viz-row" id="row_${prefix}">`;
+    for(let i=0; i<str.length; i++) {
+        let char = str[i] === ' ' ? '&nbsp;' : str[i];
+        let c = colors[i % colors.length];
+        html += `<div class="char-col" id="${prefix}_col_${i}">
+                    <div class="char-idx">${i}</div>
+                    <div class="char-box" style="background-color: ${c};">${char}</div>
+                 </div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+// --- Common Evaluation Function with Integrated Custom String Animation ---
+async function evaluateAndPrint(resultStr, sourceLineId, focusCode, focusDesc, heapRefs, stackRefs, resultTitle, vizHTML = "", vizAnimFunc = null) {
+    const slot = document.getElementById('focus_generic');
+    document.getElementById('focus_method_code').innerHTML = focusCode;
+    document.getElementById('focus_method_desc').innerHTML = focusDesc;
+    
+    // Inject and immediately show the baseline array UI before animation
+    document.getElementById('focus_string_viz').innerHTML = vizHTML;
+    slot.classList.add('show');
+    
+    const consoleStart = getConsoleInputStart();
+    await actorFadeIn(consoleStart.startX, consoleStart.startY);
+    
+    for (let ref of stackRefs) { await triggerPing(ref.id, ref.color); }
+    for (let ref of heapRefs) { await triggerPing(ref.id, ref.color); }
+    
+    setArms('carry'); payload.textContent = `${resultStr}`; payload.style.opacity = "1"; await wait(400);
+    setArms('throw'); payload.style.opacity = "0"; 
+    
+    // Run the string manipulation animation logic
+    if (vizAnimFunc) {
+        await vizAnimFunc();
+    }
+    
+    appendToConsole(`${resultTitle}: ${resultStr}`);
+    
+    await wait(800); await actorFadeOut();
+}
+
+// --- Script Generation ---
+function buildScript() {
+    script.length = 0;
+    
+    let cLines = []; // Tracks console state
+
+    // Step 0
+    script.push({ 
+        text: "Let's dive into String methods! We'll start by initializing a Scanner to get user input.", 
+        line: 0, tag: "Standby", 
+        state: { sc: false, s1: false, s2: false, s3: false, heap1: false, heap2: false, heap3: false, cLines: [] } 
+    });
+
+    // Step 1: Scanner Setup
+    script.push({
+        text: "Line 6: First, we initialize the Scanner. The reference 'sc' is added to the Stack.",
+        line: 6, tag: "Init Scanner", 
+        state: { sc: true, s1: false, s2: false, s3: false, heap1: false, heap2: false, heap3: false, cLines: [] },
+        action: async () => {
+            const slot = document.getElementById('focus_generic');
+            document.getElementById('focus_method_code').innerHTML = 'Scanner <span class="vr">sc</span> = <span class="kw">new</span> Scanner(System.in);';
+            document.getElementById('focus_method_desc').innerHTML = 'Creating a Scanner object to read from the console.';
+            document.getElementById('focus_string_viz').innerHTML = ''; // Ensure clear
+            slot.classList.add('show');
+            
+            const y = getRect('src_sc').top - 10; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_sc').right + 20;
+            
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 1000);
+            setArms('carry'); payload.textContent = "Scanner"; payload.style.opacity = "1"; await wait(500);
+
+            const memPanel = getRect('mem_sc'); 
+            const targetMemX = memPanel.left + (memPanel.width / 2) - 30; 
+            const targetMemY = memPanel.top - 70; 
+            
+            await animWalk(targetX, y, targetMemX, targetMemY, 1500);
+            payload.style.opacity = "0"; setArms('relaxed');
+            document.getElementById('stackEmpty').style.display = 'none'; document.getElementById('mem_sc').classList.add('stored');
+            createSparks(targetMemX + 30, targetMemY + 70); await wait(400);
+            await triggerPing('mem_sc', 'var(--ref-color)');
+
+            await animWalk(targetMemX, targetMemY, startX, y, 1000); await wait(200); await actorFadeOut();
+        }
+    });
+
+    // Step 2: Read s
+    script.push({
+        text: "Lines 8-9: We ask the user for a string. Please type a string in the console!",
+        line: 9, tag: "Read Input 1", 
+        state: { sc: true, s1: userString1 !== null, s2: false, s3: false, heap1: userString1 !== null, heap2: false, heap3: false, cLines: [...cLines] },
+        action: async () => {
+            const slot = document.getElementById('focus_input'); 
+            document.getElementById('focus_input_code').innerHTML = 'String <span class="vr">s</span> = sc.nextLine();';
+            document.getElementById('focus_input_desc').innerHTML = 'Awaiting user input in the console...';
+            slot.classList.add('show');
+            
+            if(userString1 === null) {
+                userString1 = await promptUserForTextInput("Enter String: ");
+                buildScript(); 
+                await renderStep(currentStep); 
+                return; 
+            }
+            
+            await wait(100);
+            appendToConsole(`Enter String: <span class="term-input">${userString1}</span>`);
+            await wait(50);
+
+            const { startX, startY } = getConsoleInputStart();
+            await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = `"${userString1}"`; payload.style.opacity = "1"; await wait(500);
+
+            const heapRect = getRect('obj_heap_1'); 
+            const targetHeapX = heapRect.left + (heapRect.width / 2) - 30;
+            const targetHeapY = heapRect.top;
+            
+            document.getElementById('heapEmpty').style.display = 'none';
+            await animWalk(startX, startY, targetHeapX, targetHeapY, 1500);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('heap_val_1').textContent = `"${userString1}"`;
+            document.getElementById('obj_heap_1').classList.add('stored');
+            
+            const chip = document.getElementById('focusStrChip'); chip.textContent = `"${userString1}"`; chip.classList.add('bumping');
+            document.getElementById('focusStrScene').classList.add('popped');
+            createSparks(targetHeapX + 30, targetHeapY + 30, "var(--dt)"); 
+            await triggerPing('obj_heap_1', 'var(--ref-color)');
+            
+            setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+            await wait(300);
+
+            setArms('carry'); payload.textContent = '0x222'; payload.style.opacity = "1"; payload.style.color = "var(--ref-color)"; payload.style.borderColor = "var(--ref-color)"; await wait(400);
+
+            const stackRect = getRect('mem_s1');
+            const targetMemX = stackRect.left + (stackRect.width / 2) - 30;
+            const targetMemY = stackRect.top - 70;
+
+            await animWalk(targetHeapX, targetHeapY, targetMemX, targetMemY, 1200);
+            payload.style.opacity = "0"; setArms('throw');
+            document.getElementById('mem_s1').classList.add('stored');
+            document.getElementById('val_s1').textContent = "0x222";
+            createSparks(targetMemX + 30, targetMemY + 70, "var(--ref-color)"); 
+            await triggerPing('mem_s1', 'var(--ref-color)');
+            
+            await wait(400); await actorFadeOut();
+            payload.style.color = "var(--val)"; payload.style.borderColor = "var(--val)";
+        }
+    });
+
+    if (userString1 !== null) {
+        cLines.push(`Enter String: <span class="term-input">${userString1}</span>`);
+        
+        // Helper to push standard eval steps with visualization capabilities
+        const pushEvalStep = (lineNum, methodCall, result, explainStr, title, vizAnimFunc) => {
+            script.push({
+                text: explainStr,
+                line: lineNum, tag: methodCall,
+                state: { sc: true, s1: true, s2: false, s3: false, heap1: true, heap2: false, heap3: false, cLines: [...cLines] },
+                action: async () => {
+                    await evaluateAndPrint(
+                        result, lineNum, 
+                        `System.out.println(... + <span class="vr">s</span>.${methodCall});`, 
+                        explainStr,
+                        [{id:'obj_heap_1', color:'var(--ref-color)'}], 
+                        [{id:'mem_s1', color:'var(--ref-color)'}], 
+                        title,
+                        getStringGridHTML(userString1, 's1'), 
+                        vizAnimFunc
+                    );
+                }
+            });
+            cLines.push(`${title}: ${result}`);
+        };
+
+        // Step 3: Print Original
+        script.push({
+            text: "Line 11: Let's print out the original string we just captured.",
+            line: 11, tag: "Print Original",
+            state: { sc: true, s1: true, s2: false, s3: false, heap1: true, heap2: false, heap3: false, cLines: [...cLines] },
+            action: async () => {
+                await evaluateAndPrint(
+                    userString1, 11, 
+                    `System.out.println(... + <span class="vr">s</span>);`, 
+                    "Accesses reference 's' to print its Heap value.", 
+                    [{id:'obj_heap_1', color:'var(--ref-color)'}], 
+                    [{id:'mem_s1', color:'var(--ref-color)'}], 
+                    "Original",
+                    getStringGridHTML(userString1, 's1'),
+                    async () => { await wait(400); } // Just simple static display
+                );
+            }
+        });
+        cLines.push(`Original: ${userString1}`);
+
+        // Step 4: length()
+        pushEvalStep(12, "length()", userString1.length, "s.length() counts how many characters are in the string.", "Length", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            for(let i=0; i<cols.length; i++) {
+                cols[i].classList.add('highlight');
+                await wait(60); // Sequential highlighting pop
+            }
+            await wait(300);
+        });
+
+        // Step 5: charAt(2)
+        let charRes = userString1.length > 2 ? userString1.charAt(2) : "Index out of bounds";
+        pushEvalStep(13, "charAt(2)", charRes, "s.charAt(2) returns the character exactly at index 2 (remember, index starts at 0!).", "CharAt(2)", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            if(cols.length > 2) {
+                cols.forEach((c, i) => { if(i===2) c.classList.add('highlight'); else c.classList.add('dimmed'); });
+            } else {
+                cols.forEach(c => c.classList.add('error'));
+            }
+            await wait(400);
+        });
+
+        // Step 6: substring(5)
+        let sub5Res = userString1.length >= 5 ? userString1.substring(5) : "Index out of bounds";
+        pushEvalStep(14, "substring(5)", sub5Res, "s.substring(5) extracts the string starting from index 5 to the end.", "Substring(5)", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            if (cols.length > 5) { // If it's 5, returns empty string, visually we dim all.
+                cols.forEach((c, i) => { if(i>=5) c.classList.add('highlight'); else c.classList.add('dimmed'); });
+            } else {
+                cols.forEach(c => c.classList.add('dimmed')); 
+            }
+            await wait(400);
+        });
+
+        // Step 7: substring(0,4)
+        let sub4Res = userString1.length >= 4 ? userString1.substring(0, 4) : "Index out of bounds";
+        pushEvalStep(15, "substring(0, 4)", sub4Res, "s.substring(0, 4) extracts characters starting from index 0 up to, but NOT including, index 4.", "Substring(0,4)", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            if (cols.length >= 4) {
+                cols.forEach((c, i) => { if(i>=0 && i<4) c.classList.add('highlight'); else c.classList.add('dimmed'); });
+            } else {
+                cols.forEach(c => c.classList.add('error'));
+            }
+            await wait(400);
+        });
+
+        // Step 8: toUpperCase()
+        pushEvalStep(16, "toUpperCase()", userString1.toUpperCase(), "Converts all letters to uppercase.", "UpperCase", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            for(let i=0; i<cols.length; i++) {
+                const box = cols[i].querySelector('.char-box');
+                box.textContent = box.textContent.toUpperCase();
+                cols[i].classList.add('highlight');
+                await wait(60);
+            }
+            await wait(300);
+        });
+
+        // Step 9: toLowerCase()
+        pushEvalStep(17, "toLowerCase()", userString1.toLowerCase(), "Converts all letters to lowercase.", "LowerCase", async () => {
+            const cols = document.querySelectorAll('#row_s1 .char-col');
+            for(let i=0; i<cols.length; i++) {
+                const box = cols[i].querySelector('.char-box');
+                box.textContent = box.textContent.toLowerCase();
+                cols[i].classList.add('highlight');
+                await wait(60);
+            }
+            await wait(300);
+        });
+
+        // Step 10: Read s2
+        script.push({
+            text: "Lines 19-20: Now we need a second string for comparisons. Type another string!",
+            line: 20, tag: "Read Input 2", 
+            state: { sc: true, s1: true, s2: userString2 !== null, s3: false, heap1: true, heap2: userString2 !== null, heap3: false, cLines: [...cLines] },
+            action: async () => {
+                const slot = document.getElementById('focus_input'); 
+                document.getElementById('focus_input_code').innerHTML = 'String <span class="vr">s2</span> = sc.nextLine();';
+                document.getElementById('focus_input_desc').innerHTML = 'Awaiting second user input...';
+                slot.classList.add('show');
+                
+                if(userString2 === null) {
+                    userString2 = await promptUserForTextInput("Enter another String: ");
+                    buildScript(); 
+                    await renderStep(currentStep); 
+                    return; 
+                }
+                
+                await wait(100);
+                appendToConsole(`Enter another String: <span class="term-input">${userString2}</span>`);
+                await wait(50);
+
+                const { startX, startY } = getConsoleInputStart();
+                await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = `"${userString2}"`; payload.style.opacity = "1"; await wait(500);
+
+                const heapRect = getRect('obj_heap_2'); 
+                const targetHeapX = heapRect.left + (heapRect.width / 2) - 30;
+                const targetHeapY = heapRect.top;
+                
+                await animWalk(startX, startY, targetHeapX, targetHeapY, 1500);
+                payload.style.opacity = "0"; setArms('throw');
+                document.getElementById('heap_val_2').textContent = `"${userString2}"`;
+                document.getElementById('obj_heap_2').classList.add('stored');
+                
+                const chip = document.getElementById('focusStrChip'); chip.textContent = `"${userString2}"`; chip.classList.add('bumping');
+                document.getElementById('focusStrScene').classList.add('popped');
+                createSparks(targetHeapX + 30, targetHeapY + 30, "var(--ref2-color)"); 
+                await triggerPing('obj_heap_2', 'var(--ref2-color)');
+                
+                setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+                await wait(300);
+
+                setArms('carry'); payload.textContent = '0x333'; payload.style.opacity = "1"; payload.style.color = "var(--ref2-color)"; payload.style.borderColor = "var(--ref2-color)"; await wait(400);
+
+                const stackRect = getRect('mem_s2');
+                const targetMemX = stackRect.left + (stackRect.width / 2) - 30;
+                const targetMemY = stackRect.top - 70;
+
+                await animWalk(targetHeapX, targetHeapY, targetMemX, targetMemY, 1200);
+                payload.style.opacity = "0"; setArms('throw');
+                document.getElementById('mem_s2').classList.add('stored');
+                document.getElementById('val_s2').textContent = "0x333";
+                createSparks(targetMemX + 30, targetMemY + 70, "var(--ref2-color)"); 
+                await triggerPing('mem_s2', 'var(--ref2-color)');
+                
+                await wait(400); await actorFadeOut();
+                payload.style.color = "var(--val)"; payload.style.borderColor = "var(--val)";
+            }
+        });
+
+        if (userString2 !== null) {
+            cLines.push(`Enter another String: <span class="term-input">${userString2}</span>`);
+
+            const pushCompareStep = (lineNum, methodCall, result, explainStr, title, vizAnimFunc) => {
+                script.push({
+                    text: explainStr,
+                    line: lineNum, tag: methodCall,
+                    state: { sc: true, s1: true, s2: true, s3: false, heap1: true, heap2: true, heap3: false, cLines: [...cLines] },
+                    action: async () => {
+                        let html = getStringGridHTML(userString1, 's1') + 
+                                   `<div style="font-weight:700; color:var(--muted); margin-bottom:-5px; font-size:12px;">VS</div>` + 
+                                   getStringGridHTML(userString2, 's2');
+                                   
+                        await evaluateAndPrint(
+                            result, lineNum, 
+                            `System.out.println(... + <span class="vr">s</span>.${methodCall}(<span class="vr2">s2</span>));`, 
+                            explainStr,
+                            [{id:'obj_heap_1', color:'var(--ref-color)'}, {id:'obj_heap_2', color:'var(--ref2-color)'}], 
+                            [{id:'mem_s1', color:'var(--ref-color)'}, {id:'mem_s2', color:'var(--ref2-color)'}], 
+                            title,
+                            html, 
+                            vizAnimFunc
+                        );
+                    }
+                });
+                cLines.push(`${title}: ${result}`);
+            };
+
+            // Step 11: equals()
+            pushCompareStep(22, "equals", userString1.equals(userString2), "equals() checks if both strings have the exact same characters and case.", "Equals", async () => {
+                const cols1 = document.querySelectorAll('#row_s1 .char-col');
+                const cols2 = document.querySelectorAll('#row_s2 .char-col');
+                const max = Math.max(cols1.length, cols2.length);
+                let mismatchFound = false;
+                for(let i=0; i<max; i++) {
+                    if(mismatchFound) {
+                        if(cols1[i]) cols1[i].classList.add('dimmed');
+                        if(cols2[i]) cols2[i].classList.add('dimmed');
+                        continue;
+                    }
+                    if(cols1[i]) cols1[i].classList.add('highlight');
+                    if(cols2[i]) cols2[i].classList.add('highlight');
+                    await wait(80);
+                    
+                    let char1 = cols1[i] ? cols1[i].querySelector('.char-box').textContent : null;
+                    let char2 = cols2[i] ? cols2[i].querySelector('.char-box').textContent : null;
+                    
+                    if(char1 !== char2) {
+                        mismatchFound = true;
+                        if(cols1[i]) cols1[i].classList.add('mismatched');
+                        if(cols2[i]) cols2[i].classList.add('mismatched');
+                    } else {
+                        if(cols1[i]) cols1[i].classList.add('matched');
+                        if(cols2[i]) cols2[i].classList.add('matched');
+                    }
+                }
+                await wait(400);
+            });
+            
+            // Step 12: equalsIgnoreCase()
+            pushCompareStep(23, "equalsIgnoreCase", userString1.toLowerCase() === userString2.toLowerCase(), "equalsIgnoreCase() compares the contents while ignoring uppercase/lowercase differences.", "IgnoreCase", async () => {
+                const cols1 = document.querySelectorAll('#row_s1 .char-col');
+                const cols2 = document.querySelectorAll('#row_s2 .char-col');
+                const max = Math.max(cols1.length, cols2.length);
+                let mismatchFound = false;
+                for(let i=0; i<max; i++) {
+                    if(mismatchFound) {
+                        if(cols1[i]) cols1[i].classList.add('dimmed');
+                        if(cols2[i]) cols2[i].classList.add('dimmed');
+                        continue;
+                    }
+                    if(cols1[i]) cols1[i].classList.add('highlight');
+                    if(cols2[i]) cols2[i].classList.add('highlight');
+                    await wait(80);
+                    
+                    let char1 = cols1[i] ? cols1[i].querySelector('.char-box').textContent.toLowerCase() : null;
+                    let char2 = cols2[i] ? cols2[i].querySelector('.char-box').textContent.toLowerCase() : null;
+                    
+                    if(char1 !== char2) {
+                        mismatchFound = true;
+                        if(cols1[i]) cols1[i].classList.add('mismatched');
+                        if(cols2[i]) cols2[i].classList.add('mismatched');
+                    } else {
+                        if(cols1[i]) { cols1[i].classList.add('matched'); cols1[i].querySelector('.char-box').textContent = char1; } // show converted to logic
+                        if(cols2[i]) { cols2[i].classList.add('matched'); cols2[i].querySelector('.char-box').textContent = char2; }
+                    }
+                }
+                await wait(400);
+            });
+
+            // Step 13: compareTo()
+            let cmpRes = userString1.localeCompare(userString2);
+            pushCompareStep(24, "compareTo", cmpRes, "compareTo() checks alphabetical order. Returns 0 if equal, negative if s < s2, positive if s > s2.", "CompareTo", async () => {
+                const cols1 = document.querySelectorAll('#row_s1 .char-col');
+                const cols2 = document.querySelectorAll('#row_s2 .char-col');
+                const max = Math.max(cols1.length, cols2.length);
+                let diffFound = false;
+                for(let i=0; i<max; i++) {
+                    if(diffFound) {
+                        if(cols1[i]) cols1[i].classList.add('dimmed');
+                        if(cols2[i]) cols2[i].classList.add('dimmed');
+                        continue;
+                    }
+                    if(cols1[i]) cols1[i].classList.add('highlight');
+                    if(cols2[i]) cols2[i].classList.add('highlight');
+                    await wait(80);
+                    let char1 = cols1[i] ? cols1[i].querySelector('.char-box').textContent : null;
+                    let char2 = cols2[i] ? cols2[i].querySelector('.char-box').textContent : null;
+                    if(char1 !== char2) { diffFound = true; } 
+                }
+                await wait(400);
+            });
+
+            // Step 14: concat()
+            script.push({
+                text: "Line 25: concat() joins (appends) s2 to the end of s.",
+                line: 25, tag: "concat",
+                state: { sc: true, s1: true, s2: true, s3: false, heap1: true, heap2: true, heap3: false, cLines: [...cLines] },
+                action: async () => {
+                    await evaluateAndPrint(
+                        userString1.concat(userString2), 25, 
+                        `System.out.println(... + <span class="vr">s</span>.concat(<span class="vr2">s2</span>));`, 
+                        "Joining s2 to the end of s.",
+                        [{id:'obj_heap_1', color:'var(--ref-color)'}, {id:'obj_heap_2', color:'var(--ref2-color)'}], 
+                        [{id:'mem_s1', color:'var(--ref-color)'}, {id:'mem_s2', color:'var(--ref2-color)'}], 
+                        "Concat",
+                        getStringGridHTML(userString1, 's1'), 
+                        async () => {
+                            const row = document.getElementById('row_s1');
+                            const colors = ['#fff500', '#ffaa00', '#92d050', '#00b0f0'];
+                            let offset = userString1.length;
+                            for(let i=0; i<userString2.length; i++) {
+                                let char = userString2[i] === ' ' ? '&nbsp;' : userString2[i];
+                                let c = colors[(offset + i) % colors.length];
+                                let col = document.createElement('div');
+                                col.className = 'char-col highlight matched'; // Highlight append
+                                col.innerHTML = `<div class="char-idx">${offset+i}</div><div class="char-box" style="background-color: ${c};">${char}</div>`;
+                                row.appendChild(col);
+                                await wait(80);
+                            }
+                            await wait(400);
+                        }
+                    );
+                }
+            });
+            cLines.push(`Concat: ${userString1.concat(userString2)}`);
+
+            // Step 15: Read search string
+            script.push({
+                text: "Lines 27-28: Let's get one final string to test the contains() method.",
+                line: 28, tag: "Read Search", 
+                state: { sc: true, s1: true, s2: true, s3: userSearch !== null, heap1: true, heap2: true, heap3: userSearch !== null, cLines: [...cLines] },
+                action: async () => {
+                    const slot = document.getElementById('focus_input'); 
+                    document.getElementById('focus_input_code').innerHTML = 'String <span class="vr">search</span> = sc.nextLine();';
+                    document.getElementById('focus_input_desc').innerHTML = 'Awaiting substring to search for...';
+                    document.getElementById('focus_string_viz').innerHTML = '';
+                    slot.classList.add('show');
+                    
+                    if(userSearch === null) {
+                        userSearch = await promptUserForTextInput("Enter search word: ");
+                        buildScript(); 
+                        await renderStep(currentStep); 
+                        return; 
+                    }
+                    
+                    await wait(100);
+                    appendToConsole(`Enter search word: <span class="term-input">${userSearch}</span>`);
+                    await wait(50);
+
+                    const { startX, startY } = getConsoleInputStart();
+                    await actorFadeIn(startX, startY); setArms('carry'); payload.textContent = `"${userSearch}"`; payload.style.opacity = "1"; await wait(500);
+
+                    const heapRect = getRect('obj_heap_3'); 
+                    const targetHeapX = heapRect.left + (heapRect.width / 2) - 30;
+                    const targetHeapY = heapRect.top;
+                    
+                    await animWalk(startX, startY, targetHeapX, targetHeapY, 1500);
+                    payload.style.opacity = "0"; setArms('throw');
+                    document.getElementById('heap_val_3').textContent = `"${userSearch}"`;
+                    document.getElementById('obj_heap_3').classList.add('stored');
+                    
+                    const chip = document.getElementById('focusStrChip'); chip.textContent = `"${userSearch}"`; chip.classList.add('bumping');
+                    document.getElementById('focusStrScene').classList.add('popped');
+                    createSparks(targetHeapX + 30, targetHeapY + 30, "var(--ref3-color)"); 
+                    await triggerPing('obj_heap_3', 'var(--ref3-color)');
+                    
+                    setTimeout(() => { chip.classList.remove('bumping'); setArms('relaxed'); }, 800);
+                    await wait(300);
+
+                    setArms('carry'); payload.textContent = '0x444'; payload.style.opacity = "1"; payload.style.color = "var(--ref3-color)"; payload.style.borderColor = "var(--ref3-color)"; await wait(400);
+
+                    const stackRect = getRect('mem_s3');
+                    const targetMemX = stackRect.left + (stackRect.width / 2) - 30;
+                    const targetMemY = stackRect.top - 70;
+
+                    await animWalk(targetHeapX, targetHeapY, targetMemX, targetMemY, 1200);
+                    payload.style.opacity = "0"; setArms('throw');
+                    document.getElementById('mem_s3').classList.add('stored');
+                    document.getElementById('val_s3').textContent = "0x444";
+                    createSparks(targetMemX + 30, targetMemY + 70, "var(--ref3-color)"); 
+                    await triggerPing('mem_s3', 'var(--ref3-color)');
+                    
+                    await wait(400); await actorFadeOut();
+                    payload.style.color = "var(--val)"; payload.style.borderColor = "var(--val)";
+                }
+            });
+
+            if (userSearch !== null) {
+                cLines.push(`Enter search word: <span class="term-input">${userSearch}</span>`);
+                
+                // Step 16: contains()
+                script.push({
+                    text: "Line 30: contains() checks if the sequence of characters in 'search' exists anywhere inside our first string 's'.",
+                    line: 30, tag: "contains",
+                    state: { sc: true, s1: true, s2: true, s3: true, heap1: true, heap2: true, heap3: true, cLines: [...cLines] },
+                    action: async () => {
+                        await evaluateAndPrint(
+                            userString1.includes(userSearch), 30, 
+                            `System.out.println(... + <span class="vr">s</span>.contains(<span class="vr2">search</span>));`, 
+                            "Searching string 's' for the substring.",
+                            [{id:'obj_heap_1', color:'var(--ref-color)'}, {id:'obj_heap_3', color:'var(--ref3-color)'}], 
+                            [{id:'mem_s1', color:'var(--ref-color)'}, {id:'mem_s3', color:'var(--ref3-color)'}], 
+                            "Contains",
+                            getStringGridHTML(userString1, 's1') + 
+                            `<div style="font-weight:700; color:var(--muted); margin-bottom:-5px; font-size:12px;">Searching for: "${userSearch}"</div>`,
+                            async () => {
+                                const cols = document.querySelectorAll('#row_s1 .char-col');
+                                const idx = userString1.indexOf(userSearch);
+                                if(idx !== -1 && userSearch !== "") {
+                                    for(let i=0; i<cols.length; i++) {
+                                        if(i >= idx && i < idx + userSearch.length) {
+                                            cols[i].classList.add('highlight', 'matched');
+                                            await wait(80);
+                                        } else {
+                                            cols[i].classList.add('dimmed');
+                                        }
+                                    }
+                                } else {
+                                    cols.forEach(c => c.classList.add('error'));
+                                }
+                                await wait(400);
+                            }
+                        );
+                    }
+                });
+                cLines.push(`Contains: ${userString1.includes(userSearch)}`);
+            }
+        }
+    }
+}
+
+function fastForwardToState(stepIdx) {
+    if(!script[stepIdx]) return;
+    const state = script[stepIdx].state;
+    
+    const toggleVar = (id, exists, val = null) => {
+        const el = document.getElementById('mem_' + id);
+        if(exists) { 
+            el.classList.add('stored'); 
+            const vEl = document.getElementById('val_' + id);
+            if (vEl && val !== null) vEl.textContent = val;
+        } else el.classList.remove('stored'); 
+    };
+
+    toggleVar('sc', state.sc, 'ref');
+    toggleVar('s1', state.s1, '0x222');
+    toggleVar('s2', state.s2, '0x333');
+    toggleVar('s3', state.s3, '0x444');
+    
+    document.getElementById('stackEmpty').style.display = (state.sc || state.s1 || state.s2 || state.s3) ? 'none' : 'block';
+    document.getElementById('heapEmpty').style.display = (state.heap1 || state.heap2 || state.heap3) ? 'none' : 'block';
+    
+    if (state.heap1) {
+        document.getElementById('obj_heap_1').classList.add('stored');
+        if(userString1) document.getElementById('heap_val_1').textContent = `"${userString1}"`;
+    } else document.getElementById('obj_heap_1').classList.remove('stored');
+
+    if (state.heap2) {
+        document.getElementById('obj_heap_2').classList.add('stored');
+        if(userString2) document.getElementById('heap_val_2').textContent = `"${userString2}"`;
+    } else document.getElementById('obj_heap_2').classList.remove('stored');
+    
+    if (state.heap3) {
+        document.getElementById('obj_heap_3').classList.add('stored');
+        if(userSearch) document.getElementById('heap_val_3').textContent = `"${userSearch}"`;
+    } else document.getElementById('obj_heap_3').classList.remove('stored');
+
+    clearConsole();
+    if(state.cLines) state.cLines.forEach(line => appendToConsole(line));
+}
+
+function resetUI() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.focus-slot').forEach(el => { el.classList.remove('show', 'eval', 'stored'); el.style.opacity = "1"; });
+    document.querySelectorAll('.box-scene').forEach(el => el.classList.remove('popped'));
+    document.querySelectorAll('.spark, .zap-fx, .throw-item').forEach(el => el.remove());
+    document.querySelectorAll('.pinging').forEach(el => el.classList.remove('pinging'));
+    document.getElementById('focus_string_viz').innerHTML = ''; // clear dynamic html
+    
+    actor.style.transition = "none"; 
+    actor.style.opacity = "0"; 
+    actor.style.transform = "translate3d(-200px, -200px, 0)"; 
+    actor.className = "actor-wrapper"; 
+    setArms('relaxed'); 
+    payload.style.opacity = "0";
+}
+
+async function renderStep(stepIndex) {
+    if (stepIndex >= script.length) return;
+    const step = script[stepIndex];
+    document.getElementById("status").textContent = `Step ${stepIndex} / ${script.length - 1}`;
+    document.getElementById("focusTag").textContent = step.tag;
+    document.getElementById("prevBtn").disabled = (stepIndex === 0);
+    // Corrected condition: Disable next button if it's the very last generated step.
+    document.getElementById("nextBtn").disabled = (stepIndex === script.length - 1); 
+    
+    killAllAnimations(); resetUI(); fastForwardToState(stepIndex); typeText(step.text);
+    if (step.line > 0) document.getElementById("line" + step.line).classList.add("active");
+    if (step.action) { try { await step.action(); } catch(e) { } }
+}
+
+async function playAuto() {
+    playing = true; 
+    const btn = document.getElementById("playBtn"); 
+    btn.innerHTML = `<span class="icon">⏸</span><span class="text"><span>Pause</span><span>Auto</span></span>`;
+    while (playing && currentStep < script.length) {
+        await renderStep(currentStep);
+        if (playing && currentStep < script.length - 1) { 
+            try { await wait(2500); currentStep++; } catch(e) { break; } 
+        }
+        else pause();
+    }
+}
+function pause() { 
+    playing = false; 
+    document.getElementById("playBtn").innerHTML = `<span class="icon">▶</span><span class="text"><span>Play</span><span>Auto</span></span>`; 
+}
+function togglePlay() { if (playing) pause(); else { if (currentStep >= script.length - 1) currentStep = 0; playAuto(); } }
+async function nextStep() { pause(); if (currentStep < script.length - 1) { currentStep++; await renderStep(currentStep); } }
+function prevStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(currentStep); } }
+function resetAnimation() { pause(); userString1 = null; userString2 = null; userSearch = null; currentStep = 0; buildScript(); renderStep(0); }
+
+// Fix prototype for .equals() helper on strings to match Java output string casing
+String.prototype.equals = function(str) { return this === str; }
+
+window.onload = () => { buildScript(); renderStep(0); };
+</script>
+</body>
+</html>

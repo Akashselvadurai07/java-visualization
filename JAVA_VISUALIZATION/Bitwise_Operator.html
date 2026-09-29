@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Java Bitwise Operators — Visual Bit Manipulation</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --bit-one: #1c8a5f;
+    --bit-zero: #94a3b8;
+    --bit-res: #2f5fd0;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --bit-one: #6fe3ac;
+    --bit-zero: #6b7280;
+    --bit-res: #86a9ff;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page {
+    max-width: 1850px; 
+    margin: 0 auto;
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage {
+    display: grid;
+    grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.9fr) minmax(0, 1fr); 
+    gap: 16px;
+    flex-grow: 1;
+    position: relative; 
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    min-width: 0; 
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--rule);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.panel-label, .panel-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    flex-wrap: wrap;
+}
+
+.main-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    margin: 0;
+    color: var(--ink);
+    padding-right: 16px;
+    border-right: 1px solid var(--rule);
+}
+
+.mascot-frame {
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mascot-avatar {
+    width: 100%;
+    height: 100%;
+    animation: mascotBob 3s ease-in-out infinite;
+}
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+.mascot-frame.pop { animation: avatarPop .4s ease; }
+@keyframes avatarPop { 0% { transform:scale(.9); } 50% { transform:scale(1.05); } 100% { transform:scale(1); } }
+
+.speech-bubble {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 14px 18px;
+    transform-origin: left center;
+}
+
+.speech-bubble p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); min-height: 24px; }
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.top-controls {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.header-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.header-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.header-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ---------- COLUMN 1: SOURCE CODE ---------- */
+.code-body {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px; 
+    line-height: 1.8;
+    padding: 16px 0; 
+    height: auto; 
+    overflow: hidden; 
+    scroll-behavior: smooth;
+}
+
+.code-line {
+    display: flex;
+    padding: 2px 16px; 
+    border-left: 4px solid transparent;
+    white-space: pre;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.spacer-line { margin-bottom: 25px; }
+
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 28px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 12px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); }
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.cmt { color: var(--cmt); font-style: italic; }
+
+
+/* ---------- COLUMN 2: ACTIVE FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body {
+    padding: 16px; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+    align-items: stretch; 
+    position: relative;
+    min-height: auto;
+}
+
+.focus-slot {
+    display: none;
+    width: 100%;
+    grid-template-columns: 1fr; 
+    align-items: start;
+    justify-items: center; 
+    gap: 16px;
+    padding: 14px;
+    border: 1.5px solid var(--accent);
+    background: var(--accent-wash);
+    border-radius: 12px;
+    height: auto; 
+}
+
+.focus-slot.show { display: grid; }
+
+.slot-visuals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    width: 100%;
+}
+
+.execution-code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13.5px; 
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--code-bg);
+    border: 1px dashed var(--dt);
+    padding: 6px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px; 
+    text-align: center;
+    position: relative;
+    z-index: 20;
+}
+.execution-code .dt { color: var(--dt); }
+.execution-code .vr { color: var(--var); }
+.execution-code .val { color: var(--val); }
+.execution-code .op { color: var(--math-op); }
+
+
+/* ---------- BITWISE SYNTHESIS ANIMATION ---------- */
+
+.binary-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    row-gap: 10px;
+    column-gap: 20px;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.bin-label { text-align: right; font-size: 14px; font-weight: 600; color: var(--muted); opacity: 0; }
+.bin-row { display: flex; gap: 6px; }
+
+/* Shift Specific Container */
+.shift-anim-container {
+    position: relative;
+    height: 32px;
+    width: 266px; 
+}
+
+/* Individual Bit Box */
+.bit-box {
+    width: 28px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 16px;
+    border: 1.5px solid var(--rule-strong);
+    opacity: 0;
+    transform: translateY(-10px) scale(0.8);
+}
+
+.bit-box.one { background: rgba(28, 138, 95, 0.1); border-color: var(--bit-one); color: var(--bit-one); }
+.bit-box.zero { background: var(--paper); color: var(--bit-zero); }
+.bit-box.res-one { background: var(--bit-res); color: #fff; border-color: var(--bit-res); }
+.bit-box.res-zero { background: var(--paper); color: var(--muted); border-style: dashed; }
+.bit-box.shift-new { border-color: var(--math-op); color: var(--math-op); background: rgba(225, 29, 72, 0.1); }
+
+.bin-divider { grid-column: 1 / 3; height: 2px; background: var(--rule-strong); width: 100%; margin: 4px 0; opacity: 0; }
+
+.math-result-chip {
+    min-width: 60px;
+    padding: 4px 8px;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--val);
+    background: var(--panel);
+    border: 1.5px solid var(--val);
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* --- Evaluation Keyframes --- */
+@keyframes fadeDrop { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Base Evaluations */
+.focus-slot.eval .bin-label.l1 { animation: fadeDrop 0.4s ease forwards 0.2s; }
+.focus-slot.eval .bin-label.l2 { animation: fadeDrop 0.4s ease forwards 1.2s; }
+.focus-slot.eval .bin-label.l3 { animation: fadeDrop 0.4s ease forwards 4.0s; } 
+
+.focus-slot.eval .bin-row.op1 .bit-box { animation: fadeDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(1) { animation-delay: 0.30s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(2) { animation-delay: 0.35s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(3) { animation-delay: 0.40s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(4) { animation-delay: 0.45s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(5) { animation-delay: 0.50s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(6) { animation-delay: 0.55s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(7) { animation-delay: 0.60s; }
+.focus-slot.eval .bin-row.op1 .bit-box:nth-child(8) { animation-delay: 0.65s; }
+
+.focus-slot.eval .bin-row.op2 .bit-box { animation: fadeDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(1) { animation-delay: 1.30s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(2) { animation-delay: 1.35s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(3) { animation-delay: 1.40s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(4) { animation-delay: 1.45s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(5) { animation-delay: 1.50s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(6) { animation-delay: 1.55s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(7) { animation-delay: 1.60s; }
+.focus-slot.eval .bin-row.op2 .bit-box:nth-child(8) { animation-delay: 1.65s; }
+
+.focus-slot.eval .bin-divider { animation: fadeDrop 0.4s ease forwards 2.5s; }
+
+/* Non-Shift Results */
+.focus-slot.eval .bin-row.res .bit-box { animation: fadeDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(8) { animation-delay: 2.8s; } 
+.focus-slot.eval .bin-row.res .bit-box:nth-child(7) { animation-delay: 3.1s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(6) { animation-delay: 3.4s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(5) { animation-delay: 3.7s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(4) { animation-delay: 4.0s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(3) { animation-delay: 4.3s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(2) { animation-delay: 4.6s; }
+.focus-slot.eval .bin-row.res .bit-box:nth-child(1) { animation-delay: 4.9s; } 
+
+/* Standard Ops completion CSS */
+.focus-slot.eval .math-result-chip { animation: fadeDrop 0.5s ease forwards 5.5s; }
+.focus-slot.eval .board-placard { animation: placardPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 5.5s forwards; }
+
+/* Disable standard completion for shift operations */
+.focus-slot.shift-op.eval .math-result-chip, .focus-slot.shift-op.eval .board-placard { animation: none; opacity: 0; }
+.focus-slot.shift-op.eval .shift-anim-container .bit-box.orig { animation: fadeDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* Shift Ops manual JS completion trigger */
+.focus-slot.shift-op.eval-done .math-result-chip { animation: fadeDrop 0.5s ease forwards; }
+.focus-slot.shift-op.eval-done .board-placard { animation: placardPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+
+.focus-slot.base-assign.eval .math-result-chip { animation: none; opacity: 1; transform: translateY(0); }
+.focus-slot.base-assign.eval .bin-row.res .bit-box { animation: none; opacity: 1; transform: translateY(0); }
+
+/* Shift Arrows */
+.shift-arrow-row { display: flex; gap: 6px; padding: 4px 0; justify-content: center; }
+.shift-arrow { width: 28px; text-align: center; color: var(--math-op); font-weight: 700; opacity: 0; transform: scale(0); }
+@keyframes arrowPop { 0% {transform:scale(0); opacity:0;} 50% {transform:scale(1.2); opacity:1;} 100%{transform:scale(1); opacity:1;} }
+.focus-slot.eval .shift-arrow { animation: arrowPop 0.4s ease forwards 2.0s; }
+
+/* Placard below the grid */
+.board-scene {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+.board-placard {
+    background: var(--panel);
+    border: 1.5px solid var(--placard-border);
+    border-radius: 9px;
+    padding: 10px 14px; 
+    width: 100%; 
+    max-width: 320px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px; 
+    line-height: 1.4;
+    color: var(--ink);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    z-index: 3;
+}
+
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+.bp-def { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: var(--ink); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--rule); line-height: 1.4; text-align: center;}
+
+.truth-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-family: "JetBrains Mono", monospace; font-size: 12.5px; border-radius: 6px; overflow: hidden; border: 1px solid var(--rule);}
+.truth-table th, .truth-table td { padding: 5px; text-align: center; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule);}
+.truth-table th:last-child, .truth-table td:last-child { border-right: none; }
+.truth-table tr:last-child td { border-bottom: none; }
+.truth-table th { background: var(--paper); color: var(--muted); font-weight: 600; }
+.tt-active { background: rgba(255, 176, 0, 0.15); color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--accent); transition: all 0.5s ease;}
+.tt-active td { color: var(--accent-ink); transition: color 0.5s ease;}
+
+
+/* ---------- COLUMN 3: PERSISTENT RIGHT-SIDE STACK TRAY ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; }
+.stack-tray-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 600px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.stack-tray-body::-webkit-scrollbar { width: 8px; }
+.stack-tray-body::-webkit-scrollbar-track { background: var(--paper); border-radius: 4px; }
+.stack-tray-body::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 4px; }
+
+.tray-empty {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    padding: 24px 8px;
+}
+
+.mini-slot {
+    display: none;
+    opacity: 0;
+    transform: translateX(-60px); 
+    grid-template-columns: 55px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 12px;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mini-slot.stored {
+    display: grid;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mini-slot.active-mini {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+}
+
+.mini-icon {
+    width: 48px;
+    height: 40px;
+    border-radius: 6px;
+    background: rgba(255,176,0,0.15);
+    border: 1.5px solid var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-ink);
+}
+
+.mini-info { display: flex; flex-direction: column; gap: 2px; }
+.mini-name { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; color: var(--var); }
+.mini-type { font-family: "JetBrains Mono", monospace; font-size: 11px; text-transform: uppercase; color: var(--dt); }
+.mini-badge { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; color: var(--val); }
+
+/* =====================================================
+   GLOBAL HUMAN CARRIERS
+   ===================================================== */
+.value-carrier {
+    position:fixed;
+    left:0;
+    top:0;
+    width:auto;
+    min-width: 150px;
+    height:72px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    z-index:99999;
+    pointer-events:none;
+    transform:translate3d(-300px,-300px,0);
+}
+
+.carrier-person {
+    width:35px;
+    height:50px;
+    flex:0 0 35px;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));
+}
+
+.carrier-person .skin { fill:#f2c9a0; }
+.carrier-person .shirt { fill:var(--dt); }
+.carrier-person .outline { stroke:var(--ink); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+.carrier-value {
+    min-width:36px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1.5px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:14px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 14px rgba(0,0,0,.12);
+    transition: all 0.4s ease;
+    white-space: nowrap;
+}
+
+.carrier-value.binary-expanded {
+    background: var(--accent-wash);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    letter-spacing: 2px;
+}
+
+.value-carrier.active { opacity:1; }
+.value-carrier.walking .carrier-person { animation:walkBob .35s ease-in-out infinite alternate; }
+
+@keyframes walkBob {
+    from { transform:translateY(0) rotate(-2deg); }
+    to { transform:translateY(-3px) rotate(2deg); }
+}
+
+.value-carrier.printing .carrier-person { animation:humanThrow .55s ease-in-out infinite alternate; } 
+
+@keyframes humanThrow {
+    0% { transform:translateY(0) rotate(-3deg); }
+    50% { transform:translateY(-5px) rotate(-8deg); }
+    100% { transform:translateY(2px) rotate(8deg); }
+}
+
+.value-carrier.flipped .carrier-person { transform: scaleX(-1); }
+.value-carrier.flipped.walking .carrier-person { animation: walkBobFlipped .4s ease-in-out infinite alternate; }
+@keyframes walkBobFlipped {
+    from { transform: scaleX(-1) translateY(0) rotate(-2deg); }
+    to { transform: scaleX(-1) translateY(-3px) rotate(2deg); }
+}
+.value-carrier.flipped .carrier-value { order: -1; }
+
+.throw-value {
+    position:fixed;
+    z-index:100000;
+    min-width:48px;
+    padding:5px 9px;
+    border-radius:999px;
+    border:2px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.18);
+    pointer-events:none;
+    opacity:0;
+}
+.throw-value.flying { opacity:1; }
+
+
+/* ---------- CONSOLE PANEL ---------- */
+.console-body {
+    background: var(--term-bg);
+    padding: 16px 20px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    height: 160px;
+    overflow-y: auto;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    scroll-behavior: smooth;
+}
+
+.term-line { color: var(--term-text); opacity: 0; transform: translateX(-6px); transition: all 0.35s ease; display: none;}
+.term-line.show { opacity: 1; transform: translateX(0); display: block;}
+.term-line::before { content: "$ println → "; color: var(--term-muted); }
+.term-line.receiving { animation:consoleReceive .6s cubic-bezier(.175,.885,.32,1.275); }
+
+@keyframes consoleReceive {
+    0% { transform:translateX(-20px) scale(.6); opacity:0; }
+    60% { transform:translateX(5px) scale(1.15); opacity:1; }
+    100% { transform:translateX(0) scale(1); opacity:1; }
+}
+
+/* ---------- TRANSPORT BAR ---------- */
+.transport-bar {
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: center; 
+    padding: 12px 10px; 
+    border-top: 1px solid var(--rule);
+    gap: 10px;
+    flex-wrap: wrap; 
+}
+
+.transport-controls {
+    display: flex;
+    gap: 8px; 
+    flex-wrap: wrap; 
+    justify-content: center;
+    width: 100%;
+}
+
+.transport-bar button {
+    font-family:"JetBrains Mono",monospace;
+    font-size: 13px; 
+    font-weight:600;
+    background:var(--panel); 
+    color:var(--ink);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    height: 34px; 
+    padding: 0 10px; 
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    justify-content: center;
+    gap: 6px; 
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+.transport-bar button:hover { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button.primary { background: #111418; color: #ffffff; border-color: #111418; }
+.transport-bar button.primary:hover { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+.transport-bar button.accent { border-color: var(--accent); color: var(--ink); }
+.transport-bar button.accent:hover { background: var(--accent-wash); }
+.transport-bar button.accent span:first-child { color: var(--accent-ink); }
+
+
+/* ---------- TUTORIAL CONTENT SECTION ---------- */
+.content-section {
+    margin-top: 24px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 40px;
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.7;
+}
+.content-section h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 8px;
+}
+.content-section h2:first-child { margin-top: 0; }
+.content-section pre {
+    background: var(--term-bg);
+    color: var(--term-text);
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+}
+.content-section code {
+    background: var(--code-bg);
+    color: var(--dt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+}
+.content-section table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.content-section th, .content-section td { border: 1px solid var(--rule); padding: 12px; text-align: left; }
+.content-section th { background: var(--paper); font-weight: 600; }
+
+@media (max-width: 1200px) {
+    .stage { grid-template-columns: 1fr; }
+    .main-title { border-right: none; padding-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 10px; width: 100%;}
+    .focus-slot { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- GLOBAL HUMAN CARRIERS -->
+<div id="carrier1" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+<div id="carrier2" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+
+<div class="page">
+
+<section class="panel narrator-panel">
+    <div class="narrator-body">
+        <h1 class="main-title">Bitwise Operators</h1>
+        <div class="mascot-frame" id="avatarContainer">
+            <img class="mascot-avatar" id="mascot" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+        </div>
+        <div class="speech-bubble" id="speechBubble">
+            <p id="mascotCaption"></p>
+        </div>
+        
+        <div class="top-controls">
+            <button class="header-btn" id="fullScreenToggle" onclick="toggleFullScreen()" aria-label="Toggle Fullscreen">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+            </button>
+            <button class="header-btn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M9 18h6"></path><path d="M10 22h4"></path>
+                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- MAIN STAGE WRAPPER -->
+<div class="stage" id="mainStage">
+    
+    <!-- COLUMN 1: SOURCE CODE -->
+    <div class="col" id="col1">
+        <section class="panel" style="display: flex; flex-direction: column;">
+            <div class="panel-head">
+                <span class="panel-label">Source</span>
+                <span class="panel-tag">Main.java</span>
+            </div>
+            <div class="code-body">
+                <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span> Main {</div>
+                <div class="code-line" id="line2"><span class="ln">2</span>    <span class="kw">public static void</span> main(String[] args) {</div>
+                <div class="code-line" id="line3"><span class="ln">3</span></div>
+                <div class="code-line" id="line4"><span class="ln">4</span>        <span class="dt">        int</span> <span class="vr"> a</span> = <span class="val">5</span>;  <span class="cmt">// 0000 0101</span></div>
+                <div class="code-line" id="line5"><span class="ln">5</span>        <span class="dt">        int</span> <span class="vr"> b</span> = <span class="val">3</span>;  <span class="cmt">// 0000 0011</span></div>
+                <div class="code-line" id="line6"><span class="ln">6</span></div>
+                <div class="code-line" id="line7"><span class="ln">7</span>       System.out.println(a <span class="op">&amp;</span> b);  <span class="cmt">// AND</span></div>
+                <div class="code-line" id="line8"><span class="ln">8</span>       System.out.println(a <span class="op">|</span> b);  <span class="cmt">// OR</span></div>
+                <div class="code-line" id="line9"><span class="ln">9</span>       System.out.println(a <span class="op">^</span> b);  <span class="cmt">// XOR</span></div>
+                <div class="code-line" id="line10"><span class="ln">10</span></div>
+                <div class="code-line" id="line11"><span class="ln">11</span>       System.out.println(<span class="op">~</span>a);     <span class="cmt">// NOT</span></div>
+                <div class="code-line" id="line12"><span class="ln">12</span></div>
+                <div class="code-line" id="line13"><span class="ln">13</span>       System.out.println(a <span class="op">&lt;&lt;</span> <span class="val">1</span>); <span class="cmt">// Left Shift</span></div>
+                <div class="code-line" id="line14"><span class="ln">14</span>       System.out.println(a <span class="op">&gt;&gt;</span> <span class="val">1</span>); <span class="cmt">// Signed Right Shift</span></div>
+                <div class="code-line" id="line15"><span class="ln">15</span>       System.out.println(a <span class="op">&gt;&gt;&gt;</span> <span class="val">1</span>);<span class="cmt">// Unsigned Right Shift</span></div>
+                <div class="code-line" id="line16"><span class="ln">16</span>    }</div>
+                <div class="code-line" id="line17"><span class="ln">17</span>}</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout</span></div>
+            <div class="console-body" id="consoleBody">
+                <div class="term-line" id="out1">1</div>
+                <div class="term-line" id="out2">7</div>
+                <div class="term-line" id="out3">6</div>
+                <div class="term-line" id="out4">-6</div>
+                <div class="term-line" id="out5">10</div>
+                <div class="term-line" id="out6">2</div>
+                <div class="term-line" id="out7">2</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+    <div class="col" id="col2">
+        <section class="panel focus-panel">
+            <div class="panel-head">
+                <span class="panel-label">Current Execution Focus</span>
+                <span class="panel-tag" id="focusTag">Standby</span>
+            </div>
+            <div class="focus-body" id="focusBody">
+
+                <!-- INIT VARS -->
+                <div class="focus-slot base-assign" id="focus_a">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">a</span> = <span class="val">5</span>;</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l3" style="opacity:1;">Decimal 5</div>
+                            <div class="bin-row res">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="focus-slot base-assign" id="focus_b">
+                    <div class="slot-visuals">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">b</span> = <span class="val">3</span>;</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l3" style="opacity:1;">Decimal 3</div>
+                            <div class="bin-row res">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box one">1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AND -->
+                <div class="focus-slot" id="focus_and">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">&amp;</span> b);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_and_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-label l2" id="lbl_and_b"><span class="op">&amp;</span> b (3)</div>
+                            <div class="bin-row op2">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-divider"></div>
+                            <div class="bin-label l3">Result (1)</div>
+                            <div class="bin-row res">
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div>
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-one">1</div>
+                            </div>
+                        </div>
+                        <div class="math-result-chip">1</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Bitwise AND (&amp;): 1 only if BOTH bits are 1.</div>
+                                <table class="truth-table"><tr><th>Bit 1</th><th>Bit 2</th><th>Result</th></tr>
+                                    <tr><td>1</td><td>1</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td><td>0</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OR -->
+                <div class="focus-slot" id="focus_or">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">|</span> b);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_or_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-label l2" id="lbl_or_b"><span class="op">|</span> b (3)</div>
+                            <div class="bin-row op2">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-divider"></div>
+                            <div class="bin-label l3">Result (7)</div>
+                            <div class="bin-row res">
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div>
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-one">1</div><div class="bit-box res-one">1</div><div class="bit-box res-one">1</div>
+                            </div>
+                        </div>
+                        <div class="math-result-chip">7</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Bitwise OR (|): 1 if AT LEAST ONE bit is 1.</div>
+                                <table class="truth-table"><tr><th>Bit 1</th><th>Bit 2</th><th>Result</th></tr>
+                                    <tr><td>1</td><td>1</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>1</td><td>0</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>0</td><td>1</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XOR -->
+                <div class="focus-slot" id="focus_xor">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">^</span> b);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_xor_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-label l2" id="lbl_xor_b"><span class="op">^</span> b (3)</div>
+                            <div class="bin-row op2">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box one">1</div>
+                            </div>
+                            <div class="bin-divider"></div>
+                            <div class="bin-label l3">Result (6)</div>
+                            <div class="bin-row res">
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div><div class="bit-box res-zero">0</div>
+                                <div class="bit-box res-zero">0</div><div class="bit-box res-one">1</div><div class="bit-box res-one">1</div><div class="bit-box res-zero">0</div>
+                            </div>
+                        </div>
+                        <div class="math-result-chip">6</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Bitwise XOR (^): 1 only if bits are DIFFERENT.</div>
+                                <table class="truth-table"><tr><th>Bit 1</th><th>Bit 2</th><th>Result</th></tr>
+                                    <tr><td>1</td><td>1</td><td>0</td></tr>
+                                    <tr><td>1</td><td>0</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>0</td><td>1</td><td style="color:var(--val);font-weight:700;">1</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOT -->
+                <div class="focus-slot" id="focus_not">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(<span class="op">~</span>a);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_not_a"><span class="op">~</span> a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            
+                            <div class="bin-label l2"></div><div class="bin-row op2"></div>
+                            
+                            <div class="bin-divider"></div>
+                            <div class="bin-label l3">Result (-6)</div>
+                            <div class="bin-row res">
+                                <div class="bit-box res-one">1</div><div class="bit-box res-one">1</div><div class="bit-box res-one">1</div><div class="bit-box res-one">1</div>
+                                <div class="bit-box res-one">1</div><div class="bit-box res-zero">0</div><div class="bit-box res-one">1</div><div class="bit-box res-zero">0</div>
+                            </div>
+                        </div>
+                        <div class="math-result-chip">-6</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Bitwise NOT (~): Inverts all bits (0→1, 1→0).<br/><small>(Note: Java uses 32-bit Two's Complement. Remaining 24 bits to the left also become 1s, making it negative).</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LSHIFT -->
+                <div class="focus-slot shift-op" id="focus_lshift">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">&lt;&lt;</span> 1);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_lshift_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            
+                            <div class="bin-label l2">Shift Left</div>
+                            <div class="shift-arrow-row">
+                                <div class="shift-arrow">↙</div><div class="shift-arrow">↙</div><div class="shift-arrow">↙</div><div class="shift-arrow">↙</div>
+                                <div class="shift-arrow">↙</div><div class="shift-arrow">↙</div><div class="shift-arrow">↙</div><div class="shift-arrow"></div>
+                            </div>
+                            
+                            <div class="bin-divider" style="margin:0;"></div>
+                            <div class="bin-label l3">Result (10)</div>
+                            
+                            <!-- DYNAMIC ANIMATION CONTAINER -->
+                            <div class="shift-anim-container" id="anim_lshift"></div>
+
+                        </div>
+                        <div class="math-result-chip">10</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Left Shift (&lt;&lt;): Moves all bits left by N positions. Zeros are filled in on the right. <br/><small>(Effectively multiplies by 2^N)</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RSHIFT -->
+                <div class="focus-slot shift-op" id="focus_rshift">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">&gt;&gt;</span> 1);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_rshift_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            
+                            <div class="bin-label l2">Shift Right</div>
+                            <div class="shift-arrow-row">
+                                <div class="shift-arrow"></div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div>
+                                <div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div>
+                            </div>
+                            
+                            <div class="bin-divider" style="margin:0;"></div>
+                            <div class="bin-label l3">Result (2)</div>
+
+                            <!-- DYNAMIC ANIMATION CONTAINER -->
+                            <div class="shift-anim-container" id="anim_rshift"></div>
+
+                        </div>
+                        <div class="math-result-chip">2</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Signed Right Shift (&gt;&gt;): Moves all bits right by N. The leftmost bit (sign bit) is duplicated to fill empty spaces.<br/><small>(Effectively integer divides by 2^N)</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UNSIGNED RSHIFT -->
+                <div class="focus-slot shift-op" id="focus_urshift">
+                    <div class="slot-visuals">
+                        <div class="execution-code">System.out.println(a <span class="op">&gt;&gt;&gt;</span> 1);</div>
+                        <div class="binary-grid">
+                            <div class="bin-label l1" id="lbl_urshift_a">a (5)</div>
+                            <div class="bin-row op1">
+                                <div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div><div class="bit-box zero">0</div>
+                                <div class="bit-box zero">0</div><div class="bit-box one">1</div><div class="bit-box zero">0</div><div class="bit-box one">1</div>
+                            </div>
+                            
+                            <div class="bin-label l2">Unsigned Shift</div>
+                            <div class="shift-arrow-row">
+                                <div class="shift-arrow"></div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div>
+                                <div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div><div class="shift-arrow">↘</div>
+                            </div>
+                            
+                            <div class="bin-divider" style="margin:0;"></div>
+                            <div class="bin-label l3">Result (2)</div>
+
+                            <!-- DYNAMIC ANIMATION CONTAINER -->
+                            <div class="shift-anim-container" id="anim_urshift"></div>
+
+                        </div>
+                        <div class="math-result-chip">2</div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Unsigned Right Shift (&gt;&gt;&gt;): Moves bits right by N. <strong>Always fills empty spaces with 0s</strong>, regardless of the original sign bit.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- COLUMN 3: RIGHT-SIDE STACK TRAY -->
+    <div class="col" id="col3">
+        <section class="panel stack-tray-panel">
+            <div class="panel-head">
+                <span class="panel-label">Stack Memory Tray</span>
+                <span class="panel-tag">Variables</span>
+            </div>
+            <div class="stack-tray-body" id="stackTrayBody">
+                <div class="tray-empty" id="trayEmpty">— no variables stored —</div>
+
+                <div class="mini-slot" id="mini_a">
+                    <div class="mini-icon">5</div>
+                    <div class="mini-info">
+                        <span class="mini-name">a</span>
+                        <span class="mini-type">int</span>
+                    </div>
+                    <div class="mini-badge">0000 0101</div>
+                </div>
+                
+                <div class="mini-slot" id="mini_b">
+                    <div class="mini-icon">3</div>
+                    <div class="mini-info">
+                        <span class="mini-name">b</span>
+                        <span class="mini-type">int</span>
+                    </div>
+                    <div class="mini-badge">0000 0011</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXTRA COMPACT TRANSPORT BAR -->
+        <section class="panel transport-bar">
+            <div class="transport-controls">
+                <button class="accent" onclick="previousStep()"><span>◂</span><span>Prev</span></button>
+                <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play</span></button>
+                <button onclick="nextStep()"><span>Next</span><span>▸</span></button>
+                <button onclick="resetAnimation()"><span>↻</span><span>Reset</span></button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- TUTORIAL CONTENT ADDED HERE -->
+<div class="content-section">
+    <h2>1. What are Bitwise Operators?</h2>
+    <p>Unlike logical operators that evaluate entire boolean expressions, bitwise operators operate on individual bits of integer data types (like <code>int</code> or <code>byte</code>). They allow precise control over data at the binary level.</p>
+
+    <h2>2. Types of Bitwise Operators</h2>
+    <table>
+        <tr><th>Symbol</th><th>Operator Name</th><th>Purpose</th></tr>
+        <tr><td><code>&amp;</code></td><td>Bitwise AND</td><td>Compares each bit. Returns 1 if <strong>both</strong> bits are 1.</td></tr>
+        <tr><td><code>|</code></td><td>Bitwise OR</td><td>Compares each bit. Returns 1 if <strong>at least one</strong> bit is 1.</td></tr>
+        <tr><td><code>^</code></td><td>Bitwise XOR</td><td>Compares each bit. Returns 1 if the bits are <strong>different</strong>.</td></tr>
+        <tr><td><code>~</code></td><td>Bitwise NOT</td><td>Inverts all bits (0 becomes 1, 1 becomes 0).</td></tr>
+        <tr><td><code>&lt;&lt;</code></td><td>Left Shift</td><td>Shifts bits to the left, filling with zeros on the right.</td></tr>
+        <tr><td><code>&gt;&gt;</code></td><td>Signed Right Shift</td><td>Shifts bits to the right, duplicating the sign bit on the left.</td></tr>
+        <tr><td><code>&gt;&gt;&gt;</code></td><td>Unsigned Right Shift</td><td>Shifts bits to the right, always filling with zeros on the left.</td></tr>
+    </table>
+</div>
+
+</div> 
+
+<script>
+function toggleTheme() { document.body.classList.toggle("dark"); }
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.warn(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+const script = [
+    { line: 0, focus: null, state: '', stored: [] },
+    
+    // INITS
+    { line: 4, focus: 'a', state: 'eval', stored: [], anim: 'sourceToEval', val: '5' },
+    { line: 4, focus: 'a', state: 'stored', stored: ['a'] },
+    
+    { line: 5, focus: 'b', state: 'eval', stored: ['a'], anim: 'sourceToEval', val: '3' },
+    { line: 5, focus: 'b', state: 'stored', stored: ['a', 'b'] },
+
+    // BITWISE OPS
+    { line: 7, focus: 'and', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseEval', op1: 'a', op2: 'b', v1: '5', b1: '0000 0101', v2: '3', b2: '0000 0011', res: '1' },
+    { line: 7, focus: 'and', state: 'eval', stored: ['a', 'b'], anim: 'printFromStage', out: 1, val: '1' },
+
+    { line: 8, focus: 'or', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseEval', op1: 'a', op2: 'b', v1: '5', b1: '0000 0101', v2: '3', b2: '0000 0011', res: '7' },
+    { line: 8, focus: 'or', state: 'eval', stored: ['a', 'b'], anim: 'printFromStage', out: 2, val: '7' },
+
+    { line: 9, focus: 'xor', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseEval', op1: 'a', op2: 'b', v1: '5', b1: '0000 0101', v2: '3', b2: '0000 0011', res: '6' },
+    { line: 9, focus: 'xor', state: 'eval', stored: ['a', 'b'], anim: 'printFromStage', out: 3, val: '6' },
+
+    { line: 11, focus: 'not', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseUnary', op1: 'a', v1: '5', b1: '0000 0101', res: '-6' },
+    { line: 11, focus: 'not', state: 'eval', stored: ['a', 'b'], anim: 'printFromStage', out: 4, val: '-6' },
+
+    { line: 13, focus: 'lshift', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseShift', op1: 'a', v1: '5', b1: '0000 0101', res: '10' },
+    { line: 13, focus: 'lshift', state: 'eval-done', stored: ['a', 'b'], anim: 'printFromStage', out: 5, val: '10' },
+
+    { line: 14, focus: 'rshift', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseShift', op1: 'a', v1: '5', b1: '0000 0101', res: '2' },
+    { line: 14, focus: 'rshift', state: 'eval-done', stored: ['a', 'b'], anim: 'printFromStage', out: 6, val: '2' },
+
+    { line: 15, focus: 'urshift', state: 'eval', stored: ['a', 'b'], anim: 'bitwiseShift', op1: 'a', v1: '5', b1: '0000 0101', res: '2' },
+    { line: 15, focus: 'urshift', state: 'eval-done', stored: ['a', 'b'], anim: 'printFromStage', out: 7, val: '2' },
+    
+    { line: 17, focus: null, state: '', stored: ['a', 'b'] }
+];
+
+let currentStep = 0;
+let playing = false;
+let timer = null;
+let animationDelay = null;
+const totalSteps = script.length;
+
+const outs = {
+    1: document.getElementById("out1"),
+    2: document.getElementById("out2"),
+    3: document.getElementById("out3"),
+    4: document.getElementById("out4"),
+    5: document.getElementById("out5"),
+    6: document.getElementById("out6"),
+    7: document.getElementById("out7")
+};
+
+let typingTimeout = null;
+
+/* STOP CARRIERS */
+function hideValueCarriers() {
+    [1, 2].forEach(id => {
+        const carrier = document.getElementById("carrier" + id);
+        carrier.getAnimations().forEach(animation => animation.cancel());
+        carrier.classList.remove("active", "walking", "printing", "flipped");
+        carrier.querySelector(".carrier-value").classList.remove("binary-expanded");
+        carrier.style.opacity = "0";
+    });
+}
+
+function animateSourceToEval(step) {
+    const line = document.getElementById("line" + step.line);
+    const sourceVal = line.querySelector(".val");
+    const slot = document.getElementById("focus_" + step.focus);
+    const targetEl = slot.querySelector(".bin-label"); 
+    
+    const carrier = document.getElementById("carrier1");
+    const carrierVal = carrier.querySelector(".carrier-value");
+    
+    const sRect = sourceVal.getBoundingClientRect();
+    const tRect = targetEl.getBoundingClientRect();
+    
+    const startX = sRect.left + sRect.width/2 - 75; 
+    const startY = sRect.top + sRect.height/2 - 36; 
+    
+    const targetX = tRect.left + tRect.width/2 - 75;
+    const targetY = tRect.top + tRect.height/2 - 36;
+    
+    carrierVal.textContent = step.val;
+    carrier.className = "value-carrier active walking";
+    carrier.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    carrier.style.opacity = "1";
+    
+    const middleX = startX + (targetX - startX) * 0.4;
+    const middleY = Math.min(startY, targetY) - 50;
+    
+    carrier.animate([
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 },
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+        { transform: `translate3d(${middleX}px,${middleY}px,0)`, opacity:1 },
+        { transform: `translate3d(${targetX}px,${targetY}px,0)`, opacity:1 }
+    ], { duration: 1800, easing: "cubic-bezier(.22,.72,.28,1)", fill: "forwards" });
+    
+    setTimeout(() => {
+        carrier.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); 
+    }, 1800);
+}
+
+function animateBitwiseEval(step) {
+    const slot = document.getElementById("focus_" + step.focus);
+    
+    // Carrier 1 (Left Operant 'a')
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    const mini1 = document.getElementById("mini_" + step.op1);
+    const targetLabel1 = document.getElementById(`lbl_${step.focus}_a`);
+    
+    const m1Rect = mini1.getBoundingClientRect();
+    const t1Rect = targetLabel1.getBoundingClientRect();
+    
+    const start1X = m1Rect.left - 75;
+    const start1Y = m1Rect.top - 36;
+    const target1X = t1Rect.left - 50;
+    const target1Y = t1Rect.top - 20;
+    const mid1X = start1X - (start1X - target1X)*0.5;
+    const mid1Y = start1Y - 40;
+
+    c1Val.textContent = step.v1; 
+    c1.className = "value-carrier active walking";
+    
+    c1.animate([
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 }
+    ], { duration: 1500, easing: "ease-in", fill: "forwards" }).onfinish = () => {
+        
+        c1Val.textContent = step.b1;
+        c1Val.classList.add("binary-expanded");
+
+        c1.animate([
+            { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 },
+            { transform: `translate3d(${target1X}px,${target1Y}px,0)`, opacity:1 }
+        ], { duration: 1500, easing: "ease-out", fill: "forwards" });
+    };
+    
+    // Carrier 2 (Right Operant 'b')
+    const c2 = document.getElementById("carrier2");
+    const c2Val = c2.querySelector(".carrier-value");
+    const mini2 = document.getElementById("mini_" + step.op2);
+    const targetLabel2 = document.getElementById(`lbl_${step.focus}_b`);
+    
+    const m2Rect = mini2.getBoundingClientRect();
+    const t2Rect = targetLabel2.getBoundingClientRect();
+    
+    const start2X = m2Rect.left - 75;
+    const start2Y = m2Rect.top - 36;
+    const target2X = t2Rect.left - 20; 
+    const target2Y = t2Rect.top - 20;
+    const mid2X = start2X - (start2X - target2X)*0.5;
+    const mid2Y = start2Y - 40;
+
+    c2Val.textContent = step.v2; 
+    c2.className = "value-carrier active walking flipped";
+
+    c2.animate([
+        { transform: `translate3d(${start2X}px,${start2Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start2X}px,${start2Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${mid2X}px,${mid2Y}px,0)`, opacity:1 }
+    ], { duration: 1500, easing: "ease-in", fill: "forwards" }).onfinish = () => {
+        
+        c2Val.textContent = step.b2;
+        c2Val.classList.add("binary-expanded");
+
+        c2.animate([
+            { transform: `translate3d(${mid2X}px,${mid2Y}px,0)`, opacity:1 },
+            { transform: `translate3d(${target2X}px,${target2Y}px,0)`, opacity:1 }
+        ], { duration: 1500, easing: "ease-out", fill: "forwards" });
+    };
+    
+    setTimeout(() => {
+        c1.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        c2.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); 
+    }, 3200); 
+}
+
+function animateBitwiseUnary(step) {
+    const slot = document.getElementById("focus_" + step.focus);
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    const mini1 = document.getElementById("mini_" + step.op1);
+    const targetLabel1 = document.getElementById(`lbl_${step.focus}_a`);
+    
+    const m1Rect = mini1.getBoundingClientRect();
+    const t1Rect = targetLabel1.getBoundingClientRect();
+    
+    const start1X = m1Rect.left - 75;
+    const start1Y = m1Rect.top - 36;
+    const target1X = t1Rect.left - 50;
+    const target1Y = t1Rect.top - 20;
+    const mid1X = start1X - (start1X - target1X)*0.5;
+    const mid1Y = start1Y - 40;
+
+    c1Val.textContent = step.v1; 
+    c1.className = "value-carrier active walking";
+    
+    c1.animate([
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 }
+    ], { duration: 1500, easing: "ease-in", fill: "forwards" }).onfinish = () => {
+        c1Val.textContent = step.b1;
+        c1Val.classList.add("binary-expanded");
+        c1.animate([
+            { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 },
+            { transform: `translate3d(${target1X}px,${target1Y}px,0)`, opacity:1 }
+        ], { duration: 1500, easing: "ease-out", fill: "forwards" });
+    };
+    
+    setTimeout(() => {
+        c1.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); 
+    }, 3200);
+}
+
+// Highly Detailed Javascript Cascading Push Animation
+function animateBitwiseShift(step) {
+    const slot = document.getElementById("focus_" + step.focus);
+    const isLeftShift = step.focus === 'lshift';
+
+    // 1. Unary load animation for operand
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    const mini1 = document.getElementById("mini_" + step.op1);
+    const targetLabel1 = document.getElementById(`lbl_${step.focus}_a`);
+    
+    const m1Rect = mini1.getBoundingClientRect();
+    const t1Rect = targetLabel1.getBoundingClientRect();
+    
+    const start1X = m1Rect.left - 75;
+    const start1Y = m1Rect.top - 36;
+    const target1X = t1Rect.left - 50;
+    const target1Y = t1Rect.top - 20;
+    const mid1X = start1X - (start1X - target1X)*0.5;
+    const mid1Y = start1Y - 40;
+
+    c1Val.textContent = step.v1; 
+    c1.className = "value-carrier active walking";
+    
+    c1.animate([
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:0 },
+        { transform: `translate3d(${start1X}px,${start1Y}px,0)`, opacity:1 },
+        { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 }
+    ], { duration: 1500, easing: "ease-in", fill: "forwards" }).onfinish = () => {
+        c1Val.textContent = step.b1;
+        c1Val.classList.add("binary-expanded");
+        c1.animate([
+            { transform: `translate3d(${mid1X}px,${mid1Y}px,0)`, opacity:1 },
+            { transform: `translate3d(${target1X}px,${target1Y}px,0)`, opacity:1 }
+        ], { duration: 1500, easing: "ease-out", fill: "forwards" });
+    };
+
+    // Build the dynamic bit row while carrier is animating
+    const animContainer = slot.querySelector(".shift-anim-container");
+    animContainer.innerHTML = ""; // reset
+    
+    const originalBits = step.b1.replace(/ /g, "").split("");
+    const bitElements = [];
+    
+    // Create the original bits in the container
+    for(let i=0; i<8; i++) {
+        let bitEl = document.createElement("div");
+        bitEl.className = `bit-box res-${originalBits[i] === '1' ? 'one' : 'zero'} orig`;
+        bitEl.textContent = originalBits[i];
+        bitEl.style.position = "absolute";
+        bitEl.style.left = (i * 34) + "px"; // 28px width + 6px gap = 34px spacing
+        bitEl.style.top = "0px";
+        // Calculate dynamic CSS fade-in delay matching the evaluation sequence
+        bitEl.style.animationDelay = (2.8 + (isLeftShift ? (7-i)*0.1 : i*0.1)) + "s";
+        animContainer.appendChild(bitEl);
+        bitElements.push(bitEl);
+    }
+
+    // 2. Carrier 1 fades out, eval styling begins
+    setTimeout(() => {
+        c1.animate([ {opacity:1}, {opacity:0} ], { duration: 300, fill: "forwards" });
+        slot.classList.add("eval"); 
+    }, 3200);
+
+    // 3. The Cascading Push Effect
+    setTimeout(() => {
+        // Handoff from CSS animation to JS controlled transitions
+        bitElements.forEach(el => {
+            el.style.animation = 'none'; 
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0) scale(1)';
+            el.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        });
+
+        // Create the new bit that will be pushed in
+        let newBitEl = document.createElement("div");
+        newBitEl.className = "bit-box shift-new";
+        newBitEl.textContent = "0"; // Left, Right (pos), Unsigned Right all push 0 here
+        newBitEl.style.position = "absolute";
+        newBitEl.style.left = isLeftShift ? (8 * 34) + 20 + "px" : (-1 * 34) - 20 + "px";
+        newBitEl.style.top = "0px";
+        newBitEl.style.opacity = "0";
+        newBitEl.style.transition = "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        animContainer.appendChild(newBitEl);
+
+        const containerRect = animContainer.getBoundingClientRect();
+        
+        // Spawn Carrier 2
+        const c2 = document.getElementById("carrier2");
+        const c2Val = c2.querySelector(".carrier-value");
+        c2Val.textContent = "0";
+        c2Val.classList.remove("binary-expanded");
+
+        let startX2 = isLeftShift ? containerRect.right + 100 : containerRect.left - 150;
+        let startY2 = containerRect.top - 20;
+        let targetX2 = isLeftShift ? containerRect.right + 5 : containerRect.left - 45;
+        
+        c2.className = `value-carrier active walking ${isLeftShift ? 'flipped' : ''}`;
+        c2.animate([
+            { transform: `translate3d(${startX2}px,${startY2}px,0)`, opacity:0 },
+            { transform: `translate3d(${startX2}px,${startY2}px,0)`, opacity:1 },
+            { transform: `translate3d(${targetX2}px,${startY2}px,0)`, opacity:1 }
+        ], { duration: 1200, easing: "ease-in-out", fill: "forwards" }).onfinish = () => {
+            
+            // Human arrived, bit appears
+            newBitEl.style.opacity = "1";
+            newBitEl.style.left = isLeftShift ? (8 * 34) + "px" : (-1 * 34) + "px";
+            
+            c2.className = `value-carrier active printing ${isLeftShift ? 'flipped' : ''}`;
+
+            setTimeout(() => {
+                // Execute physical push!
+                const pushOffset = isLeftShift ? -34 : 34;
+                c2.animate([
+                    { transform: `translate3d(${targetX2}px,${startY2}px,0)` },
+                    { transform: `translate3d(${targetX2 + pushOffset}px,${startY2}px,0)` }
+                ], { duration: 300, fill: "forwards", easing: "ease-out" });
+
+                newBitEl.style.left = isLeftShift ? (7 * 34) + "px" : "0px";
+                
+                let delay = 0;
+                const gapTime = 180; // Delay between each bit being nudged
+                
+                if (isLeftShift) {
+                    for(let i=7; i>=0; i--) {
+                        setTimeout(() => {
+                            let el = bitElements[i];
+                            el.style.left = ((i - 1) * 34) + "px";
+                            if (i === 0) {
+                                // Leftmost bit falls off the edge
+                                el.style.transform = "translateY(30px) rotate(-45deg) scale(0.5)";
+                                el.style.opacity = "0";
+                            } else {
+                                // Slight physical bump effect
+                                el.style.transform = "scale(1.05)";
+                                setTimeout(()=> el.style.transform="scale(1)", 150);
+                            }
+                        }, delay);
+                        delay += gapTime;
+                    }
+                } else {
+                    for(let i=0; i<8; i++) {
+                        setTimeout(() => {
+                            let el = bitElements[i];
+                            el.style.left = ((i + 1) * 34) + "px";
+                            if (i === 7) {
+                                // Rightmost bit falls off the edge
+                                el.style.transform = "translateY(30px) rotate(45deg) scale(0.5)";
+                                el.style.opacity = "0";
+                            } else {
+                                // Slight physical bump effect
+                                el.style.transform = "scale(1.05)";
+                                setTimeout(()=> el.style.transform="scale(1)", 150);
+                            }
+                        }, delay);
+                        delay += gapTime;
+                    }
+                }
+
+                // Finalize sequence
+                setTimeout(() => {
+                    c2.animate([ {opacity:1}, {opacity:0} ], { duration: 400, fill: "forwards" });
+                    slot.classList.add("eval-done"); // Triggers result placard to appear
+                }, delay + 400);
+
+            }, 400); // slight pause before pushing
+        };
+    }, 4500); // trigger push sequence after original bits load
+}
+
+
+function animatePrintFromStage(step) {
+    const outLine = document.getElementById("out" + step.out);
+    const slot = document.getElementById("focus_" + step.focus);
+    const chip = slot.querySelector(".math-result-chip");
+    const c1 = document.getElementById("carrier1");
+    const c1Val = c1.querySelector(".carrier-value");
+    
+    const sRect = chip.getBoundingClientRect();
+    const oRect = outLine.getBoundingClientRect();
+    
+    const startX = sRect.left - 50; 
+    const startY = sRect.top - 20; 
+    
+    const endX = oRect.left - 60;
+    const endY = oRect.top + oRect.height/2 - 36;
+    
+    const val = step.val;
+    c1Val.textContent = val;
+    c1Val.classList.remove("binary-expanded");
+    
+    c1.className = "value-carrier active printing";
+    c1.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    c1.style.opacity = "1";
+    
+    setTimeout(() => {
+        const thrown = document.createElement("div");
+        thrown.className = "throw-value flying";
+        thrown.textContent = val;
+        document.body.appendChild(thrown);
+
+        const handX = startX + 70;
+        const handY = startY + 20;
+        thrown.style.left = `${handX}px`;
+        thrown.style.top = `${handY}px`;
+
+        const deltaX = endX - handX;
+        const deltaY = endY - handY;
+
+        thrown.animate([
+            { transform: "translate3d(0,0,0) scale(1)", opacity:1 },
+            { transform: `translate3d(${deltaX*.25}px,-100px,0) scale(1.2) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.55}px,-130px,0) scale(1.1) rotate(10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.82}px,-60px,0) scale(.95)`, opacity:1 },
+            { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(.7)`, opacity:0 }
+        ], { duration:2000, easing:"cubic-bezier(.22,.72,.28,1)", fill:"forwards" });
+
+        c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+            { transform: `translate3d(${startX-10}px,${startY-10}px,0) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 }
+        ], { duration:1000, easing:"ease-out", fill:"forwards" });
+
+        setTimeout(() => {
+            outLine.classList.add("show");
+            outLine.classList.remove("receiving");
+            void outLine.offsetWidth;
+            outLine.classList.add("receiving");
+            outLine.scrollIntoView({ behavior:"smooth", block:"nearest" });
+        },1800);
+
+        setTimeout(() => {
+            thrown.remove();
+            c1.classList.remove("active", "printing");
+            c1.style.opacity = "0";
+        },2200);
+
+    }, 500);
+}
+
+
+function renderStep() {
+    const stepData = script[currentStep];
+
+    document.querySelectorAll(".code-line").forEach(l => l.classList.remove("active"));
+    if (stepData.line > 0) {
+        const lineEl = document.getElementById("line" + stepData.line);
+        if (lineEl) {
+            lineEl.classList.add("active");
+            lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    document.querySelectorAll(".focus-slot").forEach(s => {
+        if(stepData.focus && s.id === "focus_" + stepData.focus) {
+            s.classList.add("show");
+            if (stepData.state === 'eval') {
+                s.classList.remove("eval", "eval-done", "stored");
+                
+                // Clear the shift animation container immediately when re-rendering eval
+                const shiftContainer = s.querySelector(".shift-anim-container");
+                if(shiftContainer) shiftContainer.innerHTML = "";
+
+                void s.offsetWidth; 
+            } else if (stepData.state === 'stored') {
+                s.classList.add("eval", "stored");
+            }
+            if (stepData.state === 'eval-done') {
+                s.classList.add("eval", "eval-done");
+            }
+        } else {
+            s.classList.remove("show", "eval", "eval-done", "stored");
+        }
+    });
+    
+    if (stepData.focus) {
+        document.getElementById("focusTag").textContent = stepData.focus;
+    } else {
+        document.getElementById("focusTag").textContent = "Console Execution";
+    }
+
+    document.getElementById("trayEmpty").style.display = stepData.stored.length > 0 ? "none" : "block";
+    document.querySelectorAll(".mini-slot").forEach(ms => {
+        const varKey = ms.id.replace("mini_", "");
+        if (stepData.stored.includes(varKey)) {
+            ms.classList.add("stored");
+            let isActive = (varKey === stepData.focus) || (stepData.focus && stepData.focus.includes(varKey) && stepData.focus.startsWith("print_")) || (stepData.focus && stepData.focus.includes(varKey));
+            
+            ms.classList.toggle("active-mini", isActive);
+            if (isActive) {
+                 ms.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } else {
+            ms.classList.remove("stored", "active-mini");
+        }
+    });
+
+    Object.keys(outs).forEach(k => outs[k].classList.remove("show"));
+    for (let i = 1; i <= stepData.out; i++) {
+        if(outs[i]) {
+            outs[i].classList.add("show");
+            if (i === stepData.out) outs[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    for (let i = 1; i < currentStep; i++) {
+        if (script[i].out && outs[script[i].out]) {
+            outs[script[i].out].classList.add("show");
+        }
+    }
+
+    setMascot(currentStep);
+    hideValueCarriers();
+
+    if(animationDelay) clearTimeout(animationDelay);
+    animationDelay = setTimeout(() => {
+        if(stepData.anim === "sourceToEval") animateSourceToEval(stepData);
+        if(stepData.anim === "bitwiseEval") animateBitwiseEval(stepData);
+        if(stepData.anim === "bitwiseUnary") animateBitwiseUnary(stepData);
+        if(stepData.anim === "bitwiseShift") animateBitwiseShift(stepData);
+        if(stepData.anim === "printFromStage") animatePrintFromStage(stepData);
+    }, 400);
+}
+
+const mascotCaptions = [
+    "Welcome! Let's examine how Java evaluates Bitwise Operators at the binary level.",
+    "First, we initialize an integer 'a' with decimal value 5.",
+    "The variable 'a' is allocated into the stack memory. Note its 8-bit binary representation: 00000101.",
+    "Next, we initialize 'b' to decimal 3.",
+    "Variable 'b' is stored in memory as 00000011.",
+    
+    // AND
+    "BITWISE AND (&): The humans carry our decimal values to the logic grid. Watch them unpack into binary! Then, we scan from right to left.",
+    "1 & 1 is 1. All other columns contain at least one 0, so they evaluate to 0. Result is 00000001, which is decimal 1.",
+
+    // OR
+    "BITWISE OR (|): Again, the decimals unpack. We scan the columns. If AT LEAST one bit is 1, the result is 1.",
+    "Three columns have a 1. The result is 00000111, which equals decimal 7. Throwing to console!",
+
+    // XOR
+    "BITWISE XOR (^): Exclusive OR. This operator returns 1 ONLY if the two bits in a column are DIFFERENT.",
+    "Columns with (0,1) or (1,0) yield 1. Columns with (1,1) yield 0. Result is 00000110, or decimal 6.",
+
+    // NOT
+    "BITWISE NOT (~): A unary operator. It takes one number and simply flips every bit. 0s become 1s, and 1s become 0s.",
+    "00000101 becomes 11111010. In Java's 32-bit signed integer system, leading 1s indicate a negative number (-6).",
+
+    // LSHIFT
+    "LEFT SHIFT (<<): We shift all bits in 'a' to the left by 1 position. Watch closely...",
+    "The assistant pushes a 0 into the right. See how each bit slowly bumps the next one over? The leftmost bit falls off! Result is 10.",
+
+    // RSHIFT
+    "SIGNED RIGHT SHIFT (>>): We shift all bits to the right by 1 position.",
+    "The empty spot on the left is filled by copying the sign bit (0). The assistant pushes it in! Result is 2. It divided by 2!",
+    
+    // URSHIFT
+    "UNSIGNED RIGHT SHIFT (>>>): We shift all bits to the right again. How is this different from Signed Right Shift?",
+    "With >>>, it ALWAYS pushes a 0 into the left side, completely ignoring the original sign bit! For positive 5, the result is still 2.",
+
+    "Execution finished! You just watched Java break down integers into binary and manipulate them bit by bit."
+];
+
+function setMascot(step) {
+    const caption = document.getElementById("mascotCaption");
+    const avatar = document.getElementById("avatarContainer");
+    const bubble = document.getElementById("speechBubble");
+    
+    if (typingTimeout) clearInterval(typingTimeout);
+    
+    avatar.classList.remove("pop");
+    bubble.classList.remove("pop");
+    void avatar.offsetWidth; 
+    void bubble.offsetWidth;
+    avatar.classList.add("pop");
+    bubble.classList.add("pop");
+    
+    const fullText = mascotCaptions[step] || "...";
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+    
+    let i = 0;
+    typingTimeout = setInterval(() => {
+        if (i < fullText.length) {
+            caption.textContent += fullText.charAt(i);
+            i++;
+        } else {
+            clearInterval(typingTimeout);
+            caption.classList.remove("typing-cursor");
+        }
+    }, 30); 
+}
+
+function play() {
+    playing = true;
+    document.getElementById("playBtn").innerHTML = "<span>⏸</span><span>Pause</span>";
+    // Slightly longer interval to allow the cascading domino shifts to fully finish
+    timer = setInterval(() => {
+        if (currentStep >= totalSteps - 1) { pause(); return; }
+        currentStep++;
+        renderStep();
+    }, 13000); 
+}
+
+function pause() {
+    playing = false;
+    document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play</span>";
+    if (timer) { clearInterval(timer); timer = null; }
+}
+
+function togglePlay() {
+    if (playing) { pause(); } else {
+        if (currentStep >= totalSteps - 1) { currentStep = 0; }
+        play();
+    }
+}
+
+function nextStep() {
+    pause();
+    if (currentStep < totalSteps - 1) { currentStep++; renderStep(); }
+}
+
+function previousStep() {
+    pause();
+    if (currentStep > 0) { currentStep--; renderStep(); }
+}
+
+function resetAnimation() {
+    pause();
+    currentStep = 0;
+    document.querySelectorAll(".term-line").forEach(line => {
+        line.classList.remove("show", "receiving");
+    });
+    renderStep();
+}
+
+// Initial Call
+renderStep();
+</script>
+
+</body>
+</html>

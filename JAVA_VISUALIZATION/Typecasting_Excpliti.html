@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Java Type Casting — Explicit Walkthrough</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper:#eef1ec;
+    --panel:#ffffff;
+    --ink:#14181f;
+    --muted:#6b7280;
+    --rule:#d8ddd3;
+    --rule-strong:#b9c0b3;
+
+    --accent:#ffb000;
+    --accent-ink:#7a4b00;
+    --accent-wash:#fff8e1;
+
+    --placard-border:#4285f4;
+
+    --kw:#5b3fd9;
+    --dt:#2f5fd0;
+    --var:#b8390e;
+    --val:#1c8a5f;
+
+    --term-bg:#f8fafc;
+    --term-text:#0f172a;
+    --term-muted:#94a3b8;
+
+    --radius:10px;
+}
+
+body.dark {
+    --paper:#12151a;
+    --panel:#191d24;
+    --ink:#eef1ec;
+    --muted:#9099a6;
+    --rule:#2a2f38;
+    --rule-strong:#3a4049;
+
+    --accent:#ffc23d;
+    --accent-ink:#ffe4ac;
+    --accent-wash:#2e2410;
+
+    --placard-border:#669df6;
+
+    --kw:#b7a4ff;
+    --dt:#86a9ff;
+    --var:#ff9466;
+    --val:#6fe3ac;
+
+    --term-bg:#05070a;
+    --term-text:#7de8b2;
+    --term-muted:#3a4841;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+html,
+body {
+    margin:0;
+    padding:0;
+    height:100%;
+}
+
+body {
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",Arial,sans-serif;
+    transition:.25s ease;
+    -webkit-font-smoothing:antialiased;
+}
+
+.page {
+    max-width:1600px;
+    margin:auto;
+    padding:16px 24px 24px;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+.stage {
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:20px;
+}
+
+.col {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    height:100%;
+}
+
+.panel {
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:var(--radius);
+}
+
+.panel-head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 20px;
+    border-bottom:1px solid var(--rule);
+}
+
+.panel-label,
+.panel-tag {
+    font-family:"JetBrains Mono",monospace;
+    font-size:13px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+
+/* HEADER */
+
+.narrator-panel {
+    margin-bottom:16px;
+}
+
+.narrator-body {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:16px 20px;
+    flex-wrap:wrap;
+}
+
+.main-title {
+    font-family:"Space Grotesk",sans-serif;
+    font-weight:600;
+    font-size:32px;
+    margin:0;
+    color:var(--ink);
+    padding-right:16px;
+    border-right:1px solid var(--rule);
+}
+
+.mascot-frame {
+    width:68px;
+    height:68px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:var(--paper);
+    border:1px solid var(--rule);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+
+.mascot-avatar {
+    width:100%;
+    height:100%;
+    animation:mascotBob 3s ease-in-out infinite;
+}
+
+@keyframes mascotBob {
+    0%,100% { transform:translateY(0); }
+    50% { transform:translateY(-3px); }
+}
+
+.mascot-frame.pop {
+    animation:avatarPop .4s ease;
+}
+
+@keyframes avatarPop {
+    0% { transform:scale(.9); }
+    50% { transform:scale(1.05); }
+    100% { transform:scale(1); }
+}
+
+.speech-bubble {
+    position:relative;
+    flex:1;
+    min-width:200px;
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:12px;
+    padding:14px 18px;
+}
+
+.speech-bubble p {
+    margin:0;
+    font-size:16px;
+    line-height:1.5;
+    min-height:24px;
+}
+
+.typing-cursor::after {
+    content:"|";
+    animation:blink 1s step-end infinite;
+    color:var(--accent);
+}
+
+@keyframes blink {
+    50% { opacity:0; }
+}
+
+.theme-toggle {
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    border:1px solid var(--rule-strong);
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.theme-toggle:hover { 
+    border-color: var(--accent); 
+    color: var(--accent); 
+    background: var(--accent-wash);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* CODE */
+
+.code-body {
+    font-family:"JetBrains Mono",monospace;
+    font-size:15px;
+    line-height:1.8;
+    padding:16px 0;
+    height:400px;
+    overflow-y:auto;
+    scroll-behavior: smooth;
+}
+
+.code-line {
+    display:flex;
+    padding:2px 20px;
+    border-left:4px solid transparent;
+    white-space:pre;
+}
+
+.code-line.active {
+    background:rgba(255,176,0,.1);
+    border-left-color:var(--accent);
+}
+
+.ln {
+    width:28px;
+    flex-shrink:0;
+    color:var(--rule-strong);
+    text-align:right;
+    margin-right:20px;
+}
+
+.kw { color:var(--kw); }
+.dt { color:var(--dt); }
+.vr { color:var(--var); font-weight:600; }
+.vl { color:var(--val); }
+
+/* STACK */
+
+.stack-panel {
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+
+.stack-body {
+    padding:24px;
+    max-height: 600px;
+    flex:1;
+    position:relative;
+    overflow-y:auto;
+    overflow-x:hidden;
+    scroll-behavior: smooth;
+}
+
+.stack-empty {
+    font-family:"JetBrains Mono",monospace;
+    font-size:15px;
+    color:var(--muted);
+    padding:10px;
+    text-align:center;
+}
+
+.slot {
+    display:none;
+    grid-template-columns:120px 1fr;
+    align-items:center;
+    gap:20px;
+    padding:15px 24px;
+    border:1px solid var(--accent);
+    background:var(--accent-wash);
+    border-radius:16px;
+    margin-bottom:8px;
+}
+
+.slot.show {
+    display:grid;
+}
+
+.slot-visuals {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+}
+
+/* UNIFORM BOX SCENE */
+.box-scene {
+    width:90px;
+    height:100px;
+    perspective:350px;
+    position:relative;
+    opacity:0;
+    transform:scale(.8);
+    transition: transform 0.4s ease;
+}
+
+.slot.show .box-scene {
+    opacity:1;
+    transform:scale(1.2);
+}
+
+.box-3d {
+    position:absolute;
+    width:60px;
+    height:60px;
+    left:15px;
+    top:25px;
+    transform-style:preserve-3d;
+    transform:rotateX(-20deg) rotateY(35deg);
+}
+
+.box-face {
+    position:absolute;
+    width:60px;
+    height:60px;
+    border:2px solid var(--accent);
+    border-radius:4px;
+    background:transparent;
+    opacity:0;
+    transform-origin: bottom center;
+}
+
+.box-floor { background:rgba(255,176,0,.1); transform-origin: center; }
+
+@keyframes floorPop {
+    0% { transform:rotateX(-90deg) translateZ(30px) scale(.3); opacity:0; }
+    70% { transform:rotateX(-90deg) translateZ(30px) scale(1.12); opacity:1; }
+    100% { transform:rotateX(-90deg) translateZ(30px) scale(1); opacity:1; }
+}
+
+@keyframes wallRiseBack {
+    0% { transform:translateZ(-30px) scaleY(0); opacity:0; }
+    100% { transform:translateZ(-30px) scaleY(1); opacity:1; }
+}
+
+@keyframes wallRiseLeft {
+    0% { transform:translateX(-30px) rotateY(-90deg) scaleY(0); opacity:0; }
+    100% { transform:translateX(-30px) rotateY(-90deg) scaleY(1); opacity:1; }
+}
+
+@keyframes wallRiseRight {
+    0% { transform: translateX(30px) rotateY(90deg) scaleY(0); opacity:0; }
+    100% { transform: translateX(30px) rotateY(90deg) scaleY(1); opacity:1; } 
+}
+
+.slot.show .box-floor { animation:floorPop .3s ease-out both; }
+.slot.show .box-back { animation:wallRiseBack .32s ease .15s both; }
+.slot.show .box-left { animation:wallRiseLeft .32s ease .26s both; }
+.slot.show .box-right { animation:wallRiseRight .32s ease .37s both; }
+
+/* VALUE INSIDE MEMORY BOX */
+.box-value {
+    position:absolute;
+    left:50%;
+    top:40px;
+    transform:translate(-50%,-50%) scale(.3);
+    min-width:36px;
+    padding:4px 7px;
+    border-radius:7px;
+    background:var(--panel);
+    border:1.5px solid var(--val);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:12px;
+    font-weight:700;
+    text-align:center;
+    white-space:nowrap;
+    opacity:0;
+    z-index:8;
+    transition: opacity .25s ease, transform .35s cubic-bezier(.2,.8,.25,1);
+}
+
+.box-value.show {
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+}
+
+/* SPARKLE ANIMATION FOR CASTING */
+@keyframes castSparkle {
+    0% { box-shadow: 0 0 0 0 rgba(255, 176, 0, 0.7); border-color: var(--accent); color: var(--accent); transform: translate(-50%, -60%) scale(1.3); }
+    50% { box-shadow: 0 0 20px 10px rgba(255, 176, 0, 0); border-color: var(--val); color: var(--val); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+.box-value.sparkle {
+    animation: castSparkle 0.8s ease-out;
+}
+
+/* SLOT INFO */
+.slot-info {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.slot-main {
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    font-family:"JetBrains Mono",monospace;
+}
+
+.slot-type { font-size:16px; color:var(--dt); font-weight:700; }
+
+.slot-assign {
+    display:inline-flex;
+    gap:10px;
+    opacity:0;
+    transform:translateX(-10px);
+    transition:.4s ease;
+}
+
+.slot.assigned .slot-assign { opacity:1; transform:translateX(0); }
+.slot-eq { color:var(--muted); }
+.slot-value { font-size:16px; color:var(--val); font-weight:700; }
+.slot-desc { font-size:13px; color:var(--muted); font-family: "IBM Plex Sans", sans-serif;}
+
+/* =====================================================
+   HUMAN CARRIER
+   ===================================================== */
+
+.value-carrier {
+    position:fixed;
+    left:0;
+    top:0;
+    width:150px;
+    height:72px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    z-index:99999;
+    pointer-events:none;
+    transform:translate3d(-300px,-300px,0);
+}
+
+.carrier-person {
+    width:35px;
+    height:50px;
+    flex:0 0 35px;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));
+}
+
+.carrier-person .skin { fill:#f2c9a0; }
+.carrier-person .shirt { fill:var(--dt); }
+.carrier-person .outline { stroke:#161616; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+.carrier-value {
+    min-width:36px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1.5px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:13px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 14px rgba(0,0,0,.12);
+}
+
+.value-carrier.active { opacity:1; }
+.value-carrier.walking .carrier-person { animation:walkBob .35s ease-in-out infinite alternate; }
+
+@keyframes walkBob {
+    from { transform:translateY(0) rotate(-2deg); }
+    to { transform:translateY(-3px) rotate(2deg); }
+}
+
+.value-carrier.printing .carrier-person { animation:humanThrow .45s ease-in-out infinite alternate; }
+
+@keyframes humanThrow {
+    0% { transform:translateY(0) rotate(-3deg); }
+    50% { transform:translateY(-5px) rotate(-8deg); }
+    100% { transform:translateY(2px) rotate(8deg); }
+}
+
+/* VALUE BEING THROWN */
+.throw-value {
+    position:fixed;
+    z-index:100000;
+    min-width:48px;
+    padding:5px 9px;
+    border-radius:999px;
+    border:2px solid var(--val);
+    background:var(--panel);
+    color:var(--val);
+    font-family:"JetBrains Mono",monospace;
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.18);
+    pointer-events:none;
+    opacity:0;
+}
+.throw-value.flying { opacity:1; }
+
+/* CONSOLE RECEIVING */
+.term-line {
+    color:var(--term-text);
+    opacity:0;
+    transform:translateX(-6px);
+    transition:.35s ease;
+}
+.term-line.show { opacity:1; transform:translateX(0); }
+.term-line::before { content:"$ println → "; color:var(--term-muted); }
+.term-line.receiving { animation:consoleReceive .6s cubic-bezier(.175,.885,.32,1.275); }
+
+@keyframes consoleReceive {
+    0% { transform:translateX(-20px) scale(.6); opacity:0; }
+    60% { transform:translateX(5px) scale(1.15); opacity:1; }
+    100% { transform:translateX(0) scale(1); opacity:1; }
+}
+
+/* CONSOLE */
+.console-panel {
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+
+.console-body {
+    background:var(--term-bg);
+    padding:20px 24px;
+    font-family:"JetBrains Mono",monospace;
+    font-size:16px;
+    line-height:2;
+    height:250px;
+    overflow-y:auto;
+    border-radius:0 0 9px 9px;
+    scroll-behavior: smooth;
+}
+
+/* BUTTONS */
+.transport-bar {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 16px;
+    border-top: 1px solid var(--rule);
+}
+
+.transport-controls {
+    display:flex;
+    gap:10px;
+}
+
+.transport-bar button {
+    font-family:"JetBrains Mono",monospace;
+    font-size:14px;
+    font-weight:600;
+    background:var(--paper);
+    color:var(--ink);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:10px 18px;
+    cursor:pointer;
+}
+
+.transport-bar button:hover { border-color: var(--accent); color: var(--accent-ink); }
+.transport-bar button.primary { background:var(--ink); color:var(--paper); }
+.transport-bar button.primary:hover { opacity: 0.85; border-color: var(--ink); color: var(--paper);}
+
+/* DETAILED NOTES SECTION */
+.detailed-notes {
+    margin-top: 20px;
+    padding: 30px 40px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    line-height: 1.6;
+}
+
+.detailed-notes h1, .detailed-notes h2, .detailed-notes h3 {
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--ink);
+}
+
+.detailed-notes h1 { font-size: 28px; border-bottom: 2px solid var(--rule); padding-bottom: 10px; margin-top: 0; }
+.detailed-notes h2 { font-size: 22px; color: var(--dt); margin-top: 40px; border-bottom: 1px solid var(--rule); padding-bottom: 5px; }
+.detailed-notes h3 { font-size: 18px; margin-bottom: 5px; }
+.detailed-notes p { margin: 10px 0; font-size: 16px; }
+
+.detailed-notes pre {
+    background: var(--term-bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    overflow-x: auto;
+    color: var(--term-text);
+}
+
+.detailed-notes code {
+    font-family: "JetBrains Mono", monospace;
+    background: var(--term-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+    font-size: 15px;
+    color: var(--term-text);
+}
+
+.detailed-notes table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+.detailed-notes th, .detailed-notes td {
+    border: 1px solid var(--rule);
+    padding: 12px;
+    text-align: left;
+}
+
+.detailed-notes th {
+    background: var(--term-bg);
+    font-weight: 600;
+    color: var(--term-text);
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.detailed-notes ul { margin-top: 5px; margin-bottom: 15px; padding-left: 20px; font-size: 16px; }
+
+/* RESPONSIVE */
+@media(max-width:1024px) {
+    .stage { grid-template-columns:1fr; }
+    .transport-bar { flex-direction: column; gap: 12px; align-items: center; }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     GLOBAL HUMAN CARRIER
+===================================================== -->
+
+<div id="valueCarrier" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span id="carrierValue" class="carrier-value"></span>
+</div>
+
+<div class="page">
+
+<!-- HEADER -->
+
+<section class="panel narrator-panel">
+    <div class="narrator-body">
+        <h1 class="main-title">Type Casting (Explicit)</h1>
+        <div class="mascot-frame" id="avatarContainer">
+            <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" style="object-fit:cover;" alt="Mascot">
+        </div>
+        <div class="speech-bubble">
+            <p id="mascotCaption"></p>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M9 18h6"></path><path d="M10 22h4"></path>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<div class="stage">
+
+<!-- =====================================================
+     LEFT - SOURCE & CONSOLE
+===================================================== -->
+<div class="col">
+<section class="panel" style="display:flex;flex-direction:column;">
+    <div class="panel-head">
+        <span class="panel-label">Source</span>
+        <span class="panel-tag">Main.java</span>
+    </div>
+
+    <div class="code-body">
+        <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span>&nbsp;Main {</div>
+        <div class="code-line" id="line2"><span class="ln">2</span>&nbsp;&nbsp;<span class="kw">public static void</span>&nbsp;main(String[] args) {</div>
+        <div class="code-line" id="line3"><span class="ln">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">double</span>&nbsp;<span class="vr">doubleValue</span>&nbsp;=&nbsp;<span class="vl">65.79</span>;</div>
+        <div class="code-line" id="line4"><span class="ln">4</span></div>
+        <div class="code-line" id="line5"><span class="ln">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">float</span>&nbsp;<span class="vr">floatValue</span>&nbsp;=&nbsp;(<span class="dt">float</span>)&nbsp;doubleValue;</div>
+        <div class="code-line" id="line6"><span class="ln">6</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">long</span>&nbsp;<span class="vr">longValue</span>&nbsp;=&nbsp;(<span class="dt">long</span>)&nbsp;floatValue;</div>
+        <div class="code-line" id="line7"><span class="ln">7</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">int</span>&nbsp;<span class="vr">intValue</span>&nbsp;=&nbsp;(<span class="dt">int</span>)&nbsp;longValue;</div>
+        <div class="code-line" id="line8"><span class="ln">8</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">short</span>&nbsp;<span class="vr">shortValue</span>&nbsp;=&nbsp;(<span class="dt">short</span>)&nbsp;intValue;</div>
+        <div class="code-line" id="line9"><span class="ln">9</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">byte</span>&nbsp;<span class="vr">byteValue</span>&nbsp;=&nbsp;(<span class="dt">byte</span>)&nbsp;shortValue;</div>
+        <div class="code-line" id="line10"><span class="ln">10</span></div>
+        <div class="code-line" id="line11"><span class="ln">11</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">int</span>&nbsp;<span class="vr">intFromByte</span>&nbsp;=&nbsp;byteValue;</div>
+        <div class="code-line" id="line12"><span class="ln">12</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">char</span>&nbsp;<span class="vr">charValue</span>&nbsp;=&nbsp;(<span class="dt">char</span>)&nbsp;intFromByte;</div>
+        <div class="code-line" id="line13"><span class="ln">13</span></div>
+        <div class="code-line" id="line14"><span class="ln">14</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">String</span>&nbsp;<span class="vr">stringValue</span>&nbsp;=&nbsp;<span class="vl">"100"</span>;</div>
+        <div class="code-line" id="line15"><span class="ln">15</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">int</span>&nbsp;<span class="vr">intFromString</span>&nbsp;=&nbsp;Integer.parseInt(stringValue);</div>
+        <div class="code-line" id="line16"><span class="ln">16</span></div>
+        <div class="code-line" id="line17"><span class="ln">17</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">double</span>&nbsp;<span class="vr">doubleFromString</span>&nbsp;=&nbsp;Double.parseDouble(<span class="vl">"25.5"</span>);</div>
+        <div class="code-line" id="line18"><span class="ln">18</span></div>
+        <div class="code-line" id="line19"><span class="ln">19</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">String</span>&nbsp;<span class="vr">stringFromInt</span>&nbsp;=&nbsp;String.valueOf(intValue);</div>
+        <div class="code-line" id="line20"><span class="ln">20</span></div>
+        <div class="code-line" id="line21"><span class="ln">21</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"double : "</span>&nbsp;+&nbsp;doubleValue);</div>
+        <div class="code-line" id="line22"><span class="ln">22</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"float  : "</span>&nbsp;+&nbsp;floatValue);</div>
+        <div class="code-line" id="line23"><span class="ln">23</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"long   : "</span>&nbsp;+&nbsp;longValue);</div>
+        <div class="code-line" id="line24"><span class="ln">24</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"int    : "</span>&nbsp;+&nbsp;intValue);</div>
+        <div class="code-line" id="line25"><span class="ln">25</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"short  : "</span>&nbsp;+&nbsp;shortValue);</div>
+        <div class="code-line" id="line26"><span class="ln">26</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"byte   : "</span>&nbsp;+&nbsp;byteValue);</div>
+        <div class="code-line" id="line27"><span class="ln">27</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"char   : "</span>&nbsp;+&nbsp;charValue);</div>
+        <div class="code-line" id="line28"><span class="ln">28</span></div>
+        <div class="code-line" id="line29"><span class="ln">29</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"String to int    : "</span>&nbsp;+&nbsp;intFromString);</div>
+        <div class="code-line" id="line30"><span class="ln">30</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"String to double : "</span>&nbsp;+&nbsp;doubleFromString);</div>
+        <div class="code-line" id="line31"><span class="ln">31</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="vl">"int to String    : "</span>&nbsp;+&nbsp;stringFromInt);</div>
+        <div class="code-line" id="line32"><span class="ln">32</span>&nbsp;&nbsp;}</div>
+        <div class="code-line" id="line33"><span class="ln">33</span>}</div>
+    </div>
+</section>
+
+<!-- CONSOLE -->
+<section class="panel console-panel">
+    <div class="panel-head">
+        <span class="panel-label">Console</span>
+        <span class="panel-tag">stdout</span>
+    </div>
+    <div class="console-body">
+        <div class="term-line" id="out1">double : 65.79</div>
+        <div class="term-line" id="out2">float  : 65.79</div>
+        <div class="term-line" id="out3">long   : 65</div>
+        <div class="term-line" id="out4">int    : 65</div>
+        <div class="term-line" id="out5">short  : 65</div>
+        <div class="term-line" id="out6">byte   : 65</div>
+        <div class="term-line" id="out7">char   : A</div>
+        <div class="term-line" id="out8">String to int    : 100</div>
+        <div class="term-line" id="out9">String to double : 25.5</div>
+        <div class="term-line" id="out10">int to String    : 65</div>
+    </div>
+</section>
+</div>
+
+<!-- =====================================================
+     RIGHT - STACK FRAME
+===================================================== -->
+<div class="col">
+<section class="panel stack-panel">
+    <div class="panel-head">
+        <span class="panel-label">Stack Frame</span>
+        <span class="panel-tag">main()</span>
+    </div>
+
+    <div class="stack-body">
+        <div class="stack-empty" id="stackEmpty">— no locals allocated yet —</div>
+
+        <!-- DOUBLE -->
+        <div class="slot" id="doubleSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65.79</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">DOUBLE</span>
+                    <span class="slot-name">doubleValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65.79</span></span>
+                </div>
+                <div class="slot-desc">64-bit precision floating point.</div>
+            </div>
+        </div>
+
+        <!-- FLOAT -->
+        <div class="slot" id="floatSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65.79f</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">FLOAT</span>
+                    <span class="slot-name">floatValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65.79f</span></span>
+                </div>
+                <div class="slot-desc">32-bit floating point.</div>
+            </div>
+        </div>
+
+        <!-- LONG -->
+        <div class="slot" id="longSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">LONG</span>
+                    <span class="slot-name">longValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65</span></span>
+                </div>
+                <div class="slot-desc">64-bit integer. Decimal lost!</div>
+            </div>
+        </div>
+
+        <!-- INT -->
+        <div class="slot" id="intSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">INT</span>
+                    <span class="slot-name">intValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65</span></span>
+                </div>
+                <div class="slot-desc">32-bit integer.</div>
+            </div>
+        </div>
+
+        <!-- SHORT -->
+        <div class="slot" id="shortSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">SHORT</span>
+                    <span class="slot-name">shortValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65</span></span>
+                </div>
+                <div class="slot-desc">16-bit integer.</div>
+            </div>
+        </div>
+
+        <!-- BYTE -->
+        <div class="slot" id="byteSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">BYTE</span>
+                    <span class="slot-name">byteValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65</span></span>
+                </div>
+                <div class="slot-desc">8-bit memory box.</div>
+            </div>
+        </div>
+        
+        <!-- INT FROM BYTE (WIDENING) -->
+        <div class="slot" id="intFromByteSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">65</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">INT</span>
+                    <span class="slot-name">intFromByte</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">65</span></span>
+                </div>
+                <div class="slot-desc">Widening conversion back to int.</div>
+            </div>
+        </div>
+
+        <!-- CHAR -->
+        <div class="slot" id="charSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">'A'</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">CHAR</span>
+                    <span class="slot-name">charValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">'A'</span></span>
+                </div>
+                <div class="slot-desc">16-bit char. Int 65 maps to 'A'.</div>
+            </div>
+        </div>
+
+        <!-- STRING 100 -->
+        <div class="slot" id="stringSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">"100"</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">STRING</span>
+                    <span class="slot-name">stringValue</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">"100"</span></span>
+                </div>
+                <div class="slot-desc">String object, not a primitive.</div>
+            </div>
+        </div>
+        
+        <!-- INT FROM STRING -->
+        <div class="slot" id="intFromStringSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">100</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">INT</span>
+                    <span class="slot-name">intFromString</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">100</span></span>
+                </div>
+                <div class="slot-desc">Parsed using Integer.parseInt().</div>
+            </div>
+        </div>
+        
+        <!-- DOUBLE FROM STRING -->
+        <div class="slot" id="doubleFromStringSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">25.5</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">DOUBLE</span>
+                    <span class="slot-name">doubleFromString</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">25.5</span></span>
+                </div>
+                <div class="slot-desc">Parsed using Double.parseDouble().</div>
+            </div>
+        </div>
+        
+        <!-- STRING FROM INT -->
+        <div class="slot" id="stringFromIntSlot">
+            <div class="slot-visuals">
+                <div class="box-scene">
+                    <div class="box-3d">
+                        <div class="box-face box-back"></div>
+                        <div class="box-face box-left"></div>
+                        <div class="box-face box-right"></div>
+                        <div class="box-face box-floor"></div>
+                    </div>
+                    <div class="box-value">"65"</div>
+                </div>
+            </div>
+            <div class="slot-info">
+                <div class="slot-main">
+                    <span class="slot-type">STRING</span>
+                    <span class="slot-name">stringFromInt</span>
+                    <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">"65"</span></span>
+                </div>
+                <div class="slot-desc">Converted using String.valueOf().</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="transport-bar">
+        <div class="transport-controls">
+            <button onclick="previousStep()">◂ Prev</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">▶ Play</button>
+            <button onclick="nextStep()">Next ▸</button>
+            <button onclick="resetAnimation()">↻ Reset</button>
+            <button id="fsBtn" onclick="toggleFullScreen()">⤢ Expand</button>
+        </div>
+    </div>
+</section>
+</div>
+</div>
+
+<!-- =====================================================
+     DETAILED NOTES SECTION (BELOW STAGE)
+===================================================== -->
+<section class="panel detailed-notes">
+    <h1>Explicit Type Casting in Java — Detailed Notes</h1>
+
+    <h2>1. What is Explicit Type Casting?</h2>
+    <p>Explicit type casting is the process of manually converting a value from one data type to another data type by using the casting operator <code>(type)</code>.</p>
+    
+    <h3>Syntax</h3>
+<pre>
+targetType variable = (targetType) value;
+</pre>
+
+    <h3>Example</h3>
+<pre>
+double value = 65.79;
+int number = (int) value;
+
+System.out.println(number);
+</pre>
+    <p>Output:</p>
+<pre>
+65
+</pre>
+    <p>The decimal part <code>.79</code> is removed.</p>
+
+    <h2>2. Why is Explicit Casting Required?</h2>
+    <p>Java does not automatically convert every data type because some conversions can cause:</p>
+    <ul>
+        <li>Loss of decimal values</li>
+        <li>Loss of numerical range</li>
+        <li>Change in the actual value</li>
+        <li>Unexpected results</li>
+    </ul>
+    <p>For example:</p>
+<pre>
+double value = 65.79;
+int number = (int) value;
+</pre>
+    <p>Java requires: <code>(int)</code> because <code>double</code> can store decimal values while <code>int</code> cannot.</p>
+
+    <h2>3. Basic Explicit Casting Flow</h2>
+    <p>The common numeric casting chain is:</p>
+<pre>
+double
+   ↓
+float
+   ↓
+long
+   ↓
+int
+   ↓
+short
+   ↓
+byte
+</pre>
+    <p>The farther we move down, the greater the possibility of data loss.</p>
+    <h3>Example:</h3>
+<pre>
+double doubleValue = 65.79;
+
+float floatValue = (float) doubleValue;
+long longValue = (long) floatValue;
+int intValue = (int) longValue;
+short shortValue = (short) intValue;
+byte byteValue = (byte) shortValue;
+</pre>
+    <p>Result:</p>
+<pre>
+double → 65.79
+float  → 65.79
+long   → 65
+int    → 65
+short  → 65
+byte   → 65
+</pre>
+
+    <h2>4. All Primitive Numeric Combinations</h2>
+    <p>Java has these numeric primitive types: <code>byte</code>, <code>short</code>, <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>. There are also: <code>char</code>, <code>boolean</code>.</p>
+    <p><strong>Important:</strong> <code>boolean</code> cannot be converted to numeric types using casting. For example, this is invalid:</p>
+<pre>
+boolean value = true;
+int number = (int) value;
+</pre>
+    <p>Java does not support boolean-to-number casting.</p>
+
+    <h2>5. double → float</h2>
+<pre>
+double value = 65.79;
+float result = (float) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>65.79</code></p>
+    <p><strong>Possible issue:</strong> float has less precision than double.</p>
+<pre>
+double value = 123456789.123456;
+float result = (float) value;
+System.out.println(result);
+</pre>
+    <p>The result may not contain exactly the same precision. <strong>Important point:</strong> <code>double → float</code> can cause precision loss.</p>
+
+    <h2>6. double → long</h2>
+<pre>
+double value = 65.79;
+long result = (long) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>65</code>. The <code>.79</code> is discarded. It does not round the value: <code>65.79 → 65</code>, <code>65.99 → 65</code>.</p>
+
+    <h2>7. double → int</h2>
+<pre>
+double value = 99.99;
+int result = (int) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>99</code>. <strong>Important:</strong> Casting does not perform normal mathematical rounding. It becomes <code>99</code>, not <code>100</code>.</p>
+
+    <h2>8. double → short</h2>
+<pre>
+double value = 100.75;
+short result = (short) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>. Two things can happen: Decimal part is removed, and if the value is outside short range, overflow can occur.</p>
+
+    <h2>9. double → byte</h2>
+<pre>
+double value = 100.75;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>. But <code>byte</code> has a very small range (-128 to 127). So if you do:</p>
+<pre>
+double value = 130.75;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>-126</code>. This is an example of overflow/wrapping.</p>
+
+    <h2>10. long → int</h2>
+<pre>
+long value = 100000;
+int result = (int) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100000</code>. But if the value is outside the int range:</p>
+<pre>
+long value = 3000000000L;
+int result = (int) value;
+System.out.println(result);
+</pre>
+    <p>The result will not be 3000000000. The value overflows because int cannot represent that number.</p>
+
+    <h2>11. int → short</h2>
+<pre>
+int value = 100;
+short result = (short) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>. But if you assign <code>40000</code>, the result is different because short can only store -32768 to 32767.</p>
+
+    <h2>12. int → byte</h2>
+<pre>
+int value = 100;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>. But if <code>value = 130</code>, output becomes <code>-126</code>. This is one of the most interesting casting examples.</p>
+
+    <h2>13. short → byte</h2>
+<pre>
+short value = 120;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>120</code>. But if <code>value = 128</code>, output becomes <code>-128</code>.</p>
+
+    <h2>14. long → byte</h2>
+<pre>
+long value = 100;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>. Again, if the value exceeds the byte range, overflow occurs.</p>
+
+    <h2>15. float → int</h2>
+<pre>
+float value = 65.99f;
+int result = (int) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>65</code>. The decimal portion disappears.</p>
+
+    <h2>16. float → long</h2>
+<pre>
+float value = 65.99f;
+long result = (long) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>65</code>.</p>
+
+    <h2>17. float → short</h2>
+<pre>
+float value = 100.5f;
+short result = (short) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>.</p>
+
+    <h2>18. float → byte</h2>
+<pre>
+float value = 100.5f;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>100</code>.</p>
+
+    <h2>19. char → int</h2>
+    <p>This conversion is very interesting.</p>
+<pre>
+char ch = 'A';
+int number = (int) ch;
+System.out.println(number);
+</pre>
+    <p>Output: <code>65</code>. Characters have numeric Unicode values. Some examples: <code>'A' → 65</code>, <code>'B' → 66</code>, <code>'a' → 97</code>, <code>'0' → 48</code>.</p>
+
+    <h2>20. int → char</h2>
+    <p>The reverse is also possible.</p>
+<pre>
+int number = 65;
+char ch = (char) number;
+System.out.println(ch);
+</pre>
+    <p>Output: <code>A</code>.</p>
+
+    <h2>21. byte → char</h2>
+    <p>This is an interesting combination.</p>
+<pre>
+byte byteValue = 65;
+int intValue = byteValue;
+char charValue = (char) intValue;
+System.out.println(charValue);
+</pre>
+    <p>Output: <code>A</code>. You can also directly cast: <code>char charValue = (char) byteValue;</code> The compiler performs the required conversion.</p>
+
+    <h2>22. char → byte</h2>
+    <p>This requires explicit casting.</p>
+<pre>
+char ch = 'A';
+byte value = (byte) ch;
+System.out.println(value);
+</pre>
+    <p>Output: <code>65</code>. But remember that char can contain values much larger than the range of byte. Therefore, data loss can occur.</p>
+
+    <h2>23. char → short</h2>
+<pre>
+char ch = 'A';
+short value = (short) ch;
+System.out.println(value);
+</pre>
+    <p>Output: <code>65</code>.</p>
+
+    <h2>24. char → long</h2>
+<pre>
+char ch = 'A';
+long value = (long) ch;
+System.out.println(value);
+</pre>
+    <p>Output: <code>65</code>.</p>
+
+    <h2>25. char → float</h2>
+<pre>
+char ch = 'A';
+float value = (float) ch;
+System.out.println(value);
+</pre>
+    <p>Output: <code>65.0</code>.</p>
+
+    <h2>26. char → double</h2>
+<pre>
+char ch = 'A';
+double value = (double) ch;
+System.out.println(value);
+</pre>
+    <p>Output: <code>65.0</code>.</p>
+
+    <h2>27. The Most Important Difference: Casting vs Parsing</h2>
+    <p>These are not the same thing.</p>
+    <p><strong>Numeric casting:</strong></p>
+<pre>
+double value = 65.79;
+int number = (int) value;
+</pre>
+    <p>Here, both are numeric types.</p>
+    <p><strong>String parsing:</strong></p>
+<pre>
+String value = "100";
+int number = Integer.parseInt(value);
+</pre>
+    <p>Here, <code>"100"</code> is a String, not a number. Therefore, <code>(int) value</code> is not how you convert a numeric String to an int. Use: <code>Integer.parseInt(value)</code></p>
+
+    <h2>28. String → int</h2>
+<pre>
+String stringValue = "100";
+int intValue = Integer.parseInt(stringValue);
+System.out.println(intValue);
+</pre>
+    <p>Output: <code>100</code></p>
+
+    <h2>29. String → double</h2>
+<pre>
+String stringValue = "25.5";
+double value = Double.parseDouble(stringValue);
+System.out.println(value);
+</pre>
+    <p>Output: <code>25.5</code></p>
+
+    <h2>30. String → float</h2>
+<pre>
+String stringValue = "25.5";
+float value = Float.parseFloat(stringValue);
+System.out.println(value);
+</pre>
+
+    <h2>31. String → long</h2>
+<pre>
+String stringValue = "100000";
+long value = Long.parseLong(stringValue);
+System.out.println(value);
+</pre>
+
+    <h2>32. String → short</h2>
+<pre>
+String stringValue = "100";
+short value = Short.parseShort(stringValue);
+System.out.println(value);
+</pre>
+
+    <h2>33. String → byte</h2>
+<pre>
+String stringValue = "100";
+byte value = Byte.parseByte(stringValue);
+System.out.println(value);
+</pre>
+
+    <h2>34. String → char</h2>
+    <p>There is no <code>Character.parseChar()</code>. Instead, you can get a character using:</p>
+<pre>
+String value = "Hello";
+char ch = value.charAt(0);
+System.out.println(ch);
+</pre>
+    <p>Output: <code>H</code></p>
+
+    <h2>35. Number → String</h2>
+    <p>For converting a number to String:</p>
+<pre>
+int intValue = 100;
+String stringValue = String.valueOf(intValue);
+System.out.println(stringValue);
+</pre>
+    <p>Output: <code>100</code>. You can also use: <code>String stringValue = Integer.toString(intValue);</code></p>
+
+    <h2>36. Very Important: Casting Does NOT Change the Original Variable</h2>
+    <p>Consider:</p>
+<pre>
+double value = 65.79;
+int result = (int) value;
+
+System.out.println(value);
+System.out.println(result);
+</pre>
+    <p>Output:</p>
+<pre>
+65.79
+65
+</pre>
+    <p>The original double is still <code>65.79</code>. Casting creates a value of the target type; it does not permanently change the original variable.</p>
+
+    <h2>37. Casting Does NOT Round</h2>
+    <p>This is one of the best things to demonstrate to students.</p>
+<pre>
+double a = 10.9;
+double b = 10.1;
+double c = -10.9;
+
+System.out.println((int) a);
+System.out.println((int) b);
+System.out.println((int) c);
+</pre>
+    <p>Output:</p>
+<pre>
+10
+10
+-10
+</pre>
+    <p>Casting simply removes the fractional part for floating-point-to-integer conversion.</p>
+
+    <h2>38. Interesting Example: 300 → byte</h2>
+    <p>Try this:</p>
+<pre>
+int value = 300;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>44</code>. Why? A byte contains only 8 bits. Its range is -128 to 127. Java keeps the low 8 bits of the integer representation. Conceptually: <code>300 → low 8 bits → 44</code>. This is called narrowing conversion with overflow.</p>
+
+    <h2>39. Interesting Example: 128 → byte</h2>
+<pre>
+int value = 128;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>-128</code></p>
+    <p>And <code>int value = 129;</code> will output <code>-127</code>. This demonstrates the wrapping behavior of narrowing conversion.</p>
+
+    <h2>40. Interesting Example: -1 → byte</h2>
+<pre>
+int value = -1;
+byte result = (byte) value;
+System.out.println(result);
+</pre>
+    <p>Output: <code>-1</code>. Internally, -1 has all bits set to 1 in two's complement representation (<code>11111111</code>). That same 8-bit pattern represents -1 as a byte.</p>
+
+    <h2>41. Multiple Casting in One Expression</h2>
+    <p>You can perform multiple conversions:</p>
+<pre>
+double value = 65.79;
+byte result = (byte) (int) (long) value;
+System.out.println(result);
+</pre>
+    <p>Final result: <code>65</code></p>
+
+    <h2>42. Casting in Arithmetic Expressions</h2>
+    <p>This is very important in Java.</p>
+<pre>
+int a = 5;
+int b = 2;
+double result = (double) a / b;
+System.out.println(result);
+</pre>
+    <p>Output: <code>2.5</code></p>
+    <p>Without casting (<code>int result = a / b;</code>), the result is <code>2</code>. Because <code>a / b</code> is integer division. Casting one operand changes the operation to floating-point division.</p>
+
+    <h2>43. Integer Division Trick</h2>
+<pre>
+int a = 10;
+int b = 4;
+System.out.println(a / b);
+System.out.println((double) a / b);
+</pre>
+    <p>Output:</p>
+<pre>
+2
+2.5
+</pre>
+
+    <h2>44. Casting During Assignment</h2>
+    <p>This will work: <code>int number = (int) 10.5;</code></p>
+    <p>But the reverse requires no explicit cast: <code>double value = 10;</code> because Java can safely widen int to double.</p>
+
+    <h2>45. Widening vs Explicit Narrowing</h2>
+    <p><strong>Widening:</strong> <code>int value = 100; double result = value;</code> (Usually safe)</p>
+    <p><strong>Narrowing:</strong> <code>double value = 100.5; int result = (int) value;</code> (Potential data loss)</p>
+
+    <h2>46. Quick Conversion Map</h2>
+<pre>
+For the reverse direction, explicit casting is generally required:
+double → float, long, int, short, byte
+float → long, int, short, byte
+long → int, short, byte
+int → short, byte
+short → byte
+</pre>
+
+    <h2>47. Important Rule for Students</h2>
+    <p>Remember this simple rule: <strong>Big type → Small type = Explicit casting</strong></p>
+    <p>Use: <code>(targetType)</code>. Example: <code>int value = (int) 65.79;</code></p>
+
+    <h2>48. Casting vs Conversion</h2>
+    <ul>
+        <li><strong>Casting:</strong> Usually refers to changing between compatible types using <code>(int) value</code>.</li>
+        <li><strong>Parsing:</strong> Converting text into a primitive: <code>Integer.parseInt("100")</code>.</li>
+        <li><strong>Conversion:</strong> A broader term that can include String → int, double → int, etc.</li>
+    </ul>
+
+    <h2>49. Final Concept Map</h2>
+<pre>
+                 TYPE CASTING
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+      Widening                Narrowing
+      Automatic                Explicit
+          │                       │
+    Small → Large             Large → Small
+          │                       │
+     int → double           double → int
+     int → long             long → int
+     char → int              int → byte
+                              │
+                              ↓
+                         Data Loss Possible
+</pre>
+
+    <h2>The 5 things students should remember</h2>
+    <ol>
+        <li>Explicit casting uses <code>(type)</code>.</li>
+        <li>Narrowing conversion generally requires explicit casting.</li>
+        <li>Decimal values can be lost.</li>
+        <li>Values can overflow when the target type has a smaller range.</li>
+        <li>String conversion uses parsing methods, not primitive casting.</li>
+    </ol>
+</section>
+
+</div>
+
+<script>
+
+/* =====================================================
+   THEME
+===================================================== */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
+
+/* =====================================================
+   FULLSCREEN TOGGLE 
+===================================================== */
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {});
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+}
+document.addEventListener('fullscreenchange', () => {
+    const fsBtn = document.getElementById("fsBtn");
+    fsBtn.innerHTML = document.fullscreenElement ? "⤡ Shrink" : "⤢ Expand";
+});
+
+
+/* =====================================================
+   SCRIPT STEPS
+===================================================== */
+const script = [
+    {line:0, slot:null, animate:""},
+
+    {line:3, slot:"doubleSlot", animate:"sourceToStack", valToCarry:"65.79"},
+    {line:5, slot:"floatSlot", animate:"stackToStack", fromSlot:"doubleSlot", valToCarry:"65.79", finalValue:"65.79f"},
+    {line:6, slot:"longSlot", animate:"stackToStack", fromSlot:"floatSlot", valToCarry:"65.79f", finalValue:"65", sparkle:true},
+    {line:7, slot:"intSlot", animate:"stackToStack", fromSlot:"longSlot", valToCarry:"65", finalValue:"65"},
+    {line:8, slot:"shortSlot", animate:"stackToStack", fromSlot:"intSlot", valToCarry:"65", finalValue:"65"},
+    {line:9, slot:"byteSlot", animate:"stackToStack", fromSlot:"shortSlot", valToCarry:"65", finalValue:"65"},
+    
+    {line:11, slot:"intFromByteSlot", animate:"stackToStack", fromSlot:"byteSlot", valToCarry:"65", finalValue:"65"},
+    {line:12, slot:"charSlot", animate:"stackToStack", fromSlot:"intFromByteSlot", valToCarry:"65", finalValue:"'A'"},
+
+    {line:14, slot:"stringSlot", animate:"sourceToStack", valToCarry:"\"100\""},
+    {line:15, slot:"intFromStringSlot", animate:"stackToStack", fromSlot:"stringSlot", valToCarry:"\"100\"", finalValue:"100", sparkle:true},
+
+    {line:17, slot:"doubleFromStringSlot", animate:"sourceToStack", valToCarry:"\"25.5\"", finalValue:"25.5", sparkle:true},
+
+    {line:19, slot:"stringFromIntSlot", animate:"stackToStack", fromSlot:"intSlot", valToCarry:"65", finalValue:"\"65\"", sparkle:true},
+
+    {line:21, slot:"doubleSlot", animate:"print", out:1},
+    {line:22, slot:"floatSlot", animate:"print", out:2},
+    {line:23, slot:"longSlot", animate:"print", out:3},
+    {line:24, slot:"intSlot", animate:"print", out:4},
+    {line:25, slot:"shortSlot", animate:"print", out:5},
+    {line:26, slot:"byteSlot", animate:"print", out:6},
+    {line:27, slot:"charSlot", animate:"print", out:7},
+    {line:29, slot:"intFromStringSlot", animate:"print", out:8},
+    {line:30, slot:"doubleFromStringSlot", animate:"print", out:9},
+    {line:31, slot:"stringFromIntSlot", animate:"print", out:10},
+    {line:32, slot:null, animate:""}
+];
+
+let currentStep = 0;
+let playing = false;
+let timer = null;
+let animationDelay = null;
+const totalSteps = script.length;
+
+/* =====================================================
+   STOP CARRIER
+===================================================== */
+function hideValueCarrier() {
+    const carrier = document.getElementById("valueCarrier");
+    carrier.getAnimations().forEach(animation => animation.cancel());
+    carrier.classList.remove("active", "walking", "printing");
+    carrier.style.opacity = "0";
+}
+
+/* =====================================================
+   SOURCE -> STACK
+===================================================== */
+function animateSourceToStack(stepData) {
+    if (stepData.animate !== "sourceToStack") return false;
+
+    const line = document.getElementById("line" + stepData.line);
+    const slot = document.getElementById(stepData.slot);
+    const sourceValue = line.querySelector(".vl");
+    const box = slot.querySelector(".box-3d");
+    const carrier = document.getElementById("valueCarrier");
+    const carrierValue = document.getElementById("carrierValue");
+
+    const sourceRect = sourceValue.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
+
+    const startX = sourceRect.left + sourceRect.width / 2 - 50;
+    const startY = sourceRect.top + sourceRect.height / 2 - 30;
+
+    const targetX = boxRect.left + boxRect.width / 2 - 50;
+    const targetY = boxRect.top + boxRect.height / 2 - 30;
+
+    const value = stepData.valToCarry;
+    carrierValue.textContent = value;
+    carrier.className = "value-carrier active walking";
+    carrier.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    carrier.style.opacity = "1";
+
+    const middleX = startX + (targetX - startX) * .5;
+    const middleY = Math.min(startY,targetY) - 70;
+
+    carrier.animate([
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 },
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+        { transform: `translate3d(${middleX}px,${middleY}px,0)`, opacity:1 },
+        { transform: `translate3d(${targetX}px,${targetY}px,0)`, opacity:1 }
+    ], { duration:2500, easing:"cubic-bezier(.22,.72,.28,1)", fill:"forwards" });
+
+    setTimeout(() => {
+        const boxValue = slot.querySelector(".box-value");
+        boxValue.textContent = stepData.finalValue || value;
+        if(stepData.sparkle) boxValue.classList.add("sparkle");
+        boxValue.classList.add("show");
+        slot.classList.add("assigned");
+    }, 2000);
+
+    setTimeout(() => {
+        carrier.animate([ {opacity:1}, {opacity:0} ], { duration:400, fill:"forwards" });
+    }, 2300);
+
+    return true;
+}
+
+/* =====================================================
+   STACK -> STACK (EXPLICIT CAST)
+===================================================== */
+function animateStackToStack(stepData) {
+    if (stepData.animate !== 'stackToStack') return false;
+
+    const fromSlot = document.getElementById(stepData.fromSlot);
+    const toSlot = document.getElementById(stepData.slot);
+    const carrier = document.getElementById("valueCarrier");
+    const carrierValue = document.getElementById("carrierValue");
+
+    const fromBox = fromSlot.querySelector(".box-3d");
+    const toBox = toSlot.querySelector(".box-3d");
+
+    const fromRect = fromBox.getBoundingClientRect();
+    const toRect = toBox.getBoundingClientRect();
+
+    const startX = fromRect.left + fromRect.width / 2 - 50;
+    const startY = fromRect.top + fromRect.height / 2 - 30;
+
+    const targetX = toRect.left + toRect.width / 2 - 50;
+    const targetY = toRect.top + toRect.height / 2 - 30;
+
+    const valToCarry = stepData.valToCarry;
+    carrierValue.textContent = valToCarry;
+
+    carrier.className = "value-carrier active walking";
+    carrier.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    carrier.style.opacity = "1";
+
+    const middleX = startX - 80; // Walk out to the left slightly
+    const middleY = Math.min(startY, targetY) - 30;
+
+    carrier.animate([
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 0 },
+        { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1 },
+        { transform: `translate3d(${middleX}px,${middleY}px,0)`, opacity: 1 },
+        { transform: `translate3d(${targetX}px,${targetY}px,0)`, opacity: 1 }
+    ], { duration: 2500, easing: "ease-in-out", fill: "forwards" });
+
+    setTimeout(() => {
+        const boxValue = toSlot.querySelector(".box-value");
+        boxValue.textContent = stepData.finalValue;
+        if (stepData.sparkle) boxValue.classList.add("sparkle");
+        boxValue.classList.add("show");
+        toSlot.classList.add("assigned");
+    }, 2200);
+
+    setTimeout(() => {
+        carrier.animate([ {opacity:1}, {opacity:0} ], { duration: 400, fill: "forwards" });
+    }, 2500);
+
+    return true;
+}
+
+
+/* =====================================================
+   STACK -> CONSOLE PRINTLN
+===================================================== */
+function animatePrint(stepData) {
+    if (stepData.animate !== "print") return false;
+
+    const slot = document.getElementById(stepData.slot);
+    const box = slot.querySelector(".box-3d");
+    const boxValue = slot.querySelector(".box-value");
+    const consoleLine = document.getElementById("out" + stepData.out);
+    const carrier = document.getElementById("valueCarrier");
+    const carrierValue = document.getElementById("carrierValue");
+
+    const boxRect = box.getBoundingClientRect();
+    const consoleRect = consoleLine.getBoundingClientRect();
+
+    const startX = boxRect.left + boxRect.width / 2 - 50;
+    const startY = boxRect.top + boxRect.height / 2 - 30;
+
+    const endX = consoleRect.left - 60;
+    const endY = consoleRect.top + consoleRect.height / 2 - 30;
+
+    const value = boxValue.textContent.trim();
+
+    carrierValue.textContent = value;
+    carrier.className = "value-carrier active printing";
+    carrier.style.transform = `translate3d(${startX}px,${startY}px,0)`;
+    carrier.style.opacity = "1";
+
+    setTimeout(() => {
+        const thrown = document.createElement("div");
+        thrown.className = "throw-value flying";
+        thrown.textContent = value;
+        document.body.appendChild(thrown);
+
+        const handX = startX + 70;
+        const handY = startY + 20;
+        thrown.style.left = `${handX}px`;
+        thrown.style.top = `${handY}px`;
+
+        const deltaX = endX - handX;
+        const deltaY = endY - handY;
+
+        thrown.animate([
+            { transform: "translate3d(0,0,0) scale(1)", opacity:1 },
+            { transform: `translate3d(${deltaX*.25}px,-100px,0) scale(1.2) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.55}px,-130px,0) scale(1.1) rotate(10deg)`, opacity:1 },
+            { transform: `translate3d(${deltaX*.82}px,-60px,0) scale(.95)`, opacity:1 },
+            { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(.7)`, opacity:0 }
+        ], { duration:2000, easing:"cubic-bezier(.22,.72,.28,1)", fill:"forwards" });
+
+        carrier.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:1 },
+            { transform: `translate3d(${startX-10}px,${startY-10}px,0) rotate(-10deg)`, opacity:1 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity:0 }
+        ], { duration:1000, easing:"ease-out", fill:"forwards" });
+
+        setTimeout(() => {
+            consoleLine.classList.add("show");
+            consoleLine.classList.remove("receiving");
+            void consoleLine.offsetWidth;
+            consoleLine.classList.add("receiving");
+            consoleLine.scrollIntoView({ behavior:"smooth", block:"nearest" });
+        },1800);
+
+        setTimeout(() => {
+            thrown.remove();
+            carrier.classList.remove("active", "printing");
+            carrier.style.opacity = "0";
+        },2200);
+
+    },500);
+
+    return true;
+}
+
+/* =====================================================
+   RENDER
+===================================================== */
+function renderStep() {
+    const step = script[currentStep];
+
+    // 1. Reset Code Panel
+    document.querySelectorAll(".code-line").forEach(line => {
+        line.classList.remove("active");
+    });
+    if (step.line > 0) {
+        const line = document.getElementById("line" + step.line);
+        if (line) {
+            line.classList.add("active");
+            line.scrollIntoView({ block:"nearest" });
+        }
+    }
+
+    document.getElementById("stackEmpty").style.display = currentStep >= 1 ? "none" : "block";
+
+    // 2. Setup Slots
+    document.querySelectorAll(".slot").forEach(slot => {
+        slot.classList.remove("show", "assigned");
+        const val = slot.querySelector(".box-value");
+        if(val) { val.classList.remove("show", "sparkle"); val.style.opacity = ""; }
+    });
+
+    for(let i=1; i<=currentStep; i++) {
+        const s = script[i];
+        if(s.slot) {
+            const el = document.getElementById(s.slot);
+            if(el) el.classList.add("show");
+            
+            // If it's a past step, show it instantly assigned
+            if(i < currentStep && el) {
+                el.classList.add("assigned");
+                const val = el.querySelector(".box-value");
+                if(s.finalValue !== undefined) val.textContent = s.finalValue;
+                else if(s.valToCarry) val.textContent = s.valToCarry;
+                val.classList.add("show");
+            }
+        }
+    }
+
+    // 3. Scroll to Current Slot
+    if (step.slot) {
+        const slotEl = document.getElementById(step.slot);
+        if(slotEl) slotEl.scrollIntoView({ block: "center" });
+    }
+
+    /* CONSOLE VISIBILITY */
+    for(let i=1; i<=10; i++) {
+        const outL = document.getElementById("out"+i);
+        if(outL) outL.classList.remove("show", "receiving");
+    }
+
+    for (let i = 1; i < currentStep; i++) {
+        if (script[i].out) {
+            const outL = document.getElementById("out" + script[i].out);
+            if(outL) outL.classList.add("show");
+        }
+    }
+
+    setMascot(currentStep);
+
+    // 4. Delay Animation so scrolling finishes and bounding box math is accurate!
+    hideValueCarrier();
+    if(animationDelay) clearTimeout(animationDelay);
+    animationDelay = setTimeout(() => {
+        if(step.animate === "sourceToStack") animateSourceToStack(step);
+        if(step.animate === "stackToStack") animateStackToStack(step);
+        if(step.animate === "print") animatePrint(step);
+    }, 400);
+}
+
+/* =====================================================
+   MASCOT
+===================================================== */
+const mascotCaptions = [
+    "Explicit Casting (Narrowing) requires parentheses. We are squeezing a larger box into a smaller one!",
+    "A double is declared and assigned 65.79.",
+    "Casting to float. The explicit cast (float) is required. Value stays 65.79f.",
+    "Casting to long. Explicit (long) cast removes the decimal point! 65.79 becomes 65.",
+    "Casting long to int. Fits easily, but explicit cast is still required down the hierarchy.",
+    "Casting int to short. Explicit cast required.",
+    "Casting short to byte. Explicit cast required.",
+    "Widening back to int implicitly! No cast needed.",
+    "Casting int 65 to char. Requires explicit cast. The number 65 maps to 'A'.",
+    "Declaring a String with text '100'.",
+    "Parsing String to int! Parsing is NOT casting.",
+    "Parsing String '25.5' directly to a double primitive.",
+    "Converting int 65 back to a String text object.",
+    "Printing the double.",
+    "Printing the float.",
+    "Printing the long (Notice it's just 65!).",
+    "Printing the int.",
+    "Printing the short.",
+    "Printing the byte.",
+    "Printing the char.",
+    "Printing the parsed int from String.",
+    "Printing the parsed double from String.",
+    "Printing the converted String from int.",
+    "Execution complete! Remember: Narrowing can cause data loss, and String conversions require Parsing!"
+];
+
+let typingTimer = null;
+
+function setMascot(step) {
+    const caption = document.getElementById("mascotCaption");
+    if (typingTimer) { clearInterval(typingTimer); }
+    const text = mascotCaptions[step] || "...";
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+
+    let index = 0;
+    typingTimer = setInterval(() => {
+        if (index < text.length) {
+            caption.textContent += text.charAt(index);
+            index++;
+        } else {
+            clearInterval(typingTimer);
+            caption.classList.remove("typing-cursor");
+        }
+    },35);
+}
+
+/* =====================================================
+   PLAY
+===================================================== */
+function play() {
+    playing = true;
+    document.getElementById("playBtn").textContent = "⏸ Pause";
+    timer = setInterval(() => {
+        if (currentStep >= totalSteps - 1) { pause(); return; }
+        currentStep++;
+        renderStep();
+    }, 4500);
+}
+
+function pause() {
+    playing = false;
+    document.getElementById("playBtn").textContent = "▶ Play";
+    if (timer) { clearInterval(timer); timer = null; }
+}
+
+function togglePlay() {
+    if (playing) pause();
+    else {
+        if (currentStep >= totalSteps - 1) currentStep = 0;
+        play();
+    }
+}
+
+function nextStep() {
+    pause();
+    if (currentStep < totalSteps - 1) { currentStep++; renderStep(); }
+}
+
+function previousStep() {
+    pause();
+    if (currentStep > 0) { currentStep--; renderStep(); }
+}
+
+function resetAnimation() {
+    pause();
+    currentStep = 0;
+    document.querySelectorAll(".box-value").forEach(value => {
+        value.classList.remove("show", "sparkle");
+        value.style.opacity = "";
+    });
+    document.querySelectorAll(".term-line").forEach(line => {
+        line.classList.remove("show", "receiving");
+    });
+    renderStep();
+}
+
+/* =====================================================
+   START
+===================================================== */
+renderStep();
+
+</script>
+</body>
+</html>

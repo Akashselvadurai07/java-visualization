@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Recursion — Fibonacci Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --paper: #eef1ec; --panel: #ffffff; --ink: #14181f; --muted: #6b7280;
+    --rule: #d8ddd3; --rule-strong: #b9c0b3; --accent: #ffb000;
+    --accent-ink: #7a4b00; --accent-wash: #fff8e1; 
+    --kw: #5b3fd9; --dt: #2f5fd0; --var: #b8390e; --val: #1c8a5f;
+    --code-bg: rgba(47, 95, 208, 0.05);
+    --term-bg: #f8fafc; --term-text: #0f172a; --term-muted: #94a3b8;
+    --radius: 10px; --stick-stroke: #1a1a1a;
+}
+
+body.dark {
+    --paper: #12151a; --panel: #191d24; --ink: #eef1ec; --muted: #9099a6;
+    --rule: #2a2f38; --rule-strong: #3a4049; --accent: #ffc23d;
+    --accent-ink: #ffe4ac; --accent-wash: #2e2410; 
+    --kw: #b7a4ff; --dt: #86a9ff; --var: #ff9466; --val: #6fe3ac;
+    --code-bg: rgba(134, 169, 255, 0.08);
+    --term-bg: #05070a; --term-text: #7de8b2; --term-muted: #3a4841;
+    --stick-stroke: #ffffff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", sans-serif; transition: background 0.25s ease, color 0.25s ease; -webkit-font-smoothing: antialiased; }
+
+.page { max-width: 1650px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; }
+.stage { display: grid; grid-template-columns: 1fr 1.3fr 0.7fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--rule); border-top-left-radius: 9px; border-top-right-radius: 9px; }
+.panel-label { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.panel-tag { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+
+/* ---------- NARRATOR ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 14px 20px; flex-wrap: wrap; }
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 28px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+.mascot-frame { width: 62px; height: 62px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; object-fit: cover; }
+@keyframes mascotBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 18px; }
+.speech-bubble::before { content: ""; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: var(--paper); border-left: 1px solid var(--rule); border-bottom: 1px solid var(--rule); transform: rotate(45deg); }
+.speech-bubble p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); min-height: 22px; }
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ---------- TOP CONTROLS ---------- */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.theme-toggle { display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--rule-strong); border-radius: 50%; width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; color: var(--muted); transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.8; padding: 24px 0px; height: 480px; overflow-y: auto; }
+.code-line { display: flex; padding: 2px 0px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease; position: relative; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left: 4px solid var(--accent); }
+.ln { width: 36px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); } .dt { color: var(--dt); } .vr { color: var(--var); } .val { color: var(--val); } .op { color: var(--math-op); } .str { color: var(--val); }
+
+/* ---------- GLOBAL HUMAN CARRIER ---------- */
+.value-carrier { position:fixed; left:0; top:0; width:150px; height:72px; display:flex; align-items:center; gap:8px; opacity:0; z-index:99999; pointer-events:none; transform:translate3d(-300px,-300px,0); }
+.carrier-person { width:35px; height:50px; flex:0 0 35px; filter:drop-shadow(0 3px 2px rgba(0,0,0,.18)); }
+.carrier-person .skin { fill:#f2c9a0; } .carrier-person .shirt { fill:var(--dt); } .carrier-person .outline { stroke:var(--stick-stroke); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.carrier-value { min-width:36px; padding:4px 8px; border-radius:999px; border:1.5px solid var(--val); background:var(--panel); color:var(--val); font-family:"JetBrains Mono",monospace; font-size:14px; font-weight:700; text-align:center; box-shadow:0 5px 14px rgba(0,0,0,.12); }
+.value-carrier.active { opacity:1; }
+.value-carrier.walking .carrier-person { animation:walkBob .35s linear infinite alternate; }
+@keyframes walkBob { from { transform:translateY(0) rotate(-4deg); } to { transform:translateY(-4px) rotate(4deg); } }
+.value-carrier.printing .carrier-person { animation:humanThrow .45s ease-in-out infinite alternate; }
+@keyframes humanThrow { 0% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-5px) rotate(-8deg); } 100% { transform:translateY(2px) rotate(8deg); } }
+.throw-value { position:fixed; z-index:100000; min-width:48px; padding:5px 9px; border-radius:999px; border:2px solid var(--val); background:var(--panel); color:var(--val); font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:700; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,.18); pointer-events:none; opacity:0; }
+.throw-value.flying { opacity:1; }
+
+/* ---------- EXECUTION FOCUS (RECURSION TREE) ---------- */
+.focus-panel { flex: 1; display: flex; flex-direction: column; background: var(--code-bg); overflow: hidden; position: relative; }
+.focus-body { flex: 1; overflow: auto; position: relative; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+
+/* SVG Overlay for Edges */
+#svgOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.tree-edge { stroke: #4285f4; stroke-width: 1.5; fill: none; transition: all 0.3s ease; opacity: 0; }
+.tree-edge.show { opacity: 1; }
+
+/* CSS Recursion Tree Nodes */
+.tree-wrapper { display: flex; flex-direction: column; align-items: center; margin: 0 10px; position: relative; z-index: 2; }
+.tree-children { display: flex; flex-direction: row; justify-content: center; margin-top: 35px; }
+.tree-node {
+    background-color: #ffff00;
+    padding: 6px 30px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+    min-width: 60px;
+    text-align: center;
+}
+.tree-node.show { opacity: 1; transform: scale(1); }
+.tree-node.active-node { border: 2px solid var(--var); outline: 4px solid rgba(184, 57, 14, 0.2); }
+
+/* ---------- CALL STACK & CONSOLE (RIGHT) ---------- */
+.console-body { background: var(--term-bg); padding: 16px 20px; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.9; height: 120px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; white-space: pre-wrap; color: var(--term-text);}
+.stack-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; flex: 1; overflow-y: auto; }
+.stack-frame-right { padding: 8px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); transition: all 0.3s ease; text-align: center; font-size: 13px;}
+.stack-frame-right.active-stack { border-color: var(--accent); background: var(--accent-wash); font-weight: 600; color: var(--accent-ink); box-shadow: 0 4px 12px rgba(255,176,0,0.1); }
+
+/* ---------- TRANSPORT ---------- */
+.transport-bar { display: flex; align-items: center; justify-content: center; padding: 12px 16px; flex-direction: column; gap: 10px; border-top: 1px solid var(--rule); }
+.input-controls { display: flex; gap: 10px; align-items: center; font-family: "Space Grotesk", sans-serif; font-size: 14px; background: var(--code-bg); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--rule-strong); }
+.input-controls input { width: 60px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 14px; text-align: center; outline: none; }
+.input-controls input:focus { border-color: var(--accent); }
+
+.transport-controls { display: flex; gap: 10px; align-items: center;}
+.transport-bar button { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 600; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 16px; cursor: pointer; transition: all 0.2s ease; }
+.transport-bar button:hover { border-color: var(--accent); color: var(--accent-ink); }
+.transport-bar button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.transport-bar button.primary:hover { opacity: 0.85; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); font-weight: bold; margin-left: auto;}
+
+/* Condition Highlight */
+.cond-highlight { position: absolute; left: 150px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 176, 0, 0.4); border: 1px solid var(--accent); opacity: 0; transition: opacity 0.3s; font-weight: bold; color: var(--accent-ink); z-index: 10; pointer-events: none;}
+.cond-highlight.show { opacity: 1; animation: popAlert 0.4s ease-out forwards; }
+@keyframes popAlert { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<div id="carrier1" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">Fibonacci Recursion Tree</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" id="mascot" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot">
+            </div>
+            <div class="speech-bubble" id="speechBubble">
+                <p id="mascotCaption">Enter N (max 5) below and click "Generate Script". Watch how a single call recursively splits into a full calculation tree!</p>
+            </div>
+            <div class="top-controls">
+                <button class="theme-toggle" id="fsToggleBtn" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg id="fsIcon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                </button>
+                <button class="theme-toggle" onclick="document.body.classList.toggle('dark')" title="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- SOURCE CODE -->
+        <div class="col">
+            <section class="panel" style="display: flex; flex-direction: column; flex: 1;">
+                <div class="panel-head">
+                    <span class="panel-label">Source</span>
+                    <span class="panel-tag">Main.java</span>
+                </div>
+                <div class="code-body">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">import</span> java.util.Scanner;</div>
+                    <div class="code-line" id="line2"><span class="ln">2</span></div>
+                    <div class="code-line" id="line3"><span class="ln">3</span><span class="kw">class</span> Main {</div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    <span class="kw">static int</span> fibonacci(<span class="kw">int</span> n) {</div>
+                    <div class="code-line" id="line5"><span class="ln">5</span>        <span class="kw">	if</span> (n <span class="op">==</span> <span class="val">0</span>) { <div id="condAlert0" class="cond-highlight"></div></div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>            <span class="kw">		return </span> <span class="val">0</span>;</div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>        }</div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>        <span class="kw">	if</span> (n <span class="op">==</span> <span class="val">1</span>) { <div id="condAlert1" class="cond-highlight"></div></div>
+                    <div class="code-line" id="line9"><span class="ln">9</span>            <span class="kw">		return </span> <span class="val">1</span>;</div>
+                    <div class="code-line" id="line10"><span class="ln">10</span>        }</div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>        <span class="kw">return</span> fibonacci(n <span class="op">-</span> <span class="val">1</span>) <span class="op">+</span> fibonacci(n <span class="op">-</span> <span class="val">2</span>);</div>
+                    <div class="code-line" id="line12"><span class="ln">12</span>    }</div>
+                    <div class="code-line" id="line13"><span class="ln">13</span></div>
+                    <div class="code-line" id="line14"><span class="ln">14</span>    <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line15"><span class="ln">15</span>        Scanner sc <span class="op">=</span> <span class="kw">new</span> Scanner(System.in);</div>
+                    <div class="code-line" id="line16"><span class="ln">16</span>        <span class="kw">	int</span> n <span class="op">=</span> sc.nextInt();</div>
+                    <div class="code-line" id="line17"><span class="ln">17</span></div>
+                    <div class="code-line" id="line18"><span class="ln">18</span>        System.out.println(fibonacci(n));</div>
+                    <div class="code-line" id="line19"><span class="ln">19</span>    }</div>
+                    <div class="code-line" id="line20"><span class="ln">20</span>}</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- EXECUTION FOCUS (RECURSION TREE) -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head">
+                    <span class="panel-label">Execution Focus</span>
+                    <span class="panel-tag" id="focusTag">Recursion Tree Viewer</span>
+                </div>
+                <div class="focus-body" id="treeCanvas">
+                    <svg id="svgOverlay">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
+                                <polygon points="0 0, 6 2.5, 0 5" fill="#4285f4" />
+                            </marker>
+                        </defs>
+                    </svg>
+                    <!-- Tree rendered via JS -->
+                    <div id="treeRoot"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CALL STACK LOG & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout/stdin</span></div>
+                <div class="console-body" id="consoleBox"></div>
+            </section>
+
+            <section class="panel" style="flex:1; display: flex; flex-direction: column;">
+                <div class="panel-head">
+                    <span class="panel-label">Active History</span>
+                    <span class="panel-tag">Call Stack</span>
+                </div>
+                <div class="stack-body" id="callStackBox"></div>
+            </section>
+            
+            <section class="panel transport-bar">
+                <div class="input-controls">
+                    <label for="nInput">Enter N (0-5):</label>
+                    <input type="number" id="nInput" value="4" min="0" max="5">
+                    <button class="primary" onclick="initDynamicScript()">Generate Script</button>
+                </div>
+                <div class="transport-controls" style="width: 100%;">
+                    <button onclick="previousStep()" id="btnPrev" disabled>◂ Prev</button>
+                    <button class="primary" id="playBtn" onclick="togglePlay()" disabled>▶ Play</button>
+                    <button onclick="nextStep()" id="btnNext" disabled>Next ▸</button>
+                    <button onclick="resetAnimation()" id="btnReset" disabled>↻ Reset</button>
+                    <div class="step-status" id="status">Step 0 / 0</div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+    else { if (document.exitFullscreen) { document.exitFullscreen(); } }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const fsIcon = document.getElementById("fsIcon");
+    if (document.fullscreenElement) {
+        fsIcon.innerHTML = '<path d="M8 3v3H5m14-3v3h3M8 21v-3H5m14 3v-3h3"/>';
+    } else {
+        fsIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+    }
+    setTimeout(drawAllEdges, 200);
+});
+window.addEventListener('resize', () => { setTimeout(drawAllEdges, 100); });
+
+let scriptArray = [];
+let currentStep = 0;
+let playing = false;
+let timer = null;
+let typingTimeout = null;
+let globalTreeHtml = ""; 
+
+function initDynamicScript() {
+    let inputVal = parseInt(document.getElementById("nInput").value);
+    if(isNaN(inputVal) || inputVal < 0) inputVal = 0;
+    if(inputVal > 5) inputVal = 5;
+    document.getElementById("nInput").value = inputVal;
+    
+    scriptArray = generateFibonacciTrace(inputVal);
+    
+    document.getElementById("btnPrev").disabled = false;
+    document.getElementById("playBtn").disabled = false;
+    document.getElementById("btnNext").disabled = false;
+    document.getElementById("btnReset").disabled = false;
+    
+    resetAnimation();
+}
+
+function buildTreeHTML(nodeDef) {
+    if (!nodeDef) return "";
+    let html = `<div class="tree-wrapper" id="wrap_${nodeDef.id}">
+                    <div class="tree-node" id="${nodeDef.id}">${nodeDef.val}</div>`;
+    
+    if (nodeDef.left || nodeDef.right) {
+        html += `<div class="tree-children">`;
+        if (nodeDef.left) html += buildTreeHTML(nodeDef.left);
+        if (nodeDef.right) html += buildTreeHTML(nodeDef.right);
+        html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function generateFibonacciTrace(n) {
+    let sc = [];
+    let hist = []; 
+    let cons = "";
+    let nodeIdCounter = 0;
+    let activeNodes = [];
+    let activeEdges = [];
+    
+    const addFrame = (str) => { hist.unshift(str); };
+    const popFrame = () => { hist.shift(); };
+    const updateTop = (str) => { hist[0] = str; };
+    const makeStep = (line, msg, activeN, activeE, currentN, anim=null, val=null, lineTarget=null) => {
+        sc.push({ line, msg, nodes: [...activeN], edges: [...activeE], activeNode: currentN, hist: [...hist], cons, anim, val, lineTarget, treeHtml: globalTreeHtml });
+    };
+
+    addFrame("main()");
+    makeStep(14, "Execution begins in the main() method.", [], [], null);
+    makeStep(15, "A Scanner object is created.", [], [], null);
+    makeStep(16, "Awaiting input for N.", [], [], null);
+    
+    cons = `${n}\n`;
+    makeStep(16, `User entered ${n}. Setting n = ${n}.`, [], [], null);
+
+    // Pre-build structure to generate HTML layout
+    function simFib(x, parentId) {
+        let id = "node_" + (nodeIdCounter++);
+        return { id, val: x, left: null, right: null };
+    }
+    function preBuildStruct(x, pid) {
+        let nObj = simFib(x, pid);
+        if (x === 0 || x === 1) return nObj;
+        nObj.left = preBuildStruct(x - 1, nObj.id);
+        nObj.right = preBuildStruct(x - 2, nObj.id);
+        return nObj;
+    }
+    
+    nodeIdCounter = 0;
+    let rootNode = preBuildStruct(n, null);
+    globalTreeHtml = buildTreeHTML(rootNode);
+
+    // Reset state for tracing
+    nodeIdCounter = 0;
+    makeStep(18, `Preparing to call fibonacci(${n}) and print the result.`, [], [], null);
+
+    function traceFib(x, parentId) {
+        let currentId = "node_" + (nodeIdCounter++);
+        activeNodes.push(currentId);
+        if (parentId) activeEdges.push({ from: parentId, to: currentId });
+        
+        addFrame(`fibonacci(${x})`);
+        makeStep(4, `Calling fibonacci(${x}). A new frame is pushed onto the stack.`, activeNodes, activeEdges, currentId);
+        
+        makeStep(5, `Checking if n (${x}) == 0`, activeNodes, activeEdges, currentId, "check_cond", x, "condAlert0");
+        if (x === 0) {
+            updateTop(`fibonacci(0) -> return 0`);
+            makeStep(6, `Condition TRUE. fibonacci(0) returns 0.`, activeNodes, activeEdges, currentId, "return_val", 0, currentId);
+            popFrame();
+            return 0;
+        }
+        
+        makeStep(8, `Checking if n (${x}) == 1`, activeNodes, activeEdges, currentId, "check_cond", x, "condAlert1");
+        if (x === 1) {
+            updateTop(`fibonacci(1) -> return 1`);
+            makeStep(9, `Condition TRUE. fibonacci(1) returns 1.`, activeNodes, activeEdges, currentId, "return_val", 1, currentId);
+            popFrame();
+            return 1;
+        }
+
+        makeStep(11, `Calculating fibonacci(${x-1}) + fibonacci(${x-2}). Branching left first.`, activeNodes, activeEdges, currentId);
+        updateTop(`fib(${x-1}) + fib(${x-2})`);
+        
+        let leftVal = traceFib(x - 1, currentId);
+        
+        makeStep(11, `Left branch returned ${leftVal}. Now branching right to fibonacci(${x-2}).`, activeNodes, activeEdges, currentId);
+        
+        let rightVal = traceFib(x - 2, currentId);
+        
+        let sum = leftVal + rightVal;
+        updateTop(`fib(${x}) -> return ${sum}`);
+        makeStep(11, `fib(${x-1}) is ${leftVal}, fib(${x-2}) is ${rightVal}. Returning ${sum}.`, activeNodes, activeEdges, currentId, "return_val", sum, currentId);
+        popFrame();
+        
+        return sum;
+    }
+
+    let finalResult = traceFib(n, null);
+    
+    makeStep(18, `Recursion completed! The final result is ${finalResult}. Throwing to console.`, activeNodes, activeEdges, "node_0", "throw_console", finalResult);
+    cons += finalResult + "\n";
+    makeStep(19, `Printed ${finalResult} to console. Execution finished.`, activeNodes, activeEdges, null);
+
+    return sc;
+}
+
+function drawAllEdges() {
+    if(scriptArray.length === 0) return;
+    const s = scriptArray[currentStep];
+    const svg = document.getElementById("svgOverlay");
+    
+    svg.innerHTML = `<defs><marker id="arrowhead" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0 0, 6 2.5, 0 5" fill="#4285f4" /></marker></defs>`;
+    
+    if (!s || !s.edges) return;
+    const svgRect = svg.getBoundingClientRect();
+
+    s.edges.forEach(edge => {
+        const fromEl = document.getElementById(edge.from);
+        const toEl = document.getElementById(edge.to);
+        if(fromEl && toEl && fromEl.classList.contains('show') && toEl.classList.contains('show')) {
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+            
+            let x1 = fRect.left + (fRect.width/2) - svgRect.left;
+            let y1 = fRect.bottom - svgRect.top;
+            
+            let x2 = tRect.left + (tRect.width/2) - svgRect.left;
+            let y2 = tRect.top - svgRect.top;
+            
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("class", "tree-edge show");
+            line.setAttribute("marker-end", "url(#arrowhead)");
+            svg.appendChild(line);
+        }
+    });
+}
+
+function hideHuman() {
+    const c = document.getElementById("carrier1");
+    c.getAnimations().forEach(a => a.cancel());
+    c.style.opacity = "0";
+    c.classList.remove("active", "walking", "printing");
+    document.getElementById("condAlert0").classList.remove("show");
+    document.getElementById("condAlert1").classList.remove("show");
+}
+
+function animateHumanMove(startId, endId, val, duration = 1200) {
+    return new Promise(resolve => {
+        const startEl = document.getElementById(startId);
+        const endEl = document.getElementById(endId);
+        const c1 = document.getElementById("carrier1");
+        if (!startEl || !endEl || !c1) { resolve(); return; }
+
+        const sRect = startEl.getBoundingClientRect();
+        const eRect = endEl.getBoundingClientRect();
+        let startX = sRect.left + (sRect.width/2) - 15;
+        let startY = sRect.top - 20;
+        let endX = eRect.left + (eRect.width/2) - 15;
+        let endY = eRect.top - 20;
+
+        c1.querySelector(".carrier-value").textContent = val;
+        c1.className = "value-carrier active walking";
+        c1.style.opacity = "1";
+
+        const anim = c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 0, offset: 0 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0.1 },
+            { transform: `translate3d(${endX}px,${endY}px,0)`, opacity: 1, offset: 0.9 },
+            { transform: `translate3d(${endX}px,${endY}px,0)`, opacity: 0, offset: 1 }
+        ], { duration, easing: "linear", fill: "forwards" });
+
+        anim.onfinish = () => resolve();
+    });
+}
+
+function humanThrowConsole(startId, endId, val, duration = 1500) {
+    return new Promise(resolve => {
+        const startEl = document.getElementById(startId);
+        const endEl = document.getElementById(endId);
+        const c1 = document.getElementById("carrier1");
+        if (!startEl || !endEl || !c1) { resolve(); return; }
+
+        const sRect = startEl.getBoundingClientRect();
+        const eRect = endEl.getBoundingClientRect();
+        let startX = sRect.left + (sRect.width/2) - 30;
+        let startY = sRect.top - 30;
+
+        c1.querySelector(".carrier-value").textContent = val;
+        c1.className = "value-carrier active printing";
+        c1.style.opacity = "1";
+
+        const thrown = document.createElement("div");
+        thrown.className = "throw-value flying";
+        thrown.textContent = val;
+        document.body.appendChild(thrown);
+
+        let handX = startX + 70; let handY = startY + 20;
+        thrown.style.left = `${handX}px`; thrown.style.top = `${handY}px`;
+        let endX = eRect.left + 50; let endY = eRect.top + 30;
+        let deltaX = endX - handX; let deltaY = endY - handY;
+
+        thrown.animate([
+            { transform: "translate3d(0,0,0) scale(1)", opacity: 1 },
+            { transform: `translate3d(${deltaX*0.3}px,-100px,0) scale(1.2)`, opacity: 1 },
+            { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(0.8)`, opacity: 0 }
+        ], { duration: 1200, easing: "cubic-bezier(.22,.72,.28,1)", fill: "forwards" });
+
+        c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0.9 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 0, offset: 1 }
+        ], { duration: 1500, easing: "linear", fill: "forwards" });
+
+        setTimeout(() => { thrown.remove(); resolve(); }, 1200);
+    });
+}
+
+function renderStep() {
+    if(scriptArray.length === 0) return;
+    const s = scriptArray[currentStep];
+    document.getElementById("status").textContent = `Step ${currentStep + 1} / ${scriptArray.length}`;
+
+    document.querySelectorAll(".code-line").forEach(l => l.classList.remove("active"));
+    if (s.line) document.getElementById("line" + s.line).classList.add("active");
+
+    hideHuman();
+
+    const root = document.getElementById("treeRoot");
+    if(s.treeHtml !== undefined && root.innerHTML !== s.treeHtml) {
+        root.innerHTML = s.treeHtml;
+    }
+
+    document.querySelectorAll('.tree-node').forEach(node => {
+        if(s.nodes.includes(node.id)) {
+            node.classList.add('show');
+            if(node.id === s.activeNode) node.classList.add('active-node');
+            else node.classList.remove('active-node');
+        } else {
+            node.classList.remove('show');
+            node.classList.remove('active-node');
+        }
+    });
+
+    setTimeout(drawAllEdges, 50);
+
+    let histHTML = "";
+    s.hist.forEach((h, idx) => {
+        if(idx === 0) histHTML += `<div class="stack-frame-right active-stack">${h}</div>`;
+        else histHTML += `<div class="stack-frame-right">${h}</div>`;
+    });
+    document.getElementById("callStackBox").innerHTML = histHTML;
+    document.getElementById("consoleBox").textContent = s.cons;
+
+    if (s.anim === "check_cond") {
+        animateHumanMove(s.lineTarget, "line" + s.line, s.val, 1200).then(() => {
+            let alertBox = document.getElementById(s.lineTarget);
+            alertBox.textContent = (s.val === 0 || s.val === 1) ? "TRUE" : "FALSE";
+            alertBox.classList.add("show");
+        });
+    }
+    else if (s.anim === "return_val") {
+        animateHumanMove(s.lineTarget, s.lineTarget, s.val, 1000); 
+    }
+    else if (s.anim === "throw_console") {
+        humanThrowConsole(s.lineTarget, "consoleBox", s.val, 1500).then(() => {
+            document.getElementById("consoleBox").textContent += s.val + "\n";
+        });
+    }
+
+    const caption = document.getElementById("mascotCaption");
+    if (typingTimeout) clearInterval(typingTimeout);
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+    let i = 0;
+    typingTimeout = setInterval(() => {
+        if (i < s.msg.length) caption.textContent += s.msg.charAt(i++);
+        else { clearInterval(typingTimeout); caption.classList.remove("typing-cursor"); }
+    }, 30);
+}
+
+function nextStep() { pause(); if (currentStep < scriptArray.length - 1) { currentStep++; renderStep(); } }
+function previousStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(); } }
+function resetAnimation() { pause(); currentStep = 0; renderStep(); }
+
+function play() {
+    playing = true; document.getElementById("playBtn").innerHTML = "<span>⏸</span><span>Pause</span>";
+    timer = setInterval(() => {
+        if (currentStep >= scriptArray.length - 1) { pause(); return; }
+        currentStep++; renderStep();
+    }, 3800); 
+}
+function pause() { playing = false; document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play</span>"; if (timer) clearInterval(timer); }
+function togglePlay() { if (playing) pause(); else play(); }
+</script>
+</body>
+</html>

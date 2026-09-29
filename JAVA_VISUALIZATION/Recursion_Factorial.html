@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Recursion — Dynamic Factorial & Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --paper: #eef1ec; --panel: #ffffff; --ink: #14181f; --muted: #6b7280;
+    --rule: #d8ddd3; --rule-strong: #b9c0b3; --accent: #ffb000;
+    --accent-ink: #7a4b00; --accent-wash: #fff8e1; --placard-border: #4285f4;
+    --kw: #5b3fd9; --dt: #2f5fd0; --var: #b8390e; --val: #1c8a5f;
+    --code-bg: rgba(47, 95, 208, 0.05);
+    --term-bg: #f8fafc; --term-text: #0f172a; --term-muted: #94a3b8;
+    --radius: 10px; --stick-stroke: #1a1a1a;
+}
+
+body.dark {
+    --paper: #12151a; --panel: #191d24; --ink: #eef1ec; --muted: #9099a6;
+    --rule: #2a2f38; --rule-strong: #3a4049; --accent: #ffc23d;
+    --accent-ink: #ffe4ac; --accent-wash: #2e2410; --placard-border: #669df6;
+    --kw: #b7a4ff; --dt: #86a9ff; --var: #ff9466; --val: #6fe3ac;
+    --code-bg: rgba(134, 169, 255, 0.08);
+    --term-bg: #05070a; --term-text: #7de8b2; --term-muted: #3a4841;
+    --stick-stroke: #ffffff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: "IBM Plex Sans", sans-serif; transition: background 0.25s ease, color 0.25s ease; -webkit-font-smoothing: antialiased; }
+
+.page { max-width: 1650px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; }
+.stage { display: grid; grid-template-columns: 1fr 1.15fr 0.85fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--rule); border-top-left-radius: 9px; border-top-right-radius: 9px; }
+.panel-label { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.panel-tag { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+
+/* ---------- NARRATOR ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 14px 20px; flex-wrap: wrap; }
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 28px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+.mascot-frame { width: 62px; height: 62px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; object-fit: cover; }
+@keyframes mascotBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 18px; }
+.speech-bubble::before { content: ""; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: var(--paper); border-left: 1px solid var(--rule); border-bottom: 1px solid var(--rule); transform: rotate(45deg); }
+.speech-bubble p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); min-height: 22px; }
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ---------- TOP CONTROLS ---------- */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.theme-toggle { display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--rule-strong); border-radius: 50%; width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; color: var(--muted); transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.8; padding: 24px 0px; height: 430px; overflow-y: auto; }
+.code-line { display: flex; padding: 2px 0px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease; position: relative; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left: 4px solid var(--accent); }
+.ln { width: 36px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); } .dt { color: var(--dt); } .vr { color: var(--var); } .val { color: var(--val); } .op { color: var(--math-op); } .str { color: var(--val); }
+
+/* ---------- GLOBAL HUMAN CARRIER & THROW ---------- */
+.value-carrier { position:fixed; left:0; top:0; width:150px; height:72px; display:flex; align-items:center; gap:8px; opacity:0; z-index:99999; pointer-events:none; transform:translate3d(-300px,-300px,0); }
+.carrier-person { width:35px; height:50px; flex:0 0 35px; filter:drop-shadow(0 3px 2px rgba(0,0,0,.18)); }
+.carrier-person .skin { fill:#f2c9a0; } .carrier-person .shirt { fill:var(--dt); } .carrier-person .outline { stroke:var(--stick-stroke); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.carrier-value { min-width:36px; padding:4px 8px; border-radius:999px; border:1.5px solid var(--val); background:var(--panel); color:var(--val); font-family:"JetBrains Mono",monospace; font-size:14px; font-weight:700; text-align:center; box-shadow:0 5px 14px rgba(0,0,0,.12); }
+.value-carrier.active { opacity:1; }
+.value-carrier.walking .carrier-person { animation:walkBob .35s linear infinite alternate; }
+@keyframes walkBob { from { transform:translateY(0) rotate(-4deg); } to { transform:translateY(-4px) rotate(4deg); } }
+.value-carrier.printing .carrier-person { animation:humanThrow .45s ease-in-out infinite alternate; }
+@keyframes humanThrow { 0% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-5px) rotate(-8deg); } 100% { transform:translateY(2px) rotate(8deg); } }
+
+.throw-value { position:fixed; z-index:100000; min-width:48px; padding:5px 9px; border-radius:999px; border:2px solid var(--val); background:var(--panel); color:var(--val); font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:700; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,.18); pointer-events:none; opacity:0; }
+.throw-value.flying { opacity:1; }
+
+/* Condition Checker Highlight */
+.cond-highlight { position: absolute; left: 150px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 176, 0, 0.4); border: 1px solid var(--accent); opacity: 0; transition: opacity 0.3s; font-weight: bold; color: var(--accent-ink); z-index: 10; pointer-events: none;}
+.cond-highlight.show { opacity: 1; animation: popAlert 0.4s ease-out forwards; }
+@keyframes popAlert { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+/* ---------- EXECUTION FOCUS (CENTER VISUAL STACK) ---------- */
+.focus-panel { flex: 1; display: flex; flex-direction: column; background: var(--code-bg); overflow: hidden; }
+.focus-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+
+.visual-stack-container { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.visual-stack-title { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em; }
+.visual-stack { width: 220px; border: 2px solid var(--stick-stroke); display: flex; flex-direction: column-reverse; background-color: transparent; box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+
+.stack-slot {
+    height: 50px; display: flex; align-items: center; padding-left: 16px;
+    font-family: "JetBrains Mono", monospace; font-size: 15px; font-weight: 700;
+    color: #000 !important; background-color: transparent;
+    border-top: 2px solid rgba(0,0,0,0.1); transition: all 0.3s ease;
+}
+.stack-slot:first-child { border-top: none; }
+
+/* ---------- CALL STACK & CONSOLE (RIGHT) ---------- */
+.console-body { background: var(--term-bg); padding: 16px 20px; font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.9; height: 120px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; white-space: pre-wrap; color: var(--term-text);}
+.stack-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; flex: 1; }
+.stack-frame-right { padding: 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); transition: all 0.3s ease; text-align: center; }
+.stack-frame-right.active-stack { border-color: var(--accent); background: var(--accent-wash); font-weight: 600; color: var(--accent-ink); box-shadow: 0 4px 12px rgba(255,176,0,0.1); }
+
+/* ---------- TRANSPORT ---------- */
+.transport-bar { display: flex; align-items: center; justify-content: center; padding: 12px 16px; flex-direction: column; gap: 10px; border-top: 1px solid var(--rule); }
+.input-controls { display: flex; gap: 10px; align-items: center; font-family: "Space Grotesk", sans-serif; font-size: 14px; background: var(--code-bg); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--rule-strong); }
+.input-controls input { width: 60px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 14px; text-align: center; outline: none; }
+.input-controls input:focus { border-color: var(--accent); }
+
+.transport-controls { display: flex; gap: 10px; align-items: center;}
+.transport-bar button { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 600; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 16px; cursor: pointer; transition: all 0.2s ease; }
+.transport-bar button:hover { border-color: var(--accent); color: var(--accent-ink); }
+.transport-bar button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.transport-bar button.primary:hover { opacity: 0.85; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); font-weight: bold; margin-left: auto;}
+
+/* ---------- NOTES PANEL ---------- */
+.notes-panel { margin-top: 16px; flex-shrink: 0; }
+.notes-body { padding: 32px 40px; font-size: 15.5px; line-height: 1.7; color: var(--ink); }
+.notes-body h2 { font-family: "Space Grotesk", sans-serif; font-size: 24px; font-weight: 700; margin-top: 40px; margin-bottom: 16px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.notes-body h2:first-child { margin-top: 0; }
+.notes-body h3 { font-family: "Space Grotesk", sans-serif; font-size: 18px; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+.notes-body p { margin-bottom: 16px; }
+.notes-body ul { margin-bottom: 24px; padding-left: 24px; }
+.notes-body li { margin-bottom: 8px; }
+.notes-body pre { background: var(--term-bg); color: var(--term-text); padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: 14px; border: 1px solid var(--rule); margin-bottom: 24px; line-height: 1.6; }
+.notes-body code { font-family: "JetBrains Mono", monospace; background: var(--code-bg); padding: 3px 6px; border-radius: 4px; font-size: 14px; color: var(--var); }
+.notes-body pre code { background: transparent; padding: 0; color: inherit; }
+.notes-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; margin-top: 8px; font-size: 14.5px; }
+.notes-table th, .notes-table td { border: 1px solid var(--rule); padding: 12px 16px; text-align: left; }
+.notes-table th { background: var(--code-bg); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL HUMAN CARRIER -->
+<div id="carrier1" class="value-carrier">
+    <svg class="carrier-person" viewBox="0 0 40 60">
+        <path class="outline" fill="none" d="M16,39 L12,56 M25,39 L29,56"></path>
+        <path class="skin outline" fill="none" d="M13,27 L4,16 M27,27 L36,16"></path>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,12 L19,12 M23,12 L25,12"></path>
+    </svg>
+    <span class="carrier-value"></span>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">Recursion</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" id="mascot" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot">
+            </div>
+            <div class="speech-bubble" id="speechBubble">
+                <p id="mascotCaption">Welcome! Enter a number below and click "Generate Script" to trace the recursive stack step-by-step.</p>
+            </div>
+            
+            <div class="top-controls">
+                <button class="theme-toggle" id="fsToggleBtn" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg id="fsIcon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                </button>
+                <button class="theme-toggle" onclick="document.body.classList.toggle('dark')" title="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE CODE -->
+        <div class="col">
+            <section class="panel" style="display: flex; flex-direction: column; flex: 1;">
+                <div class="panel-head">
+                    <span class="panel-label">Source</span>
+                    <span class="panel-tag">Main.java</span>
+                </div>
+                <div class="code-body">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">import</span> java.util.Scanner;</div>
+                    <div class="code-line" id="line2"><span class="ln">2</span></div>
+                    <div class="code-line" id="line3"><span class="ln">3</span><span class="kw">class</span> Main {</div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    <span class="kw">static int</span> factorial(<span class="kw">int</span> n) {</div>
+                    <div class="code-line" id="line5"><span class="ln">5</span>        <span class="kw">	if</span> (n <span class="op">==</span> <span class="val">0</span> <span class="op">||</span> n <span class="op">==</span> <span class="val">1</span>) { <div id="condAlert" class="cond-highlight"></div></div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>            <span class="kw">		return </span> <span class="val">1</span>;</div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>        }</div>
+                    <div class="code-line" id="line8"><span class="ln">8</span>        <span class="kw">return</span> n <span class="op">*</span> factorial(n <span class="op">-</span> <span class="val">1</span>);</div>
+                    <div class="code-line" id="line9"><span class="ln">9</span>    }</div>
+                    <div class="code-line" id="line10"><span class="ln">10</span></div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>    <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line12"><span class="ln">12</span>        Scanner sc <span class="op">=</span> <span class="kw">new</span> Scanner(System.in);</div>
+                    <div class="code-line" id="line13"><span class="ln">13</span>        System.out.print(<span class="str">"Enter a number: "</span>);</div>
+                    <div class="code-line" id="line14"><span class="ln">14</span>        <span class="kw">int</span> n <span class="op">=</span> sc.nextInt(); } }</div>
+                    <div class="code-line" id="line15"><span class="ln">15</span>        System.out.println(<span class="str">"Factorial = "</span> <span class="op">+</span> factorial(n));</div>
+                    <div class="code-line" id="line16"><span class="ln">16</span>    }</div>
+                    <div class="code-line" id="line17"><span class="ln">17</span>}</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: EXECUTION FOCUS (VISUAL STACK TRACE) -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head">
+                    <span class="panel-label">Execution Focus</span>
+                    <span class="panel-tag" id="focusTag">Call Stack Memory</span>
+                </div>
+                <div class="focus-body">
+                    <div class="visual-stack-container" id="visualStackContainer">
+                        <div class="visual-stack-title">Java Call Stack</div>
+                        <div class="visual-stack" id="dynamicStack">
+                            <!-- Slots injected via JS based on user input -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 3: CALL STACK LOG & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout/stdin</span></div>
+                <div class="console-body" id="consoleBox"></div>
+            </section>
+
+            <section class="panel" style="flex:1; display: flex; flex-direction: column;">
+                <div class="panel-head">
+                    <span class="panel-label">Active Frames</span>
+                    <span class="panel-tag">History</span>
+                </div>
+                <div class="stack-body" id="callStackBox"></div>
+            </section>
+            
+            <section class="panel transport-bar">
+                <div class="input-controls">
+                    <label for="nInput">Enter N (1-5):</label>
+                    <input type="number" id="nInput" value="3" min="1" max="5">
+                    <button class="primary" onclick="initDynamicScript()">Generate Script</button>
+                </div>
+                <div class="transport-controls" style="width: 100%;">
+                    <button onclick="previousStep()" id="btnPrev" disabled>◂ Prev</button>
+                    <button class="primary" id="playBtn" onclick="togglePlay()" disabled>▶ Play</button>
+                    <button onclick="nextStep()" id="btnNext" disabled>Next ▸</button>
+                    <button onclick="resetAnimation()" id="btnReset" disabled>↻ Reset</button>
+                    <div class="step-status" id="status">Step 0 / 0</div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- ADDED: NOTES SECTION -->
+    <section class="panel notes-panel">
+        <div class="panel-head">
+            <span class="panel-label">Documentation</span>
+            <span class="panel-tag">Java Recursion — Detailed Notes</span>
+        </div>
+        <div class="notes-body">
+            <h2>1. What is Recursion?</h2>
+            <p>Recursion is a programming technique where a method calls itself to solve a problem. In simple words: a method repeatedly calls itself with a smaller or simpler input until it reaches a stopping condition.</p>
+            <p>A recursive method must have two important parts:</p>
+            <ul>
+                <li><strong>Base Case</strong> → Stops the recursion</li>
+                <li><strong>Recursive Case</strong> → Calls the same method again</li>
+            </ul>
+            <pre><code>static void function() {
+    // Base Condition
+
+    // Recursive Call
+    function();
+}</code></pre>
+
+            <h2>2. Why Do We Need Recursion?</h2>
+            <p>Some problems naturally have a repetitive or self-similar structure. Examples include:</p>
+            <ul>
+                <li>Factorial</li>
+                <li>Fibonacci</li>
+                <li>Sum of numbers</li>
+                <li>Power calculation</li>
+                <li>Reverse a number/string</li>
+                <li>Palindrome</li>
+                <li>Binary Search</li>
+                <li>Tree & Graph traversal</li>
+                <li>Divide and conquer algorithms</li>
+                <li>Backtracking</li>
+            </ul>
+
+            <h2>3. Base Case</h2>
+            <p>The base case is the condition that stops the recursive calls.</p>
+            <pre><code>static void print(int n) {
+    if (n == 0) { // Base Case
+        return;
+    }
+    System.out.println(n);
+    print(n - 1);
+}</code></pre>
+            <p>Without a base case, the method continues calling itself forever.</p>
+
+            <h2>4. Recursive Case</h2>
+            <p>The part where the method calls itself is called the recursive case. (e.g., <code>print(n - 1);</code>). The value becomes smaller: 5, 4, 3, 2, 1, 0, eventually making the base case true.</p>
+
+            <h2>5. Simple Recursion Example</h2>
+            <pre><code>class Main {
+    static void print(int n) {
+        if (n == 0) {
+            return;
+        }
+        System.out.println(n);
+        print(n - 1);
+    }
+    public static void main(String[] args) {
+        print(5);
+    }
+}</code></pre>
+            <p><strong>Output:</strong> 5, 4, 3, 2, 1</p>
+            <p><strong>Flow:</strong> print(5) &rarr; print(4) &rarr; print(3) &rarr; print(2) &rarr; print(1) &rarr; print(0) &rarr; return</p>
+
+            <h2>6. How Recursion Works Internally</h2>
+            <p>Java uses the Call Stack to manage method calls. Each method call is stored in the stack. When <code>print(0)</code> reaches the base case, it returns, and then the previous method calls return one by one.</p>
+            <pre><code>STACK
+┌─────────────┐
+│ print(0)    │
+├─────────────┤
+│ print(1)    │
+├─────────────┤
+│ print(2)    │
+├─────────────┤
+│ print(3)    │
+└─────────────┘</code></pre>
+
+            <h2>7. Recursion Has Two Phases</h2>
+            <p><strong>Phase 1 — Going Down:</strong> Recursive calls keep happening (5 &rarr; 4 &rarr; 3 &rarr; 2 &rarr; 1 &rarr; 0).</p>
+            <p><strong>Phase 2 — Coming Back:</strong> After reaching the base case, the methods return (0 &rarr; 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 5). This is why the position of statements like <code>System.out.println()</code> matters.</p>
+
+            <h2>8. Print Before Recursive Call</h2>
+            <pre><code>static void print(int n) {
+    if (n == 0) return;
+    System.out.println(n); // Executes on the way down
+    print(n - 1);
+}</code></pre>
+            <p><strong>Output:</strong> 5, 4, 3, 2, 1</p>
+
+            <h2>9. Print After Recursive Call</h2>
+            <pre><code>static void print(int n) {
+    if (n == 0) return;
+    print(n - 1);
+    System.out.println(n); // Executes on the way back up
+}</code></pre>
+            <p><strong>Output:</strong> 1, 2, 3, 4, 5</p>
+
+            <h2>10. Factorial Using Recursion</h2>
+            <p>Recursive Formula: <code>n! = n &times; (n - 1)!</code><br>Base case: <code>0! = 1</code></p>
+            <pre><code>static int factorial(int n) {
+    if (n == 0) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}</code></pre>
+
+            <h2>11. Fibonacci Using Recursion</h2>
+            <p>Formula: <code>F(n) = F(n - 1) + F(n - 2)</code><br>Base cases: <code>F(0) = 0</code>, <code>F(1) = 1</code></p>
+            <pre><code>static int fibonacci(int n) {
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}</code></pre>
+
+            <h2>12. Sum of First N Natural Numbers</h2>
+            <p>Formula: <code>sum(n) = n + sum(n - 1)</code></p>
+            <pre><code>static int sum(int n) {
+    if (n == 0) return 0;
+    return n + sum(n - 1);
+}</code></pre>
+
+            <h2>13. Power Using Recursion</h2>
+            <p>Formula: <code>power(a, n) = a &times; power(a, n - 1)</code></p>
+            <pre><code>static int power(int a, int n) {
+    if (n == 0) return 1;
+    return a * power(a, n - 1);
+}</code></pre>
+
+            <h2>14. Reverse a Number Using Recursion</h2>
+            <p>One approach carries the reversed value as an additional parameter.</p>
+            <pre><code>static int reverse(int n, int rev) {
+    if (n == 0) return rev;
+    return reverse(n / 10, rev * 10 + n % 10);
+}
+// Call: reverse(1234, 0) -> Returns 4321</code></pre>
+
+            <h2>15. Recursion vs Iteration</h2>
+            <table class="notes-table">
+                <thead>
+                    <tr>
+                        <th>Recursion</th>
+                        <th>Iteration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Method calls itself</td>
+                        <td>Loop repeats</td>
+                    </tr>
+                    <tr>
+                        <td>Uses call stack</td>
+                        <td>Usually uses less stack memory</td>
+                    </tr>
+                    <tr>
+                        <td>Can make tree/divide-and-conquer problems easier</td>
+                        <td>Often simpler for straightforward repetition</td>
+                    </tr>
+                    <tr>
+                        <td>Can have function-call overhead</td>
+                        <td>Usually lower overhead</td>
+                    </tr>
+                    <tr>
+                        <td>Needs a base case</td>
+                        <td>Needs loop condition</td>
+                    </tr>
+                    <tr>
+                        <td>May cause StackOverflowError</td>
+                        <td>Usually doesn't have recursive stack growth</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>16. Recursion and Stack Memory</h2>
+            <p>Every recursive call creates a new stack frame. <code>factorial(5)</code> occupies memory until the base case is reached, after which frames are removed one by one.</p>
+
+            <h2>17. Stack Overflow</h2>
+            <p>If recursion never reaches a base case, calls continue indefinitely until Java throws a <code>StackOverflowError</code>.</p>
+
+            <h2>18. Types of Recursion</h2>
+            <h3>18.1 Direct Recursion</h3>
+            <p>A method directly calls itself.</p>
+            <h3>18.2 Indirect Recursion</h3>
+            <p>One method calls another method, which eventually calls the first method. (e.g., A() calls B(), B() calls A()).</p>
+
+            <h2>19. Tail Recursion</h2>
+            <p>A recursive call is the last operation performed by the method. (e.g., calling <code>print(n - 1)</code> with no further calculations).</p>
+
+            <h2>20. Non-Tail Recursion</h2>
+            <p>If operations happen after the recursive call (like multiplication in <code>return n * factorial(n - 1)</code>), it is non-tail recursion because it must return before calculating the final result.</p>
+
+            <h2>21. Multiple Recursion</h2>
+            <p>A method makes more than one recursive call (like Fibonacci), creating a branching recursion tree.</p>
+
+            <h2>22. Recursion Tree</h2>
+            <p>Visualizing Fibonacci shows how the same values are repeatedly calculated, highlighting why simple recursion for Fibonacci is inefficient:</p>
+            <pre><code>fib(4)
+├── fib(3)
+│   ├── fib(2)
+│   │   ├── fib(1)
+│   │   └── fib(0)
+│   └── fib(1)
+└── fib(2)
+    ├── fib(1)
+    └── fib(0)</code></pre>
+
+            <h2>23. Time Complexity</h2>
+            <ul>
+                <li><strong>Factorial:</strong> Time: O(n), Space: O(n) (stack space).</li>
+                <li><strong>Fibonacci (Simple):</strong> Time: O(2^n), Space: O(n).</li>
+            </ul>
+
+            <h2>24. Recursion Template</h2>
+            <pre><code>static returnType function(parameters) {
+    if (baseCondition) {
+        return baseValue;
+    }
+    return function(smallerInput);
+}</code></pre>
+
+            <h2>25. Three Questions to Ask When Solving Recursion</h2>
+            <p>Whenever you see a recursion problem, ask:</p>
+            <ul>
+                <li><strong>Question 1:</strong> What is the base case? (e.g., <code>n == 0</code>)</li>
+                <li><strong>Question 2:</strong> What is the smaller problem? (e.g., <code>n - 1</code>)</li>
+                <li><strong>Question 3:</strong> How do I combine the answer? (e.g., <code>return n * factorial(n - 1);</code>)</li>
+            </ul>
+        </div>
+    </section>
+</div>
+
+<script>
+// --- Fullscreen Toggle Logic ---
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+    else { if (document.exitFullscreen) { document.exitFullscreen(); } }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const fsIcon = document.getElementById("fsIcon");
+    const fsToggleBtn = document.getElementById("fsToggleBtn");
+    if (document.fullscreenElement) {
+        fsToggleBtn.title = "Shrink Fullscreen";
+        fsIcon.innerHTML = '<path d="M8 3v3H5m14-3v3h3M8 21v-3H5m14 3v-3h3"/>';
+    } else {
+        fsToggleBtn.title = "Expand Fullscreen";
+        fsIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+    }
+});
+
+// --- Dynamic Script Generation ---
+let scriptArray = [];
+let currentStep = 0;
+let playing = false;
+let timer = null;
+let typingTimeout = null;
+let maxStackDepth = 0;
+
+function initDynamicScript() {
+    let inputVal = parseInt(document.getElementById("nInput").value);
+    if(isNaN(inputVal) || inputVal < 1) inputVal = 1;
+    if(inputVal > 5) inputVal = 5;
+    document.getElementById("nInput").value = inputVal;
+    
+    // Generate script array based on N
+    scriptArray = generateScriptAndState(inputVal);
+    maxStackDepth = inputVal + 2; // main() + factorials
+    
+    // Build the visual stack DOM elements
+    const stackContainer = document.getElementById("dynamicStack");
+    stackContainer.innerHTML = "";
+    for(let i=0; i < maxStackDepth; i++) {
+        let slot = document.createElement("div");
+        slot.className = "stack-slot";
+        slot.id = "slot" + i;
+        stackContainer.appendChild(slot);
+    }
+    
+    // Enable controls
+    document.getElementById("btnPrev").disabled = false;
+    document.getElementById("playBtn").disabled = false;
+    document.getElementById("btnNext").disabled = false;
+    document.getElementById("btnReset").disabled = false;
+    
+    resetAnimation();
+}
+
+function generateScriptAndState(n) {
+    let sc = [];
+    let st = []; // stack frames
+    let hist = []; // text history
+    let cons = "";
+
+    const addFrame = (frameStr) => { st.push(frameStr); hist.unshift(frameStr); };
+    const popFrame = () => { st.pop(); hist.shift(); };
+    const updateTop = (frameStr) => { st[st.length-1] = frameStr; hist[0] = frameStr; };
+    const makeStep = (line, msg, anim=null, val=null, sourceSlot=null) => {
+        sc.push({ line, msg, anim, val, sourceSlot, stack: [...st], hist: [...hist], cons });
+    };
+
+    // Initialization
+    addFrame("main()");
+    makeStep(11, "Execution begins in the main() method.");
+    makeStep(12, "A Scanner object is created to read input.");
+    
+    cons = "Enter a number: ";
+    makeStep(13, "We print a prompt asking the user for a number.");
+
+    cons = `Enter a number: ${n}\n`;
+    updateTop(`main()  [n=${n}]`);
+    makeStep(14, `The user enters '${n}'. The local variable n is assigned ${n}.`, "input_n", n);
+
+    addFrame(`factorial(${n})`);
+    makeStep(15, `We call factorial(${n}). This suspends main() and pushes a new frame onto the Stack.`);
+
+    // Recursive Descent
+    for (let i = n; i >= 1; i--) {
+        makeStep(4, `A new frame is active! Inside factorial(n), where local variable n = ${i}.`);
+
+        // Check Condition Animation Step
+        makeStep(5, `Checking condition: is n (${i}) == 0 or 1?`, "check_cond", i, st.length - 1);
+
+        if (i === 1) {
+            makeStep(5, `Condition is TRUE! We hit the base case (n == 1).`);
+        } else {
+            makeStep(5, `Condition is FALSE. We skip the if-block.`);
+            updateTop(`${i} * factorial(${i-1})`);
+            addFrame(`factorial(${i-1})`);
+            makeStep(8, `We must return ${i} * factorial(${i-1}). We pause here and push another frame!`);
+        }
+    }
+
+    // Base Return
+    let retVal = 1;
+    updateTop(`return 1`);
+    makeStep(6, `factorial(1) immediately returns 1. Its frame is ready to pop off the stack.`, "return_val", 1, st.length - 1);
+    popFrame();
+
+    // Recursive Ascent
+    for (let i = 2; i <= n; i++) {
+        let prevVal = retVal;
+        retVal = i * prevVal;
+        updateTop(`return ${i} * ${prevVal}`);
+        makeStep(8, `Back in factorial(${i}), it substitutes ${prevVal}. It calculates ${i} * ${prevVal} = ${retVal}.`, "return_val", retVal, st.length - 1);
+        popFrame();
+    }
+
+    updateTop(`main()`);
+    makeStep(15, `Finally, control returns to main(). The calculated factorial is ${retVal}.`, "throw_console", retVal);
+    
+    cons = `Enter a number: ${n}\nFactorial = ${retVal}\n`;
+    makeStep(16, `We print the final output. Execution is complete!`);
+
+    return sc;
+}
+
+
+// --- Animation Logistics ---
+function hideHuman() {
+    const c = document.getElementById("carrier1");
+    c.getAnimations().forEach(a => a.cancel());
+    c.style.opacity = "0";
+    c.classList.remove("active", "walking", "printing");
+    document.getElementById("condAlert").classList.remove("show");
+}
+
+function animateHumanMove(startId, endId, val, duration = 1200) {
+    return new Promise(resolve => {
+        const startEl = document.getElementById(startId);
+        const endEl = document.getElementById(endId);
+        const c1 = document.getElementById("carrier1");
+        if (!startEl || !endEl || !c1) { resolve(); return; }
+
+        const sRect = startEl.getBoundingClientRect();
+        const eRect = endEl.getBoundingClientRect();
+
+        let startX = sRect.left + (sRect.width/2) - 15;
+        let startY = sRect.top - 20;
+        let endX = eRect.left + (eRect.width/2) - 15;
+        let endY = eRect.top - 20;
+
+        c1.querySelector(".carrier-value").textContent = val;
+        c1.className = "value-carrier active walking";
+        c1.style.opacity = "1";
+
+        const anim = c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 0, offset: 0 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0.1 },
+            { transform: `translate3d(${endX}px,${endY}px,0)`, opacity: 1, offset: 0.9 },
+            { transform: `translate3d(${endX}px,${endY}px,0)`, opacity: 0, offset: 1 }
+        ], { duration, easing: "linear", fill: "forwards" });
+
+        anim.onfinish = () => resolve();
+    });
+}
+
+function humanThrowConsole(startId, endId, val, duration = 1500) {
+    return new Promise(resolve => {
+        const startEl = document.getElementById(startId);
+        const endEl = document.getElementById(endId);
+        const c1 = document.getElementById("carrier1");
+        if (!startEl || !endEl || !c1) { resolve(); return; }
+
+        const sRect = startEl.getBoundingClientRect();
+        const eRect = endEl.getBoundingClientRect();
+        let startX = sRect.left + (sRect.width/2) - 30;
+        let startY = sRect.top - 30;
+
+        c1.querySelector(".carrier-value").textContent = val;
+        c1.className = "value-carrier active printing";
+        c1.style.opacity = "1";
+
+        const thrown = document.createElement("div");
+        thrown.className = "throw-value flying";
+        thrown.textContent = val;
+        document.body.appendChild(thrown);
+
+        let handX = startX + 70; let handY = startY + 20;
+        thrown.style.left = `${handX}px`; thrown.style.top = `${handY}px`;
+        let endX = eRect.left + 50; let endY = eRect.top + 30;
+        let deltaX = endX - handX; let deltaY = endY - handY;
+
+        thrown.animate([
+            { transform: "translate3d(0,0,0) scale(1)", opacity: 1 },
+            { transform: `translate3d(${deltaX*0.3}px,-100px,0) scale(1.2)`, opacity: 1 },
+            { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(0.8)`, opacity: 0 }
+        ], { duration: 1200, easing: "cubic-bezier(.22,.72,.28,1)", fill: "forwards" });
+
+        c1.animate([
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 1, offset: 0.9 },
+            { transform: `translate3d(${startX}px,${startY}px,0)`, opacity: 0, offset: 1 }
+        ], { duration: 1500, easing: "linear", fill: "forwards" });
+
+        setTimeout(() => { thrown.remove(); resolve(); }, 1200);
+    });
+}
+
+function renderStep() {
+    if(scriptArray.length === 0) return;
+    const s = scriptArray[currentStep];
+    document.getElementById("status").textContent = `Step ${currentStep + 1} / ${scriptArray.length}`;
+
+    // Source Code Highlight
+    document.querySelectorAll(".code-line").forEach(l => l.classList.remove("active"));
+    if (s.line) document.getElementById("line" + s.line).classList.add("active");
+
+    hideHuman();
+
+    // Update Visual Stack Memory Boxes
+    for(let i=0; i<maxStackDepth; i++) {
+        let el = document.getElementById("slot" + i);
+        el.textContent = s.stack[i] || "";
+        if(s.stack[i]) {
+            el.style.backgroundColor = '#ffff00';
+            el.style.borderTop = '2px solid var(--stick-stroke)';
+        } else {
+            el.style.backgroundColor = 'transparent';
+            el.style.borderTop = '2px solid rgba(0,0,0,0.1)';
+            if(i===0) el.style.borderTop = 'none';
+        }
+    }
+
+    // Update Call Stack History Text
+    let histHTML = "";
+    s.hist.forEach((h, idx) => {
+        if(idx === 0) histHTML += `<div class="stack-frame-right active-stack">${h}</div>`;
+        else histHTML += `<div class="stack-frame-right">${h}</div>`;
+    });
+    document.getElementById("callStackBox").innerHTML = histHTML;
+
+    // Update Console Text
+    document.getElementById("consoleBox").textContent = s.cons;
+
+    // Handle Animations
+    if (s.anim === "input_n") {
+        animateHumanMove("consoleBox", "slot0", s.val, 1200);
+    }
+    else if (s.anim === "check_cond") {
+        // Human walks from current stack frame to the if condition line
+        let srcSlot = "slot" + s.sourceSlot;
+        animateHumanMove(srcSlot, "line5", s.val, 1500).then(() => {
+            // Flash a true/false condition indicator
+            let alertBox = document.getElementById("condAlert");
+            alertBox.textContent = (s.val === 1 || s.val === 0) ? "TRUE" : "FALSE";
+            alertBox.classList.add("show");
+        });
+    }
+    else if (s.anim === "return_val") {
+        let srcSlot = "slot" + s.sourceSlot;
+        let dstSlot = "slot" + (s.sourceSlot - 1);
+        animateHumanMove(srcSlot, dstSlot, s.val, 1200);
+    }
+    else if (s.anim === "throw_console") {
+        humanThrowConsole("slot0", "consoleBox", s.val, 1500).then(() => {
+            document.getElementById("consoleBox").textContent += `Factorial = ${s.val}\n`;
+        });
+    }
+
+    // Narrator Typwriter
+    const caption = document.getElementById("mascotCaption");
+    if (typingTimeout) clearInterval(typingTimeout);
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+    let i = 0;
+    typingTimeout = setInterval(() => {
+        if (i < s.msg.length) caption.textContent += s.msg.charAt(i++);
+        else { clearInterval(typingTimeout); caption.classList.remove("typing-cursor"); }
+    }, 30);
+}
+
+function nextStep() { pause(); if (currentStep < scriptArray.length - 1) { currentStep++; renderStep(); } }
+function previousStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(); } }
+function resetAnimation() { pause(); currentStep = 0; renderStep(); }
+
+function play() {
+    playing = true; document.getElementById("playBtn").innerHTML = "<span>⏸</span><span>Pause</span>";
+    timer = setInterval(() => {
+        if (currentStep >= scriptArray.length - 1) { pause(); return; }
+        currentStep++; renderStep();
+    }, 4500); // Slightly longer delay to allow condition check animations to finish
+}
+function pause() { playing = false; document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play</span>"; if (timer) clearInterval(timer); }
+function togglePlay() { if (playing) pause(); else play(); }
+
+</script>
+</body>
+</html>

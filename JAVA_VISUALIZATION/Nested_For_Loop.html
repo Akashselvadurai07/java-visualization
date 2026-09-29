@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Control Flow: Nested For Loop</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+    --code-bg: rgba(47, 95, 208, 0.08);
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #f97316;
+    --var2: #10b981;
+    --val: #1c8a5f;
+    --cmt: #6b7280;
+    --math-op: #e11d48;
+    
+    --barrier: #ef4444;
+
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+    --code-bg: rgba(134, 169, 255, 0.1);
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #f97316;
+    --var2: #10b981;
+    --val: #6fe3ac;
+    --cmt: #9099a6;
+    --math-op: #fb7185;
+    
+    --barrier: #f87171;
+
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1750px; margin: 0 auto; padding: 16px 24px 24px; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+
+/* ---------- 3-COLUMN STAGE ---------- */
+.stage { display: grid; grid-template-columns: 1.1fr 1fr 0.9fr; gap: 16px; flex-grow: 1; position: relative; }
+.col { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--rule); }
+.panel-label, .panel-tag { font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- NARRATOR & HEADER ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+.narrator-body { display: flex; align-items: center; gap: 16px; padding: 16px 20px; flex-wrap: wrap; }
+.main-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 32px; margin: 0; color: var(--ink); padding-right: 16px; border-right: 1px solid var(--rule); }
+
+.mascot-frame { width: 68px; height: 68px; flex-shrink: 0; border-radius: 10px; background: var(--paper); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+
+.speech-bubble { position: relative; flex: 1; min-width: 200px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px; transform-origin: left center; }
+.speech-bubble p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); min-height: 24px; font-weight: 500;}
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Controls */
+.top-controls { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.theme-toggle { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--rule-strong); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.expand-btn { width: auto; padding: 0 16px; border-radius: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; color: var(--ink); }
+.expand-btn svg { margin-right: 8px; width: 20px; height: 20px; }
+
+/* ---------- COLUMN 1: SOURCE CODE ---------- */
+.code-body { font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.8; padding: 16px 0; height: 450px; overflow-y: auto; scroll-behavior: smooth; position: relative; }
+.code-line { display: flex; padding: 2px 20px; border-left: 4px solid transparent; white-space: pre; transition: background 0.25s ease, border-color 0.25s ease; position: relative; }
+.spacer-line { margin-bottom: 20px; }
+.code-line.active { background: rgba(255, 176, 0, 0.12); border-left-color: var(--accent); }
+.ln { width: 36px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 16px; }
+.code-line.active .ln { color: var(--accent-ink); font-weight: 700; }
+.kw { color: var(--kw); font-weight: 600;}
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.vr2 { color: var(--var2); font-weight: 600; }
+.val { color: var(--val); }
+.op { color: var(--math-op); font-weight: 700; }
+.str { color: var(--val); transition: opacity 0.3s; }
+.cmt { color: var(--cmt); font-style: italic; }
+
+/* ---------- COLUMN 2: FOCUS WORKSPACE ---------- */
+.focus-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.focus-body { padding: 40px 20px 20px; flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; min-height: 300px; }
+
+.focus-slot { display: none; width: 100%; flex-direction: column; align-items: center; justify-content: flex-start; gap: 30px; padding: 24px; border: 1.5px solid var(--accent); background: var(--accent-wash); border-radius: 16px; position: relative; }
+.focus-slot.show { display: flex; }
+
+.execution-code { font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--code-bg); border: 1px dashed var(--dt); padding: 10px 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; z-index: 20; }
+.execution-code .kw { color: var(--kw); }
+.execution-code .op { color: var(--math-op); }
+.execution-code .val { color: var(--val); }
+.execution-code .vr { color: var(--var); }
+.execution-code .vr2 { color: var(--var2); }
+
+/* Math Stage & Animations */
+.math-stage { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; z-index: 15; font-family: "JetBrains Mono", monospace; }
+.m-op-val { font-size: 28px; font-weight: 700; color: var(--val); opacity: 0; transform: scale(0.5) translateY(-20px); }
+.m-symb { font-size: 44px; color: var(--math-op); font-weight: 700; opacity: 0; transform: scale(0); }
+
+.math-stage.do-math .m-op-val { animation: mathDropIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.math-stage.do-math .m-op-val:nth-child(3) { animation-delay: 0.15s; }
+.math-stage.do-math .m-symb { animation: mathSymPulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 0.3s; }
+
+.math-success .m-symb { color: var(--val); text-shadow: 0 0 12px rgba(28,138,95,0.6); transition: all 0.3s ease; }
+.math-fail .m-symb { color: var(--barrier); text-shadow: 0 0 12px rgba(239,68,68,0.6); transition: all 0.3s ease; }
+
+@keyframes mathDropIn { to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes mathSymPulse { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+/* Bottom Placards */
+.board-placard { background: var(--panel); border: 1.5px solid var(--placard-border); border-radius: 9px; padding: 12px 14px; width: 300px; font-family: "JetBrains Mono", monospace; font-size: 13px; opacity: 0; transform: translateY(10px); z-index: 3; text-align: center; margin-top: auto;}
+.focus-slot.eval .board-placard, .focus-slot.stored .board-placard { opacity: 1; transform: translateY(0); animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s backwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* ---------- ITERATION TRACKER TABLE ---------- */
+.tracker-wrapper { border-top: 1px solid var(--rule); background: var(--paper); border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; overflow-y: auto; max-height: 220px; padding-bottom: 15px; scroll-behavior: smooth;}
+.tracker-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-family: "JetBrains Mono", monospace; font-size: 12px; text-align: center; padding: 0 15px; }
+.tracker-table th { background: var(--paper); color: var(--muted); padding: 8px 6px; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; border-bottom: 2px dashed var(--rule); position: sticky; top: 0; z-index: 5;}
+
+.tracker-table td { padding: 8px 6px; color: var(--ink); opacity: 0.3; transition: all 0.3s ease; background: var(--panel); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.tracker-table td:first-child { border-left: 1px solid var(--rule); border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+.tracker-table td:last-child { border-right: 1px solid var(--rule); border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+
+.tracker-table tbody tr { display: none; }
+.tracker-table tbody tr.revealed { display: table-row; }
+
+.tracker-table tr.active td { 
+    background: rgba(255, 176, 0, 0.08); color: var(--accent-ink); font-weight: 700; 
+    border-top-color: var(--accent); border-bottom-color: var(--accent); opacity: 0; 
+    animation: cellSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.tracker-table tr.active td:first-child { border-left-color: var(--accent); }
+.tracker-table tr.active td:last-child { border-right-color: var(--accent); box-shadow: 4px 0 12px rgba(255, 176, 0, 0.1); }
+
+@keyframes cellSlideUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+
+.tracker-table tr.done td { opacity: 0.5; background: transparent; border-color: transparent; }
+.tracker-table tr.done td:first-child { border-left-color: transparent; }
+.tracker-table tr.done td:last-child { border-right-color: transparent; box-shadow: none; }
+
+.badge { padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 10px; display: inline-block; letter-spacing: 0.05em; text-transform: uppercase; box-shadow: inset 0 0 0 1.5px currentColor; background: transparent; }
+.badge-true { color: var(--val); background: rgba(28, 138, 95, 0.1); }
+.badge-false { color: var(--barrier); background: rgba(239, 68, 68, 0.1); }
+.badge-exit { background: var(--barrier); color: white; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); border-radius: 6px; padding: 4px 8px; border: none; margin-left: 4px;}
+
+.action-text { display: inline-block; transition: all 0.3s ease; }
+.action-pop { position: relative; z-index: 5; color: var(--val) !important; font-weight: 900 !important; animation: textPopAction 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important; }
+@keyframes textPopAction { 0% { transform: scale(1); text-shadow: 0 0 0 rgba(28, 138, 95, 0); } 50% { transform: scale(1.25); text-shadow: 0 0 12px rgba(28, 138, 95, 0.8); } 100% { transform: scale(1); text-shadow: 0 0 5px rgba(28, 138, 95, 0.3); } }
+
+/* ---------- COLUMN 3: STACK TRAY / ARRAY VISUALIZATION ---------- */
+.stack-tray-panel { display: flex; flex-direction: column; flex: 1; }
+.stack-tray-body { padding: 24px; flex: 1; display: flex; flex-direction: column; gap: 24px; overflow-y: auto; align-items: center;}
+.tray-empty { font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); text-align: center; padding: 24px 8px; transition: opacity 0.3s; width: 100%;}
+
+.var-tracker-container { display: none; flex-direction: column; gap: 20px; width: 100%; max-width: 400px;}
+.var-track { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.var-track-left { display: flex; align-items: center; gap: 12px; }
+.var-label { font-size: 24px; font-family: "JetBrains Mono", monospace; font-weight: bold; width: 20px; color: var(--ink); }
+
+.array-blocks { display: flex; border-radius: 2px; border: 1px solid var(--rule-strong); overflow: hidden; }
+.a-block { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500; font-family: "IBM Plex Sans", sans-serif; color: #000; border-right: 1px solid rgba(0,0,0,0.15); opacity: 0.3; transition: all 0.3s ease; }
+.a-block:last-child { border-right: none; }
+.i-blocks { background-color: var(--var); }
+.j-blocks { background-color: var(--var2); }
+.a-block.active { opacity: 1; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 5; font-weight: 700; background: inherit; border-radius: 4px; border: 1px solid rgba(255,255,255,0.8);}
+
+.curr-readout { display: flex; align-items: center; gap: 10px; font-size: 16px; font-family: "IBM Plex Sans", sans-serif; color: var(--ink);}
+.curr-val { width: 36px; height: 36px; border: 1.5px solid #228b22; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; font-family: "IBM Plex Sans", sans-serif; color: var(--ink); transition: transform 0.2s;}
+.curr-val.empty { border-color: var(--rule-strong); color: var(--muted); }
+.curr-val.bumping { transform: scale(1.2); border-color: var(--val); border-width: 2px;}
+
+/* COLORED GRID MAP STYLES */
+.grid-vis { display: flex; width: 100%; max-width: 320px; flex-direction: column; align-items: center; gap: 6px; margin-top: 10px; padding-top: 20px; border-top: 2px dashed var(--rule); z-index: 25; }
+.grid-title { font-family: "Space Grotesk", sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); text-align: center; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;}
+.grid-container { display: grid; grid-template-columns: 30px repeat(3, 50px); gap: 4px; align-items: center; justify-items: center; }
+.grid-header { font-size: 20px; font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; color: var(--ink); }
+.n-cell { width: 100%; height: 50px; border: 1px solid var(--rule); background: var(--panel); display: flex; align-items: center; justify-content: center; font-family: "JetBrains Mono", monospace; font-size: 12px; color: transparent; transition: all 0.3s ease; }
+.n-cell.filled { color: #000; border-color: rgba(0,0,0,0.1); font-weight: 700;}
+
+/* Matching image colors */
+.cell-0-0.filled { background-color: #fff200; }
+.cell-0-1.filled { background-color: #92d050; }
+.cell-0-2.filled { background-color: #00b050; color: white;}
+.cell-1-0.filled { background-color: #00b0f0; }
+.cell-1-1.filled { background-color: #0070c0; color: white;}
+.cell-1-2.filled { background-color: #ff0000; color: white;}
+.cell-2-0.filled { background-color: #ed7d31; }
+.cell-2-1.filled { background-color: #7030a0; color: white;}
+.cell-2-2.filled { background-color: #b4c6e7; }
+
+.n-cell.active { border: 3px solid #228b22; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10; }
+
+/* ---------- GLOBAL SCENE PROPS ---------- */
+.blocked-sticker { position: fixed; color: #ef4444; border: 3px solid #ef4444; border-radius: 8px; padding: 2px 8px; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; background: rgba(239, 68, 68, 0.1); backdrop-filter: blur(2px); transform: rotate(-10deg) scale(0); opacity: 0; z-index: 50; pointer-events: none; }
+.blocked-sticker.active { animation: stampStamp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes stampStamp { 0% { opacity: 0; transform: rotate(-10deg) scale(2); } 100% { opacity: 1; transform: rotate(-10deg) scale(1); } }
+
+.spark { position: fixed; width: 6px; height: 6px; border-radius: 50%; z-index: 99998; pointer-events: none; }
+.zap-fx { position: fixed; color: var(--barrier); font-weight: 900; font-size: 28px; z-index: 99998; pointer-events: none; text-shadow: 0 0 15px var(--barrier); font-style: italic; }
+.throw-item { position: fixed; z-index: 100000; pointer-events: none; opacity: 0; margin:0; white-space: nowrap; }
+
+/* ---------- ADVANCED ACTOR ---------- */
+.actor-wrapper { position: fixed; left: 0; top: 0; width: 60px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; opacity: 0; z-index: 99999; pointer-events: none; transform: translate3d(-200px, -200px, 0); transform-origin: bottom center; }
+.actor-person { width: 45px; height: 60px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.3)); transition: transform 0.15s ease-out;}
+.actor-person .skin { fill: #f2c9a0; }
+.actor-person .shirt { fill: var(--dt); }
+.actor-person .outline { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: d 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+
+.actor-payload { position: absolute; top: -15px; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--val); background: var(--panel); color: var(--val); font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; text-align: center; box-shadow: 0 5px 14px rgba(0,0,0,.15); opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+
+/* Walk Cycle */
+.actor-wrapper.walking .actor-person { animation: bodyBounce 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-l { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .leg-r { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-l { animation: walkSwing 0.4s infinite alternate-reverse cubic-bezier(0.4, 0, 0.6, 1); }
+.actor-wrapper.walking .arm-r { animation: walkSwing 0.4s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+
+@keyframes walkSwing { 0% { transform: rotate(-25deg); } 100% { transform: rotate(25deg); } }
+@keyframes bodyBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-4px); } }
+
+/* ---------- CONSOLE PANEL ---------- */
+.console-body { background: var(--term-bg); padding: 20px 24px; font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 2; height: 160px; overflow-y: auto; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; }
+.term-line { color: var(--term-text); opacity: 0; transform: translateX(-6px); display: none; white-space: pre-wrap;}
+.term-line.show { opacity: 1; transform: translateX(0); display: block;}
+.term-line::before { content: "$ > "; color: var(--term-muted); }
+.term-line.receiving { animation: consoleReceive .6s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes consoleReceive { 0% { transform:translateX(-20px) scale(.6); opacity:0; } 60% { transform:translateX(5px) scale(1.15); opacity:1; } 100% { transform:translateX(0) scale(1); opacity:1; } }
+
+/* ---------- TRANSPORT BAR ---------- */
+.transport-bar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:16px 20px; border-top: 1px solid var(--rule); gap:12px; }
+.step-status { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--muted); min-width: 120px; font-weight: 600;}
+.transport-controls { display:flex; gap:10px; }
+.transport-bar button { font-family:"JetBrains Mono",monospace; font-size:14px; font-weight:600; background:var(--panel); color:var(--ink); border:1px solid var(--rule); border-radius:6px; height: 38px; padding: 0 16px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor:pointer; transition: all 0.2s ease; }
+.transport-bar button:hover:not(:disabled) { border-color: var(--rule-strong); background: var(--paper); }
+.transport-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+.transport-bar button.primary { background: #111418; color: #ffffff; border-color: #111418; }
+.transport-bar button.primary:hover:not(:disabled) { background: #222831; }
+.transport-bar button.primary span:first-child { color: var(--accent); } 
+
+/* ---------- TUTORIAL CONTENT SECTION ---------- */
+.content-section { margin-top: 24px; background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 40px; line-height: 1.7; display: flex; flex-direction: column; gap: 20px;}
+.content-section h2 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 26px; margin-top: 20px; margin-bottom: 8px; border-bottom: 2px solid var(--rule); padding-bottom: 8px; color: var(--ink); }
+.content-section h3 { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 20px; margin-top: 16px; margin-bottom: 8px; color: var(--ink); }
+.content-section p { margin-top: 0; margin-bottom: 12px; }
+.content-section pre { background: var(--term-bg); color: var(--term-text); padding: 16px 20px; border-radius: 8px; font-family: "JetBrains Mono", monospace; font-size: 14px; border: 1px solid var(--rule); overflow-x: auto;}
+.content-section code { background: var(--code-bg); color: var(--dt); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; }
+.content-section ul { padding-left: 20px; margin: 0; }
+.content-section li { margin-bottom: 12px; color: var(--muted); }
+.highlight-box { background: var(--accent-wash); padding: 16px 20px; border-radius: 8px; border-left: 4px solid var(--accent); margin: 10px 0; font-weight: 500; }
+
+.content-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-family: "IBM Plex Sans", sans-serif; font-size: 15px; }
+.content-table th, .content-table td { border: 1px solid var(--rule); padding: 12px 16px; text-align: left; }
+.content-table th { background: var(--paper); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; border-bottom: 2px solid var(--rule-strong); }
+.content-table td { color: var(--ink); font-family: "JetBrains Mono", monospace; font-size: 14px; }
+.content-table tr:nth-child(even) { background-color: var(--accent-wash); }
+
+@media (max-width: 1200px) { .stage { grid-template-columns: 1fr; } .main-title { width: 100%; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 10px;} .transport-bar { flex-direction: column; align-items: flex-start; } .transport-controls { flex-wrap: wrap; } .var-track { flex-direction: column; align-items: flex-start;} }
+</style>
+</head>
+<body>
+
+<div class="blocked-sticker" id="global_barrier_1">BLOCKED</div>
+
+<div id="actor" class="actor-wrapper">
+    <div class="actor-payload" id="actorPayload"></div>
+    <svg class="actor-person" viewBox="0 0 40 60">
+        <g class="legs">
+            <path class="outline leg-l" fill="none" d="M16,40 L16,58" style="transform-origin: 16px 40px;"></path>
+            <path class="outline leg-r" fill="none" d="M24,40 L24,58" style="transform-origin: 24px 40px;"></path>
+        </g>
+        <g class="arms">
+            <path class="skin outline arm-l" fill="none" d="M12,24 L5,36" style="transform-origin: 12px 24px;"></path>
+            <path class="skin outline arm-r" fill="none" d="M28,24 L35,36" style="transform-origin: 28px 24px;"></path>
+        </g>
+        <rect class="shirt outline" x="12" y="20" width="16" height="20" rx="6"></rect>
+        <circle class="skin outline head" cx="20" cy="11" r="8"></circle>
+        <path class="outline" fill="none" d="M17,11 L19,11 M23,11 L25,11"></path>
+    </svg>
+</div>
+
+<div class="page">
+    <section class="panel narrator-panel">
+        <div class="narrator-body">
+            <h1 class="main-title">Control Flow: Nested Loop</h1>
+            <div class="mascot-frame" id="avatarContainer">
+                <img class="mascot-avatar" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            <div class="speech-bubble" id="speechBubble"><p id="mascotCaption"></p></div>
+            <div class="top-controls">
+                <button class="expand-btn theme-toggle" onclick="toggleFullScreen()" title="Expand Fullscreen">
+                    <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    <span>Expand</span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="stage">
+        <!-- COLUMN 1: SOURCE & CONSOLE -->
+        <div class="col">
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Source</span><span class="panel-tag">Main.java</span></div>
+                <div class="code-body" id="sourceBox">
+                    <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span> Main {</div>
+                    <div class="code-line" id="line2"><span class="ln">2</span>  <span class="kw">public static void</span> main(String[] args) {</div>
+                    <div class="code-line" id="line3"><span class="ln">3</span></div>
+                    <div class="code-line" id="line4"><span class="ln">4</span>    <span class="kw" id="kw_for_outer">for</span>(<span class="dt">int </span> <span class="vr" id="src_out_init">i</span> = <span class="val">0</span>; <span class="vr" id="src_out_cond">i</span> < <span class="val">3</span>; <span class="vr" id="src_out_inc">i</span><span class="op">++</span>) {</div>
+                    <div class="code-line" id="line5"><span class="ln">5</span>      <span class="kw" id="kw_for_inner">	for</span>(<span class="dt">int </span> <span class="vr2" id="src_in_init">j</span> = <span class="val">0</span>; <span class="vr2" id="src_in_cond">j</span> < <span class="val">3</span>; <span class="vr2" id="src_in_inc">j</span><span class="op">++</span>) {</div>
+                    <div class="code-line" id="line6"><span class="ln">6</span>              System.out.print(<span class="str">"("</span> + <span class="vr" id="src_print_i">i</span> + <span class="str">","</span> + <span class="vr2" id="src_print_j">j</span> + <span class="str">") "</span>);</div>
+                    <div class="code-line" id="line7"><span class="ln">7</span>      }</div>
+                    <div class="code-line" id="line8"><span class="ln" id="ln_8">8</span>      System.out.println(); <span class="cmt">// Print \n at end of row</span></div>
+                    <div class="code-line" id="line9"><span class="ln" id="ln_9">9</span>    }</div>
+                    <div class="code-line" id="line10"><span class="ln" id="ln_10">10</span>  }</div>
+                    <div class="code-line" id="line11"><span class="ln">11</span>}</div>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout</span></div>
+                <div class="console-body" id="consoleBox">
+                    <div class="term-line show" id="current_term_line"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 2: MIDDLE FOCUS WORKSPACE -->
+        <div class="col">
+            <section class="panel focus-panel">
+                <div class="panel-head"><span class="panel-label">Execution Focus</span><span class="panel-tag" id="focusTag">Standby</span></div>
+                <div class="focus-body" id="focusBody">
+                    <!-- SLOT: Outer Init -->
+                    <div class="focus-slot" id="focus_out_init">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr">i</span> = <span class="val">0</span>;</div>
+                        <div class="board-placard" style="margin-top: 150px;">Creating <b>Outer Loop</b> counter <span class="vr">i</span>.</div>
+                    </div>
+
+                    <!-- SLOT: Outer Cond -->
+                    <div class="focus-slot" id="focus_out_cond">
+                        <div class="execution-code"><span class="vr">i</span> < <span class="val">3</span></div>
+                        <div class="math-stage" id="math_out_cond">
+                            <span class="m-op-val" id="mc_v1_out">0</span>
+                            <span class="m-symb"><</span>
+                            <span class="m-op-val">3</span>
+                        </div>
+                        <div class="board-placard" style="margin-top: 150px;">Checking <b>Outer Loop</b> condition.</div>
+                    </div>
+
+                    <!-- SLOT: Inner Init -->
+                    <div class="focus-slot" id="focus_in_init">
+                        <div class="execution-code"><span class="dt">int</span> <span class="vr2">j</span> = <span class="val">0</span>;</div>
+                        <div class="board-placard" style="margin-top: 150px;">Creating <b>Inner Loop</b> counter <span class="vr2">j</span>.</div>
+                    </div>
+
+                    <!-- SLOT: Inner Cond -->
+                    <div class="focus-slot" id="focus_in_cond">
+                        <div class="execution-code"><span class="vr2">j</span> < <span class="val">3</span></div>
+                        <div class="math-stage" id="math_in_cond">
+                            <span class="m-op-val" id="mc_v1_in">0</span>
+                            <span class="m-symb"><</span>
+                            <span class="m-op-val">3</span>
+                        </div>
+                        <div class="board-placard" style="margin-top: 150px;">Checking <b>Inner Loop</b> condition.</div>
+                    </div>
+
+                    <!-- SLOT: Print -->
+                    <div class="focus-slot" id="focus_print">
+                        <div class="execution-code">System.out.print(<span class="str">"("</span> + <span class="vr">i</span> + <span class="str">","</span> + <span class="vr2">j</span> + <span class="str">") "</span>);</div>
+                        <div class="board-placard" style="margin-top: 150px;">Appending to the current row and updating grid.</div>
+                    </div>
+
+                    <!-- SLOT: Println -->
+                    <div class="focus-slot" id="focus_println">
+                        <div class="execution-code">System.out.println();</div>
+                        <div class="board-placard" style="margin-top: 150px;">Creating a new line (\n) for the console.</div>
+                    </div>
+
+                    <!-- SLOT: Inner Increment -->
+                    <div class="focus-slot" id="focus_in_inc">
+                        <div class="execution-code"><span class="vr2">j</span><span class="op">++</span></div>
+                        <div class="board-placard" style="margin-top: 150px;">Incrementing inner counter <span class="vr2">j</span>.</div>
+                    </div>
+
+                    <!-- SLOT: Outer Increment -->
+                    <div class="focus-slot" id="focus_out_inc">
+                        <div class="execution-code"><span class="vr">i</span><span class="op">++</span></div>
+                        <div class="board-placard" style="margin-top: 150px;">Incrementing outer counter <span class="vr">i</span>.</div>
+                    </div>
+                </div>
+
+                <!-- ITERATION TRACKER TABLE -->
+                <div class="tracker-wrapper">
+                    <table class="tracker-table" id="trackerTable">
+                        <thead>
+                            <tr>
+                                <th>Iter</th>
+                                <th>Outer <span style="color:var(--var)">i</span></th>
+                                <th>Inner <span style="color:var(--var2)">j</span></th>
+                                <th>Condition</th>
+                                <th>Action Executed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JS Gen -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- COLUMN 3: RIGHT STACK TRAY -->
+        <div class="col">
+            <section class="panel stack-tray-panel" id="stackMemoryPanel">
+                <div class="panel-head"><span class="panel-label">Variable Tracking</span><span class="panel-tag">Arrays</span></div>
+                <div class="stack-tray-body" id="stackTrayBody">
+                    <div class="tray-empty" id="trayEmpty">— no variables stored —</div>
+                    
+                    <div class="var-tracker-container" id="varTracker">
+                        <!-- i Track -->
+                        <div class="var-track">
+                            <div class="var-track-left">
+                                <span class="var-label">i</span>
+                                <div class="array-blocks i-blocks">
+                                    <div class="a-block" id="ib_0">0</div>
+                                    <div class="a-block" id="ib_1">1</div>
+                                    <div class="a-block" id="ib_2">2</div>
+                                </div>
+                            </div>
+                            <div class="curr-readout">current i <div class="curr-val empty" id="curr_i_val"></div></div>
+                        </div>
+
+                        <!-- j Track -->
+                        <div class="var-track">
+                            <div class="var-track-left">
+                                <span class="var-label">j</span>
+                                <div class="array-blocks j-blocks">
+                                    <div class="a-block" id="jb_0">0</div>
+                                    <div class="a-block" id="jb_1">1</div>
+                                    <div class="a-block" id="jb_2">2</div>
+                                </div>
+                            </div>
+                            <div class="curr-readout">current j <div class="curr-val empty" id="curr_j_val"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- COLORED GRID MAP BELOW TRACKER -->
+                    <div class="grid-vis" id="gridVis">
+                        <div class="grid-title"></div>
+                        <div id="gridVisMap">
+                            <!-- JS Gen -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="panel transport-bar">
+                <div class="step-status" id="status">Step 0 / X</div>
+                <div class="transport-controls">
+                    <button class="primary" id="playBtn" onclick="togglePlay()"><span>▶</span><span>Play Auto</span></button>
+                    <button id="prevBtn" onclick="prevStep()" disabled><span>◂</span><span>Prev</span></button>
+                    <button id="nextBtn" onclick="nextStep()"><span>Next Step</span><span>▸</span></button>
+                    <button onclick="resetAnimation()" title="Reset Environment"><span>↻</span></button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TUTORIAL CONTENT SECTION -->
+    <div class="content-section">
+        <h2>Nested Loops: Managing 2D Structure</h2>
+        <p>A nested loop is perfectly suited for working with two-dimensional arrays or grid structures. Every full execution of the inner loop builds a single horizontal "row" before dropping down.</p>
+
+        <h3>The Mechanics</h3>
+        <pre><code>for (int i = 0; i < 3; i++) {       // The "Outer" Row Loop
+    for (int j = 0; j < 3; j++) {   // The "Inner" Column Loop
+        System.out.print("(" + i + "," + j + ") ");
+    }
+    System.out.println();           // The Newline trigger
+}</code></pre>
+        <ul>
+            <li><b>Real-Time Tracking:</b> Watch the <code>Variable Tracking</code> panel on the right. When a value is printed to the console, its corresponding color-coded cell is activated in the 2D array matrix simultaneously.</li>
+            <li><b>The Row Builder:</b> We use <code>System.out.print()</code> (without the 'ln') so that coordinates print horizontally side-by-side matching the columns in the grid matrix.</li>
+            <li><b>The Newline:</b> Once the inner loop completes all its <code>j</code> cycles, execution drops back out. We immediately call <code>System.out.println()</code> to push the console cursor to the next line before starting the next row.</li>
+        </ul>
+    </div>
+
+    <!-- DETAILED NOTES ADDITION -->
+    <div class="content-section">
+        <h2>Detailed Notes: Nested for Loops in Java</h2>
+        
+        <h3>1. Definition</h3>
+        <p>A nested for loop is a for loop placed inside another for loop. The outer loop controls the main/repeated process, while the inner loop runs completely for every single iteration of the outer loop. Multiple levels of nesting are possible.</p>
+        <p><b>General Structure:</b></p>
+        <pre><code>Outer Loop
+    ↓
+    Inner Loop
+        ↓
+        Statements</code></pre>
+
+        <h3>2. How a Nested Loop Works</h3>
+        <p>Suppose the outer loop executes <code>N</code> times and the inner loop executes <code>M</code> times for each outer iteration. Then the inner statements execute <code>N × M</code> times.</p>
+        <div class="highlight-box">Example Concept: If the outer loop runs 3 times and the inner loop runs 4 times: 3 × 4 = 12 executions. The inner loop completes all 4 iterations before the outer loop moves to its next iteration.</div>
+
+        <h3>3. Execution Order</h3>
+        <p>Nested loops follow this order:</p>
+        <ol>
+            <li>Outer loop starts.</li>
+            <li>Inner loop starts.</li>
+            <li>Inner loop completes all its iterations.</li>
+            <li>Outer loop moves to the next iteration.</li>
+            <li>Inner loop starts again.</li>
+        </ol>
+        <p><i>Important Point: The inner loop is restarted for every iteration of the outer loop.</i></p>
+
+        <h3>4. Time Complexity</h3>
+        <p>Time complexity describes how the number of operations grows as the input size increases. For nested loops, the most important question is: <i>How many times does the innermost operation execute?</i></p>
+
+        <h3>5. Two Nested Loops</h3>
+        <p>When both loops depend on N, operations = <code>N × N</code>. Therefore, the Time Complexity is <code>O(N²)</code>. This is called quadratic time complexity.</p>
+
+        <h3>6. Two Different Input Sizes</h3>
+        <p>If the outer loop has N iterations and the inner loop has M iterations, then operations = <code>N × M</code>. Time Complexity is <code>O(N × M)</code>. Do not automatically write O(N²) unless both input sizes are represented by the same N.</p>
+
+        <h3>7. Three & Four Nested Loops</h3>
+        <ul>
+            <li><b>Three Loops:</b> <code>N × N × N</code>. Time Complexity = <code>O(N³)</code> (Cubic).</li>
+            <li><b>Four Loops:</b> <code>N × N × N × N</code>. Time Complexity = <code>O(N⁴)</code>.</li>
+        </ul>
+
+        <h3>9. General Rule</h3>
+        <p>If there are K nested loops and every loop executes N times, the total executions is <code>Nᴷ</code>. Time Complexity: <code>O(Nᴷ)</code>.</p>
+
+        <h3>10. Nested Loop Does Not Always Mean O(N²)</h3>
+        <p>This is a very important concept. The number of nested loops alone does not determine the time complexity. For example, if the outer loop takes N iterations and the inner loop takes a constant 10 iterations: Total = <code>N × 10</code>. Since constants are ignored, Time Complexity is <code>O(N)</code>. So: Nested loop ≠ automatically O(N²).</p>
+
+        <h3>11. Constant Inner Loop</h3>
+        <p>If the inner loop always executes a fixed number of times, such as 5, 10, or 100: <code>N × Constant</code>. Therefore, Time Complexity is <code>O(N)</code>. The constant does not grow with the input.</p>
+
+        <h3>12. Inner Loop Depends on Outer Loop</h3>
+        <p>Sometimes the number of inner-loop iterations changes depending on the outer-loop value. For example, the inner loop may execute: <code>1 + 2 + 3 + 4 + ... + N</code>. The total is <code>N(N + 1) / 2</code>. Expanding this gives <code>(N² + N) / 2</code>. For Big-O analysis, constants and lower-order terms are ignored. Therefore, Time Complexity is <code>O(N²)</code>.</p>
+
+        <h3>13. Why Is It O(N²)?</h3>
+        <p>Consider the growth: The number of operations grows approximately as N².</p>
+        <table class="content-table" style="width: 50%;">
+            <thead><tr><th>N</th><th>Approximate Operations</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td>1</td></tr>
+                <tr><td>2</td><td>4</td></tr>
+                <tr><td>3</td><td>9</td></tr>
+                <tr><td>10</td><td>100</td></tr>
+                <tr><td>100</td><td>10,000</td></tr>
+                <tr><td>1,000</td><td>1,000,000</td></tr>
+            </tbody>
+        </table>
+
+        <h3>14. Nested Loop With Logarithmic Inner Loop</h3>
+        <p>Sometimes the inner loop does not increase one-by-one. It may repeatedly Double, Halve, Multiply by a constant, or Divide by a constant. Such a loop generally takes <code>O(log N)</code> operations. If the outer loop takes N operations: <code>N × log N</code>. Therefore, Time Complexity is <code>O(N log N)</code>.</p>
+
+        <h3>15. Common Nested Loop Complexities</h3>
+        <table class="content-table">
+            <thead>
+                <tr>
+                    <th>Outer Loop</th>
+                    <th>Inner Loop</th>
+                    <th>Complexity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>N</td><td>N</td><td>O(N²)</td></tr>
+                <tr><td>N</td><td>M</td><td>O(NM)</td></tr>
+                <tr><td>N</td><td>Constant</td><td>O(N)</td></tr>
+                <tr><td>N</td><td>log N</td><td>O(N log N)</td></tr>
+                <tr><td>log N</td><td>N</td><td>O(N log N)</td></tr>
+                <tr><td>N × N × N</td><td>—</td><td>O(N³)</td></tr>
+            </tbody>
+        </table>
+
+        <h3>16. Nested Loops and 2D Data</h3>
+        <p>Nested loops are commonly used to process two-dimensional data. A two-dimensional structure has Rows and Columns. If there are R rows × C columns, then processing every element requires <code>R × C</code> operations. Time Complexity = <code>O(R × C)</code>. If rows and columns are both N: <code>O(N²)</code>.</p>
+
+        <h3>17. Nested Loops and Pattern Problems</h3>
+        <p>Nested loops are commonly used for: Star patterns, Number patterns, Character patterns, Matrix processing, Row and column operations, and Searching in two-dimensional data. For an N × N pattern: <code>N × N = N²</code>. Time Complexity is <code>O(N²)</code>.</p>
+
+        <h3>18. Nested Loop vs Sequential Loop</h3>
+        <ul>
+            <li><b>Nested:</b> When one loop is inside another, <i>Multiply</i> the number of iterations. (e.g., N × N = N²).</li>
+            <li><b>Sequential:</b> When loops execute one after another, <i>Add</i> the number of iterations. (e.g., N + N = 2N, ignoring the constant, it is O(N)).</li>
+        </ul>
+
+        <h3>19. Effect of break</h3>
+        <p>A break can stop the inner loop before it completes. Therefore, the actual execution may be smaller. However, for worst-case time complexity, if the inner loop can still run N times: Worst Case is <code>O(N²)</code>. Always consider the worst-case number of iterations when determining Big-O unless specifically asked for best or average case.</p>
+
+        <h3>20. Effect of continue</h3>
+        <p><code>continue</code> skips the remaining work of the current iteration and moves to the next iteration. It does not necessarily terminate the loop. Therefore, if the loops still perform N × N iterations, the Time Complexity remains <code>O(N²)</code>.</p>
+
+        <h3>21. Space Complexity of Nested Loops</h3>
+        <p>Nested loops mainly affect time complexity. If the loops use only a fixed number of variables and do not create additional data structures, Space Complexity is <code>O(1)</code>. It is completely possible to have Time Complexity → <code>O(N²)</code> but Space Complexity → <code>O(1)</code>.</p>
+
+        <h3>22. How to Find Nested Loop Time Complexity</h3>
+        <p>Use these steps:</p>
+        <ol>
+            <li><b>Identify the outer loop:</b> Find how many times it executes.</li>
+            <li><b>Identify the inner loop:</b> Find how many times it executes for each outer iteration.</li>
+            <li><b>Multiply:</b> Outer iterations × Inner iterations.</li>
+            <li><b>If there are more levels:</b> Multiply each level.</li>
+            <li><b>Simplify:</b> Remove constants and lower-order terms.</li>
+        </ol>
+
+        <h3>23. Important Complexity Examples</h3>
+        <ul>
+            <li><b>Case 1:</b> Outer: N | Inner: N ➔ N × N = N² ➔ <b>O(N²)</b></li>
+            <li><b>Case 2:</b> Outer: N | Inner: M ➔ N × M ➔ <b>O(NM)</b></li>
+            <li><b>Case 3:</b> Outer: N | Inner: 10 ➔ 10N ➔ <b>O(N)</b></li>
+            <li><b>Case 4:</b> Outer: N | Inner: log N ➔ N log N ➔ <b>O(N log N)</b></li>
+            <li><b>Case 5:</b> Three loops, each N: ➔ N³ ➔ <b>O(N³)</b></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+const MAX_VAL = 2; // Matches 0, 1, 2 for a 3x3 grid
+
+// Initialize Console and Real-Time Grid Map
+const gridMap = document.getElementById('gridVisMap');
+gridMap.className = 'grid-container';
+
+// Top-left corner blank
+gridMap.appendChild(document.createElement('div')); 
+// Column Headers
+for(let c=0; c<=MAX_VAL; c++) {
+    let th = document.createElement('div');
+    th.className = 'grid-header'; th.textContent = c;
+    gridMap.appendChild(th);
+}
+// Rows and cells
+for(let r=0; r<=MAX_VAL; r++) {
+    // Row Header
+    let rh = document.createElement('div');
+    rh.className = 'grid-header'; rh.textContent = r;
+    gridMap.appendChild(rh);
+    // Cells
+    for(let c=0; c<=MAX_VAL; c++) {
+        const cell = document.createElement('div');
+        cell.className = `n-cell cell-${r}-${c}`;
+        cell.id = `cell_${r}_${c}`;
+        cell.textContent = `(${r},${c})`;
+        gridMap.appendChild(cell);
+    }
+}
+
+function toggleTheme() { document.body.classList.toggle("dark"); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e=>{}); } 
+    else { if (document.exitFullscreen) document.exitFullscreen(); }
+}
+
+// --- Animation State & Core Selectors ---
+const actor = document.getElementById('actor');
+const payload = document.getElementById('actorPayload');
+let currentStep = 0;
+let playing = false;
+let activeAnimations = [];
+let typingInterval = null; 
+
+function killAllAnimations() {
+    activeAnimations.forEach(a => { if(a.cancel) a.cancel(); });
+    activeAnimations = [];
+}
+
+async function wait(ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(resolve, ms);
+        activeAnimations.push({ cancel: () => { clearTimeout(t); reject("cancelled"); } });
+    });
+}
+
+function getRect(id) {
+    const el = document.getElementById(id);
+    return el ? el.getBoundingClientRect() : { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 };
+}
+
+function getActorTarget(elemId) {
+    const rect = getRect(elemId);
+    return { y: rect.bottom - 12 };
+}
+
+function setArms(state) {
+    const armL = actor.querySelector('.arm-l');
+    const armR = actor.querySelector('.arm-r');
+    if(state === 'carry') {
+        armL.setAttribute('d', 'M12,24 L0,15'); 
+        armR.setAttribute('d', 'M28,24 L40,15'); 
+    } else if(state === 'throw') {
+        armL.setAttribute('d', 'M12,24 L0,24'); 
+        armR.setAttribute('d', 'M28,24 L40,24'); 
+    } else {
+        armL.setAttribute('d', 'M12,24 L5,36'); 
+        armR.setAttribute('d', 'M28,24 L35,36'); 
+    }
+}
+
+function setFacing(startX, endX) {
+    const scale = endX < startX ? -1 : 1;
+    actor.querySelector('.actor-person').style.transform = `scaleX(${scale}) rotate(0deg)`;
+}
+
+async function actorFadeIn(x, y) {
+    const person = actor.querySelector('.actor-person');
+    if (person) person.style.transform = `scaleX(1) rotate(0deg)`;
+    actor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    
+    const a = actor.animate([{opacity: 0}, {opacity: 1}], {duration: 300, fill: 'forwards'});
+    activeAnimations.push(a); await a.finished.catch(e=>{});
+    actor.style.opacity = "1";
+}
+
+async function actorFadeOut() {
+    const a = actor.animate([{opacity: 1}, {opacity: 0}], {duration: 300, fill: 'forwards'});
+    activeAnimations.push(a); await a.finished.catch(e=>{});
+    actor.style.opacity = "0";
+}
+
+async function animWalk(startX, startY, endX, endY, duration = 900) {
+    setFacing(startX, endX);
+    actor.className = "actor-wrapper walking";
+    const a = actor.animate([ 
+        { transform: `translate3d(${startX}px, ${startY}px, 0)` }, 
+        { transform: `translate3d(${endX}px, ${endY}px, 0)` } 
+    ], { duration, fill: "forwards", easing: "linear" });
+    activeAnimations.push(a); await a.finished.catch(e=>{});
+    actor.className = "actor-wrapper";
+}
+
+async function animJumpParabola(startX, startY, endX, endY, peakHeight, flips, duration = 700) {
+    actor.className = "actor-wrapper";
+    actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`;
+    
+    const pre = actor.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scaleY(1)` }, 
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scaleY(0.7) scaleX(1.2)` }
+    ], { duration: 150, fill: "forwards" });
+    activeAnimations.push(pre); await pre.finished.catch(e=>{});
+
+    const midX = startX + (endX - startX) / 2;
+    const peakY = Math.min(startY, endY) - peakHeight;
+    const rotateEnd = flips * 360 * (endX < startX ? -1 : 1);
+
+    const a = actor.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) rotate(0deg) scale(1)` },
+        { transform: `translate3d(${midX}px, ${peakY}px, 0) rotate(${rotateEnd / 2}deg) scale(1.1)`, offset: 0.5 },
+        { transform: `translate3d(${endX}px, ${endY}px, 0) rotate(${rotateEnd}deg) scale(1)` }
+    ], { duration, fill: "forwards", easing: "cubic-bezier(.3, .8, .4, 1)" });
+    activeAnimations.push(a); await a.finished.catch(e=>{});
+
+    const post = actor.animate([
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scaleY(0.6) scaleX(1.3)` }, 
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scale(1)` }
+    ], { duration: 250, fill: "forwards", easing: "ease-out" });
+    activeAnimations.push(post); await post.finished.catch(e=>{});
+}
+
+function pasteSticker(id, anchorId, offsetX = 10, offsetY = -5) {
+    const sticker = document.getElementById(id);
+    const rect = getRect(anchorId);
+    sticker.style.top = (rect.top + offsetY) + 'px';
+    sticker.style.left = (rect.right + offsetX) + 'px';
+    return sticker;
+}
+
+function createSparks(x, y, color = 'var(--barrier)') {
+    for(let i=0; i<12; i++) {
+        let s = document.createElement('div');
+        s.className = 'spark';
+        s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.backgroundColor = color;
+        document.body.appendChild(s);
+        let angle = Math.random() * Math.PI * 2; let dist = Math.random() * 60 + 20;
+        s.animate([ 
+            {transform: 'translate(0,0) scale(1)', opacity: 1}, 
+            {transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0}
+        ], {duration: 400 + Math.random()*300, easing: 'cubic-bezier(.25, .8, .25, 1)'});
+        setTimeout(()=>s.remove(), 700);
+    }
+}
+
+async function throwElement(htmlString, startX, startY, endX, endY, duration = 800) {
+    const thrown = document.createElement("div");
+    thrown.className = "throw-item"; thrown.innerHTML = htmlString;
+    document.body.appendChild(thrown);
+
+    const a = thrown.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) scale(1) rotate(0deg)`, opacity: 1 },
+        { transform: `translate3d(${startX + (endX-startX)*0.4}px, ${startY - 120}px, 0) scale(1.3) rotate(-20deg)`, opacity: 1, offset: 0.5 },
+        { transform: `translate3d(${endX}px, ${endY}px, 0) scale(0.7) rotate(10deg)`, opacity: 0 }
+    ], { duration, easing: "ease-in-out", fill: "forwards" });
+    activeAnimations.push(a); await a.finished.catch(e=>{}); thrown.remove();
+}
+
+function typeText(text) {
+    const el = document.getElementById('mascotCaption');
+    el.textContent = ""; el.classList.add("typing-cursor");
+    let i = 0; if (typingInterval) clearInterval(typingInterval);
+    typingInterval = setInterval(() => {
+        if(i < text.length) el.textContent += text[i++];
+        else { clearInterval(typingInterval); el.classList.remove("typing-cursor"); }
+    }, 20);
+}
+
+const trackerTbody = document.querySelector('#trackerTable tbody');
+function addTableRow(id, iStr, jStr, condStr, actionStr, condClass, actClass) {
+    const tr = document.createElement('tr');
+    tr.id = 'tr_' + id;
+    tr.innerHTML = `
+        <td>#${id}</td>
+        <td><span style="color:var(--var); font-weight:bold;">${iStr}</span></td>
+        <td><span style="color:var(--var2); font-weight:bold;">${jStr}</span></td>
+        <td><span class="badge ${condClass}">${condStr}</span></td>
+        <td><span class="${actClass}">${actionStr}</span></td>
+    `;
+    trackerTbody.appendChild(tr);
+}
+
+function setTrackerRow(rowNum) {
+    for(let i=1; i<=trackerTbody.children.length; i++) { 
+        const tr = document.getElementById('tr_' + i);
+        if(tr) {
+            tr.classList.remove('active', 'done', 'revealed');
+            if (i <= rowNum) tr.classList.add('revealed');
+            if (i < rowNum) tr.classList.add('done');
+            else if (i === rowNum) {
+                tr.classList.remove('active'); void tr.offsetWidth; tr.classList.add('active');
+                tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+}
+
+// --- Dynamic Script Generator for Nested Loops (3x3 Grid) ---
+
+function createOuterInit(iVal) {
+    return {
+        text: `Line 4: First, the Outer Loop initializes. We create 'i' and set it to ${iVal} in Variable Tracking.`,
+        line: 4, tag: "Outer Initialization", state: { i: iVal, j: null, out: [], row: 0 },
+        action: async () => {
+            const slot = document.getElementById('focus_out_init'); slot.classList.add('show');
+            const y = getActorTarget('src_out_init').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_out_init').right + 15;
+
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+
+            actor.querySelector('.actor-person').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 300 });
+            setArms('carry'); payload.innerHTML = `<span style="color:var(--var)">i=${iVal}</span>`; payload.style.opacity = "1"; await wait(400);
+
+            const trackBlock = getRect('curr_i_val'); const stackTargetX = trackBlock.left - 20; const stackTargetY = trackBlock.bottom + 10;
+            await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+            payload.style.opacity = "0"; setArms('relaxed');
+            document.getElementById('trayEmpty').style.display = 'none';
+            document.getElementById('varTracker').style.display = 'flex';
+            
+            const currBox = document.getElementById('curr_i_val'); currBox.classList.remove('empty'); currBox.textContent = iVal; currBox.classList.add('bumping');
+            document.getElementById('ib_' + iVal).classList.add('active');
+            createSparks(stackTargetX, stackTargetY, 'var(--var)'); 
+            
+            setTimeout(() => { currBox.classList.remove('bumping'); }, 300); await wait(600);
+
+            await animWalk(stackTargetX, stackTargetY, startX, y, 1200); await actorFadeOut();
+        }
+    };
+}
+
+function createOuterCond(iVal, isValid, rowId, outState) {
+    return {
+        text: `Line 4: Evaluate Outer Condition. Is outer 'i' (${iVal}) < 3? ${isValid ? 'Yes! We start a new row block.' : 'No, FALSE. The nested loop terminates!'}`,
+        line: 4, tag: `Outer Cond (i=${iVal})`, state: { i: iVal, j: null, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_out_cond'); slot.classList.add('show');
+            const y = getActorTarget('src_out_cond').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_out_cond').right + 15;
+            
+            document.getElementById('mc_v1_out').textContent = iVal;
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+            
+            setArms('carry'); payload.innerHTML = `<span style="color:var(--var)">${iVal}</span>`; payload.style.opacity = "1"; await wait(500);
+
+            slot.classList.add('eval'); const mathStage = document.getElementById('math_out_cond'); mathStage.classList.add('do-math'); await wait(800);
+            
+            if (isValid) {
+                mathStage.classList.add('math-success'); await wait(600);
+            } else {
+                mathStage.classList.add('math-fail');
+                const sticker = pasteSticker('global_barrier_1', 'src_out_cond', 30, -5); sticker.classList.add('active');
+                const bRect = sticker.getBoundingClientRect(); createSparks(bRect.left + 30, bRect.top + 15, 'var(--barrier)');
+                await wait(600);
+                const exitY = getActorTarget('ln_9').y; await animJumpParabola(targetX, y, startX + 10, exitY, 50, 1, 800); await animWalk(startX + 10, exitY, startX, exitY, 600);
+            }
+            await actorFadeOut();
+        }
+    };
+}
+
+function createInnerInit(iVal, jVal, rowId, outState) {
+    return {
+        text: `Line 5: We hit the Inner Loop! It initializes 'j' to ${jVal}. Because we are inside 'i', this happens fresh for every row.`,
+        line: 5, tag: "Inner Initialization", state: { i: iVal, j: jVal, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_in_init'); slot.classList.add('show');
+            const y = getActorTarget('src_in_init').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_in_init').right + 15;
+
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+
+            actor.querySelector('.actor-person').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 300 });
+            setArms('carry'); payload.innerHTML = `<span style="color:var(--var2)">j=${jVal}</span>`; payload.style.opacity = "1"; await wait(400);
+
+            const trackBlock = getRect('curr_j_val'); const stackTargetX = trackBlock.left - 20; const stackTargetY = trackBlock.bottom + 10;
+            await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+            payload.style.opacity = "0"; setArms('relaxed');
+            
+            const currBox = document.getElementById('curr_j_val'); currBox.classList.remove('empty'); currBox.textContent = jVal; currBox.classList.add('bumping');
+            document.getElementById('jb_' + jVal).classList.add('active');
+            createSparks(stackTargetX, stackTargetY, 'var(--var2)'); 
+            
+            setTimeout(() => { currBox.classList.remove('bumping'); }, 300); await wait(600);
+
+            await animWalk(stackTargetX, stackTargetY, startX, y, 1200); await actorFadeOut();
+        }
+    };
+}
+
+function createInnerCond(iVal, jVal, isValid, rowId, outState) {
+    return {
+        text: `Line 5: Evaluate Inner Condition. Is inner 'j' (${jVal}) < 3? ${isValid ? 'Yes, process the next column cell.' : 'No, FALSE. We break out of the inner loop!'}`,
+        line: 5, tag: `Inner Cond (j=${jVal})`, state: { i: iVal, j: jVal, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_in_cond'); slot.classList.add('show');
+            const y = getActorTarget('src_in_cond').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_in_cond').right + 15;
+            
+            document.getElementById('mc_v1_in').textContent = jVal;
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+            
+            setArms('carry'); payload.innerHTML = `<span style="color:var(--var2)">${jVal}</span>`; payload.style.opacity = "1"; await wait(500);
+
+            slot.classList.add('eval'); const mathStage = document.getElementById('math_in_cond'); mathStage.classList.add('do-math'); await wait(800);
+            
+            if (isValid) {
+                mathStage.classList.add('math-success'); await wait(600);
+                await animWalk(targetX, y, startX, y, 700);
+            } else {
+                mathStage.classList.add('math-fail');
+                const sticker = pasteSticker('global_barrier_1', 'src_in_cond', 30, -5); sticker.classList.add('active');
+                const bRect = sticker.getBoundingClientRect(); createSparks(bRect.left + 30, bRect.top + 15, 'var(--barrier)');
+                await wait(600);
+                
+                const exitY = getActorTarget('ln_8').y; await animJumpParabola(targetX, y, startX + 20, exitY, 40, 1, 800); await animWalk(startX + 20, exitY, startX, exitY, 600);
+            }
+            await actorFadeOut();
+        }
+    };
+}
+
+function createPrint(iVal, jVal, rowId, outState) {
+    return {
+        text: `Line 6: Execute body. We print '(${iVal},${jVal}) ' to the console. Watch the corresponding cell fill in the 2D matrix map simultaneously!`,
+        line: 6, tag: "Execute Body", state: { i: iVal, j: jVal, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_print'); slot.classList.add('show');
+            const y = getActorTarget('src_print_i').y; const conPos = getRect('consoleBox');
+            const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_print_j').right + 15;
+
+            await actorFadeIn(startX, y);
+            const memPanel = getRect('curr_i_val');
+            await animWalk(startX, y, memPanel.left - 50, memPanel.top + 50, 1000);
+
+            actor.querySelector('.actor-person').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 300 });
+            setArms('carry'); payload.innerHTML = `<span style="color:var(--val)">${iVal},${jVal}</span>`; payload.style.opacity = "1"; await wait(400);
+
+            await animWalk(memPanel.left - 50, memPanel.top + 50, targetX, y, 1000);
+
+            const windup = actor.querySelector('.actor-person').animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(30deg) scaleX(1.1)' }, { transform: 'rotate(-40deg) scaleX(0.9)' }], { duration: 400, fill: 'forwards' });
+            activeAnimations.push(windup); await wait(250);
+
+            payload.style.opacity = "0"; setArms('throw');
+            await throwElement(`<div style='background:var(--val); color:var(--panel); padding:4px 10px; border-radius:12px; font-weight:bold; box-shadow:0 0 12px var(--val);'>(${iVal},${jVal})</div>`, targetX, y - 40, conPos.left + 50, conPos.top + 50, 700);
+
+            windup.cancel(); actor.querySelector('.actor-person').style.transform = `scaleX(1) rotate(0deg)`; setArms('relaxed');
+            
+            // Append to single active console line
+            const currentLine = document.getElementById('current_term_line');
+            if (currentLine) { currentLine.textContent += `(${iVal},${jVal}) `; currentLine.classList.add('receiving'); }
+
+            // Fill corresponding matrix grid cell
+            const cell = document.getElementById(`cell_${iVal}_${jVal}`);
+            if(cell) {
+                cell.classList.add('filled', 'active');
+                const cRect = cell.getBoundingClientRect();
+                createSparks(cRect.left + cRect.width/2, cRect.top + cRect.height/2, 'var(--val)');
+            }
+
+            const tr = document.getElementById('tr_' + rowId);
+            if (tr) {
+                const actionCell = tr.querySelectorAll('td')[4];
+                if (actionCell) {
+                    const span = actionCell.querySelector('.action-text');
+                    if(span) { span.classList.add('action-pop'); const spR = span.getBoundingClientRect(); createSparks(spR.left + spR.width/2, spR.top + spR.height/2, 'var(--val)'); }
+                }
+            }
+            await wait(400); await animWalk(targetX, y, startX, y, 700); await actorFadeOut();
+        }
+    };
+}
+
+function createInnerInc(iVal, jVal, rowId, outState) {
+    const nextVal = jVal + 1;
+    return {
+        text: `Line 5: The inner loop jumps back to its own Update statement. Inner 'j' advances down the array tracker to ${nextVal}.`,
+        line: 5, tag: "Inner Update", state: { i: iVal, j: jVal, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_in_inc'); slot.classList.add('show');
+            const y = getActorTarget('src_in_inc').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_in_inc').right + 15;
+
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+            
+            actor.querySelector('.actor-person').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 300 });
+            setArms('carry'); payload.innerHTML = `<span style='color:var(--var2)'>+1</span>`; payload.style.opacity = "1"; await wait(400);
+
+            const trackBlock = getRect('curr_j_val'); const stackTargetX = trackBlock.left - 20; const stackTargetY = trackBlock.bottom + 10;
+            await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+            payload.style.opacity = "0"; setArms('relaxed');
+            const currBox = document.getElementById('curr_j_val'); currBox.textContent = nextVal; currBox.classList.add('bumping'); 
+            createSparks(stackTargetX, stackTargetY, 'var(--var2)');
+            
+            document.querySelectorAll('.j-blocks .a-block').forEach(b => b.classList.remove('active'));
+            if(nextVal <= MAX_VAL) document.getElementById('jb_' + nextVal).classList.add('active');
+
+            setTimeout(() => { currBox.classList.remove('bumping'); }, 300); await wait(600);
+            await animWalk(stackTargetX, stackTargetY, startX, y, 1200); await actorFadeOut();
+        }
+    };
+}
+
+function createOuterNewline(iVal, rowId, outState) {
+    return {
+        text: `Line 8: The inner loop is done! We execute println() to generate a newline character (\\n), moving our console output to the next row.`,
+        line: 8, tag: "Print Newline", state: { i: iVal, j: null, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_println'); slot.classList.add('show');
+            const currentLine = document.getElementById('current_term_line');
+            if (currentLine) { currentLine.removeAttribute('id'); } // Lock the old line
+            
+            const newLine = document.createElement('div');
+            newLine.className = 'term-line show';
+            newLine.id = 'current_term_line';
+            document.getElementById('consoleBox').appendChild(newLine);
+            
+            const conPos = getRect('consoleBox');
+            createSparks(conPos.left + 30, conPos.bottom - 40, 'var(--dt)');
+            await wait(800);
+        }
+    };
+}
+
+function createOuterInc(iVal, rowId, outState) {
+    const nextVal = iVal + 1;
+    return {
+        text: `Line 4: Now execution returns to the Outer Loop update statement. Outer 'i' advances to ${nextVal} for the next row.`,
+        line: 4, tag: "Outer Update", state: { i: iVal, j: null, out: outState, row: rowId },
+        action: async () => {
+            const slot = document.getElementById('focus_out_inc'); slot.classList.add('show');
+            const y = getActorTarget('src_out_inc').y; const startX = getRect('sourceBox').left + 45; const targetX = getRect('src_out_inc').right + 15;
+
+            await actorFadeIn(startX, y); await animWalk(startX, y, targetX, y, 700);
+            
+            actor.querySelector('.actor-person').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 300 });
+            setArms('carry'); payload.innerHTML = `<span style='color:var(--var)'>+1</span>`; payload.style.opacity = "1"; await wait(400);
+
+            const trackBlock = getRect('curr_i_val'); const stackTargetX = trackBlock.left - 20; const stackTargetY = trackBlock.bottom + 10;
+            await animWalk(targetX, y, stackTargetX, stackTargetY, 1200);
+
+            payload.style.opacity = "0"; setArms('relaxed');
+            const currBox = document.getElementById('curr_i_val'); currBox.textContent = nextVal; currBox.classList.add('bumping'); 
+            createSparks(stackTargetX, stackTargetY, 'var(--var)');
+            
+            document.querySelectorAll('.i-blocks .a-block').forEach(b => b.classList.remove('active'));
+            if(nextVal <= MAX_VAL) document.getElementById('ib_' + nextVal).classList.add('active');
+
+            setTimeout(() => { currBox.classList.remove('bumping'); }, 300); await wait(600);
+            await animWalk(stackTargetX, stackTargetY, startX, y, 1200); await actorFadeOut();
+        }
+    };
+}
+
+// Generate Script Array and Table Rows
+const script = [];
+let printedList = [];
+let rowIdx = 0;
+
+script.push({ text: "Let's build a grid format by manipulating print and println statements inside the loop.", line: 0, tag: "Standby", state: { i: null, j: null, out: [], row: 0 } });
+
+script.push(createOuterInit(0));
+for (let i = 0; i <= MAX_VAL; i++) {
+    rowIdx++;
+    addTableRow(rowIdx, i, '-', 'True', 'Enter Inner', 'badge-true', 'action-text');
+    script.push(createOuterCond(i, true, rowIdx, [...printedList]));
+    
+    script.push(createInnerInit(i, 0, rowIdx, [...printedList]));
+    for (let j = 0; j <= MAX_VAL; j++) {
+        rowIdx++;
+        addTableRow(rowIdx, i, j, 'True', `Print (${i},${j})`, 'badge-true', 'action-text');
+        script.push(createInnerCond(i, j, true, rowIdx, [...printedList]));
+        
+        // Push state BEFORE adding to the permanent array prevents print duplication on frame jumps
+        script.push(createPrint(i, j, rowIdx, [...printedList])); 
+        printedList.push(`${i}_${j}`);
+        script.push(createInnerInc(i, j, rowIdx, [...printedList]));
+    }
+    // j fail
+    rowIdx++;
+    addTableRow(rowIdx, i, MAX_VAL+1, 'False', 'EXIT INNER', 'badge-false', 'badge-exit');
+    script.push(createInnerCond(i, MAX_VAL + 1, false, rowIdx, [...printedList]));
+    
+    // Add the println Step
+    rowIdx++;
+    addTableRow(rowIdx, i, '-', '-', 'Print (\\n)', 'badge-true', 'action-text');
+    script.push(createOuterNewline(i, rowIdx, [...printedList]));
+    
+    script.push(createOuterInc(i, rowIdx, [...printedList]));
+}
+// i fail
+rowIdx++;
+addTableRow(rowIdx, MAX_VAL+1, '-', 'False (Outer)', 'EXIT LOOP', 'badge-false', 'badge-exit');
+script.push(createOuterCond(MAX_VAL + 1, false, rowIdx, [...printedList]));
+
+// --- Engine Core ---
+function resetUI() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.focus-slot').forEach(el => { el.classList.remove('show', 'eval', 'stored'); el.style.opacity = "1"; });
+    document.querySelectorAll('.math-stage').forEach(el => { el.classList.remove('do-math', 'math-success', 'math-fail'); });
+    document.querySelectorAll('.blocked-sticker').forEach(el => { el.classList.remove('active'); el.style.opacity = ''; });
+    document.querySelectorAll('.action-pop').forEach(el => el.classList.remove('action-pop'));
+    document.querySelectorAll('.term-line.receiving').forEach(el => el.classList.remove('receiving'));
+    document.querySelectorAll('.n-cell').forEach(el => el.classList.remove('active'));
+    
+    document.querySelectorAll('.spark, .zap-fx, .throw-item').forEach(el => el.remove());
+    actor.style.opacity = "0"; actor.className = "actor-wrapper";
+    const person = actor.querySelector('.actor-person'); if (person) person.style.transform = `scaleX(1) rotate(0deg)`;
+    setArms('relaxed'); payload.style.opacity = "0";
+}
+
+function fastForwardToState(stepIdx) {
+    const state = script[stepIdx].state;
+    
+    if (state.i !== null) {
+        document.getElementById('trayEmpty').style.display = 'none';
+        document.getElementById('varTracker').style.display = 'flex';
+        
+        const currBox = document.getElementById('curr_i_val');
+        currBox.classList.remove('empty');
+        currBox.textContent = state.i;
+        
+        document.querySelectorAll('.i-blocks .a-block').forEach(b => b.classList.remove('active'));
+        if(state.i <= MAX_VAL) document.getElementById('ib_' + state.i).classList.add('active');
+    } else {
+        document.getElementById('trayEmpty').style.display = 'block';
+        document.getElementById('varTracker').style.display = 'none';
+    }
+
+    if (state.j !== null) {
+        const currBox = document.getElementById('curr_j_val');
+        currBox.classList.remove('empty');
+        currBox.textContent = state.j;
+        
+        document.querySelectorAll('.j-blocks .a-block').forEach(b => b.classList.remove('active'));
+        if(state.j <= MAX_VAL) document.getElementById('jb_' + state.j).classList.add('active');
+    } else {
+        const currBox = document.getElementById('curr_j_val');
+        currBox.classList.add('empty');
+        currBox.textContent = '';
+        document.querySelectorAll('.j-blocks .a-block').forEach(b => b.classList.remove('active'));
+    }
+    
+    // Quick rebuild console state & grid state up to this point
+    const conBox = document.getElementById('consoleBox');
+    conBox.innerHTML = '<div class="term-line show" id="current_term_line"></div>';
+    let currentLine = document.getElementById('current_term_line');
+    
+    for(let r=0; r<=MAX_VAL; r++) {
+        for(let c=0; c<=MAX_VAL; c++) {
+            const sId = `${r}_${c}`;
+            const cellEl = document.getElementById(`cell_${sId}`);
+            
+            if (state.out.includes(sId)) {
+                currentLine.textContent += `(${r},${c}) `;
+                if(cellEl) cellEl.classList.add('filled');
+            } else {
+                if(cellEl) cellEl.classList.remove('filled');
+            }
+        }
+        
+        // Prevent doubling of row generation line breaks by strictly applying past the targeted row
+        if (state.i > r) {
+            currentLine.removeAttribute('id');
+            const newLine = document.createElement('div');
+            newLine.className = 'term-line show';
+            newLine.id = 'current_term_line';
+            conBox.appendChild(newLine);
+            currentLine = newLine;
+        }
+    }
+
+    setTrackerRow(state.row);
+}
+
+async function renderStep(stepIndex) {
+    if (stepIndex >= script.length) return;
+    const step = script[stepIndex];
+    document.getElementById("status").textContent = `Step ${stepIndex} / ${script.length - 1}`;
+    document.getElementById("focusTag").textContent = step.tag;
+    document.getElementById("prevBtn").disabled = (stepIndex === 0);
+    document.getElementById("nextBtn").disabled = (stepIndex === script.length - 1);
+    
+    killAllAnimations(); resetUI(); fastForwardToState(stepIndex); typeText(step.text);
+    if (step.line > 0) document.getElementById("line" + step.line).classList.add("active");
+    if (step.action) { try { await step.action(); } catch(e) { } }
+}
+
+async function playAuto() {
+    playing = true; document.getElementById("playBtn").innerHTML = "<span>⏸</span><span>Pause</span>";
+    while (playing && currentStep < script.length) {
+        await renderStep(currentStep);
+        if (playing && currentStep < script.length - 1) { try { await wait(800); currentStep++; } catch(e) { break; } } else { pause(); }
+    }
+}
+
+function pause() { playing = false; document.getElementById("playBtn").innerHTML = "<span>▶</span><span>Play Auto</span>"; }
+function togglePlay() { if (playing) pause(); else { if (currentStep >= script.length - 1) currentStep = 0; playAuto(); } }
+function nextStep() { pause(); if (currentStep < script.length - 1) { currentStep++; renderStep(currentStep); } }
+function prevStep() { pause(); if (currentStep > 0) { currentStep--; renderStep(currentStep); } }
+function resetAnimation() { pause(); currentStep = 0; renderStep(0); }
+
+window.onload = () => { renderStep(0); };
+</script>
+</body>
+</html>

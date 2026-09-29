@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Data Types — Stack Frame Walkthrough & Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+    --paper: #eef1ec;
+    --panel: #ffffff;
+    --ink: #14181f;
+    --muted: #6b7280;
+    --rule: #d8ddd3;
+    --rule-strong: #b9c0b3;
+
+    --accent: #ffb000;
+    --accent-ink: #7a4b00;
+    --accent-wash: #fff8e1;
+    --placard-border: #4285f4;
+
+    --kw: #5b3fd9;
+    --dt: #2f5fd0;
+    --var: #b8390e;
+    --val: #1c8a5f;
+
+    /* Light Theme Console Variables */
+    --term-bg: #f8fafc;
+    --term-text: #0f172a;
+    --term-muted: #94a3b8;
+    
+    --code-bg: rgba(0, 0, 0, 0.05);
+
+    --radius: 10px;
+}
+
+body.dark {
+    --paper: #12151a;
+    --panel: #191d24;
+    --ink: #eef1ec;
+    --muted: #9099a6;
+    --rule: #2a2f38;
+    --rule-strong: #3a4049;
+
+    --accent: #ffc23d;
+    --accent-ink: #ffe4ac;
+    --accent-wash: #2e2410;
+    --placard-border: #669df6;
+
+    --kw: #b7a4ff;
+    --dt: #86a9ff;
+    --var: #ff9466;
+    --val: #6fe3ac;
+
+    /* Dark Theme Console Variables */
+    --term-bg: #05070a;
+    --term-text: #7de8b2;
+    --term-muted: #3a4841;
+    
+    --code-bg: rgba(255, 255, 255, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ---------- MAIN GRID ---------- */
+
+.stage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex-grow: 0;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--rule);
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.panel-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.panel-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* ---------- NARRATOR & HEADER COMBINED ---------- */
+.narrator-panel { margin-bottom: 16px; flex-shrink: 0; }
+
+.narrator-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    flex-wrap: wrap;
+}
+
+.main-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--ink);
+    padding-right: 16px;
+    border-right: 1px solid var(--rule);
+}
+
+.mascot-frame {
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mascot-frame.pop { animation: avatarPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes avatarPop { 0% { transform: scale(0.9); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+.mascot-avatar { width: 100%; height: 100%; animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+.speech-bubble {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 14px 18px;
+    transform-origin: left center;
+}
+
+.speech-bubble.pop { animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes bubblePop { 0% { transform: scale(0.95); opacity: 0; } 50% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+.speech-bubble::before {
+    content: "";
+    position: absolute;
+    left: -7px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    transform: rotate(45deg);
+}
+
+.speech-bubble p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--ink); min-height: 24px; }
+
+.typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; color: var(--accent); font-weight: bold; margin-left: 2px; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    cursor: pointer;
+    color: var(--muted);
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    margin-left: auto;
+}
+
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-wash); }
+.theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ---------- CODE PANEL ---------- */
+
+.code-body {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    line-height: 1.8;
+    padding: 16px 0;
+    height: 400px;
+    overflow-y: auto;
+}
+
+.code-line {
+    display: flex;
+    padding: 2px 20px;
+    border-left: 4px solid transparent;
+    white-space: pre;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.code-line.active { background: rgba(255, 176, 0, 0.1); border-left: 4px solid var(--accent); }
+.ln { width: 28px; flex-shrink: 0; color: var(--rule-strong); user-select: none; text-align: right; margin-right: 20px; }
+.code-line.active .ln { color: var(--accent-ink); }
+.kw { color: var(--kw); }
+.dt { color: var(--dt); }
+.vr { color: var(--var); font-weight: 600; }
+.vl { color: var(--val); }
+
+
+/* ---------- STACK PANEL ---------- */
+
+.stack-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1; 
+}
+
+.stack-body { 
+    padding: 24px; 
+    min-height: 350px; 
+    flex: 1; 
+    position: relative;
+    overflow-y: auto;
+}
+
+.stack-empty {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    color: var(--muted);
+    padding: 10px;
+    text-align: center;
+}
+
+.slot {
+    display: none;
+    grid-template-columns: 240px 1fr;
+    align-items: center;
+    gap: 40px;
+    padding: 30px 24px;
+    border: 1px solid var(--accent);
+    background: var(--accent-wash);
+    border-radius: 16px;
+    margin-bottom: 8px;
+}
+
+.slot.show { display: grid; }
+
+/* ---- Slot Visuals Column (Box + Board) ---- */
+
+.slot-visuals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    position: relative;
+}
+
+/* 3D Box */
+.box-scene {
+    width: 90px;
+    height: 100px;
+    perspective: 350px;
+    position: relative;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.slot.show .box-scene { opacity: 1; transform: scale(1.2); }
+
+.box-3d {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    left: 15px;
+    top: 25px;
+    transform-style: preserve-3d;
+    transform: rotateX(-20deg) rotateY(35deg);
+    transition: transform 0.3s ease;
+}
+
+.slot.assigned .box-3d { transform: rotateX(-25deg) rotateY(35deg) translateY(-2px); }
+
+.box-face {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background: transparent;
+    opacity: 0;
+}
+
+.box-floor { background: rgba(255,176,0,0.1); transform-origin: center; }
+.box-back  { transform-origin: bottom center; }
+.box-left  { transform-origin: bottom center; }
+.box-right { transform-origin: bottom center; }
+
+@keyframes floorPop { 0% { transform: rotateX(-90deg) translateZ(30px) scale(0.3); opacity: 0; } 70% { transform: rotateX(-90deg) translateZ(30px) scale(1.12); opacity: 1; } 100% { transform: rotateX(-90deg) translateZ(30px) scale(1); opacity: 1; } }
+@keyframes wallRiseBack { 0% { transform: rotateY(180deg) translateZ(30px) scaleY(0); opacity: 0; } 100% { transform: rotateY(180deg) translateZ(30px) scaleY(1); opacity: 1; } }
+@keyframes wallRiseLeft { 0% { transform: rotateY(-90deg) translateZ(30px) scaleY(0); opacity: 0; } 100% { transform: rotateY(-90deg) translateZ(30px) scaleY(1); opacity: 1; } }
+@keyframes wallRiseRight { 0% { transform: rotateY(90deg) translateZ(30px) scaleY(0); opacity: 0; } 100% { transform: rotateY(90deg) translateZ(30px) scaleY(1); opacity: 1; } }
+@keyframes floorFlash { 0%, 100% { background: rgba(255,176,0,0.1); } 50% { background: rgba(255,176,0,0.4); } }
+
+.slot.show .box-floor { animation: floorPop 0.3s ease-out 0s both, floorFlash 0.5s ease 1.05s; }
+.slot.show .box-back  { animation: wallRiseBack 0.32s ease 0.15s both; }
+.slot.show .box-left  { animation: wallRiseLeft 0.32s ease 0.26s both; }
+.slot.show .box-right { animation: wallRiseRight 0.32s ease 0.37s both; }
+
+.box-tag {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    background: var(--panel);
+    border: 1.5px solid var(--var);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--var);
+    white-space: nowrap;
+    opacity: 0;
+    z-index: 6;
+}
+
+@keyframes tagPop { 0% { transform: translate(-50%, 6px) scale(0.4); opacity: 0; } 65% { transform: translate(-50%, -3px) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, 0) scale(1); opacity: 1; } }
+.slot.show .box-tag { animation: tagPop 0.4s cubic-bezier(.34,1.56,.64,1) 0.62s both; }
+
+/* The Board Man & Placard */
+.board-scene {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board-guy {
+    width: 50px;
+    height: 60px;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(10px);
+    margin-top: -10px; 
+}
+.board-guy .skin  { fill: #f2c9a0; }
+.board-guy .shirt { fill: var(--dt); }
+.board-guy .outline { stroke: #1a1a1a; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+
+.slot.show .board-guy { animation: guyPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.6s forwards; }
+@keyframes guyPop { to { opacity: 1; transform: translateY(0); } }
+
+.board-placard {
+    background: var(--panel);
+    border: 1.5px solid var(--placard-border);
+    border-radius: 10px;
+    padding: 16px;
+    width: 220px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+    opacity: 0;
+    transform: translateY(15px) scale(0.9);
+    z-index: 3;
+}
+
+.slot.show .board-placard { animation: placardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards; }
+@keyframes placardPop { 0% { opacity: 0; transform: translateY(15px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+.bp-def { font-family: "IBM Plex Sans", sans-serif; font-size: 15px; color: var(--ink); margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); line-height: 1.4; }
+.bp-line { display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; margin-bottom: 4px; }
+.bp-lbl { color: var(--muted); }
+.bp-val { color: var(--ink); font-weight: 600; text-align: right; font-size: 14px;}
+.bp-val.dt-color { color: var(--dt); text-transform: lowercase; font-weight: 700;}
+
+/* Universal Chip Fly-in */
+.value-chip {
+    position: absolute;
+    top: 40px;
+    left: 15px;
+    width: 60px;
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--val);
+    opacity: 0;
+    z-index: 10;
+    pointer-events: none;
+    transform-style: preserve-3d;
+}
+
+.little-person {
+    position: absolute;
+    top: 10px;
+    left: -15px;
+    width: 40px;
+    height: 55px;
+    opacity: 0;
+    z-index: 9;
+    pointer-events: none;
+}
+
+@keyframes chipWalk {
+    0%   { transform: translate(-300px, -50px) rotate(-5deg) scale(1.3); opacity: 0; }
+    5%   { opacity: 1; }
+    15%  { transform: translate(-200px, -60px) rotate(5deg) scale(1.3); }
+    30%  { transform: translate(-100px, -40px) rotate(-5deg) scale(1.3); }
+    50%  { transform: translate(0px, -20px) rotate(0deg) scale(1.3); opacity: 1; }
+    54%  { transform: translate(0px, -4px) rotateX(25deg) rotateY(15deg) scale(1.1); opacity: 1; }
+    58%  { transform: translate(0px, 0px) rotateX(-10deg) rotateY(0deg) scale(0.95); opacity: 1; }
+    62%  { transform: translate(0px, 0px) rotateX(0deg) rotateY(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(0px, 0px) rotateX(0deg) rotateY(0deg) scale(1); opacity: 1; }
+}
+
+@keyframes personWalk {
+    0%   { transform: translateX(-300px) translateY(-50px) rotate(-5deg); opacity: 0; }
+    5%   { opacity: 1; }
+    15%  { transform: translateX(-200px) translateY(-60px) rotate(5deg); }
+    30%  { transform: translateX(-100px) translateY(-40px) rotate(-5deg); }
+    50%  { transform: translateX(0px) translateY(-20px) rotate(0deg); opacity: 1; }
+    55%  { transform: translateX(0px) translateY(0px) rotate(0deg); opacity: 1; }
+    60%  { transform: translateX(0px) translateY(0px) scaleX(-1) rotate(0deg); opacity: 1; } 
+    70%  { transform: translateX(-100px) translateY(-40px) scaleX(-1) rotate(-5deg); opacity: 1; }
+    80%  { transform: translateX(-200px) translateY(-60px) scaleX(-1) rotate(5deg); }
+    100% { transform: translateX(-300px) translateY(-50px) scaleX(-1) rotate(0deg); opacity: 0; }
+}
+
+@keyframes boxImpact {
+    0%, 50% { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px); }
+    54%     { transform: rotateX(-26deg) rotateY(35deg) translateY(6px) scaleY(0.85); }
+    62%     { transform: rotateX(-16deg) rotateY(35deg) translateY(-4px) scaleY(1.05); }
+    70%     { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px) scaleY(1); }
+    100%    { transform: rotateX(-20deg) rotateY(35deg) translateY(-2px); }
+}
+
+.slot.assigned .value-chip { animation: chipWalk 2.8s linear 0.2s both; }
+.slot.assigned .little-person { animation: personWalk 2.8s linear 0.2s both; }
+.slot.assigned .box-3d { animation: boxImpact 2.8s linear 0.2s both; }
+
+.box-scene::after {
+    content: ""; position: absolute; top: 56px; left: 45px; width: 12px; height: 12px;
+    margin: -6px 0 0 -6px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; pointer-events: none;
+}
+@keyframes ringPulse { 0% { transform: scale(0.3); opacity: 0.9; } 100% { transform: scale(3.4); opacity: 0; } }
+.slot.assigned .box-scene::after { animation: ringPulse 0.55s ease-out 1.75s; }
+
+/* Slot Right Column Layout */
+.slot-info { display: flex; flex-direction: column; gap: 16px; min-width: 0; z-index: 5; justify-content: center; padding-left: 20px;}
+
+.slot-addr { font-family: "JetBrains Mono", monospace; font-size: 16px; color: var(--muted); white-space: nowrap; }
+.slot-main { display: flex; align-items: baseline; gap: 12px; font-family: "JetBrains Mono", monospace; flex-wrap: wrap; }
+.slot-type { font-size: 20px; text-transform: uppercase; color: var(--dt); }
+.slot-name { font-size: 24px; font-weight: 600; color: var(--var); }
+
+/* Assignment Logic */
+.slot-assign {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.4s ease;
+}
+.slot-eq { color: var(--muted); font-size: 20px; }
+.slot-value { font-size: 22px; font-weight: 700; color: var(--val); }
+.slot-semi { color: var(--muted); font-size: 20px; margin-left: 5px;}
+
+/* Show assignment when ready */
+.slot.assigned .slot-assign {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: 1.7s;
+}
+
+.ref-arrow { display: none; }
+
+
+/* ---------- CONSOLE STRETCHING ---------- */
+.console-panel { display: flex; flex-direction: column; flex: 1; }
+.console-body {
+    background: var(--term-bg);
+    padding: 20px 24px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px; 
+    line-height: 2;
+    height: 200px;
+    overflow-y: auto;
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.term-line { color: var(--term-text); opacity: 0; transform: translateX(-6px); transition: all 0.35s ease; }
+.term-line.show { opacity: 1; transform: translateX(0); }
+.term-line::before { content: "$ println → "; color: var(--term-muted); }
+
+/* ---------- TRANSPORT BAR ---------- */
+.transport-bar { display: flex; align-items: center; justify-content: center; padding: 14px 16px; }
+.transport-controls { display: flex; gap: 10px; }
+.transport-bar button {
+    font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 600; letter-spacing: 0.02em; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 18px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease;
+}
+.transport-bar button:hover { border-color: var(--accent); color: var(--accent-ink); }
+.transport-bar button.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.transport-bar button.primary:hover { opacity: 0.85; color: var(--paper); }
+
+
+/* ---------- NOTES SECTION ---------- */
+.notes-panel {
+    margin-top: 32px;
+}
+
+.notes-body {
+    padding: 40px;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink);
+}
+
+.notes-body h2 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--ink);
+}
+
+.notes-body h3 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 22px;
+    margin-top: 48px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+}
+
+.notes-body h4 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 18px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+.notes-body p {
+    margin-bottom: 16px;
+}
+
+.notes-body ul {
+    margin-bottom: 24px;
+    padding-left: 24px;
+}
+
+.notes-body li {
+    margin-bottom: 8px;
+}
+
+.notes-body pre {
+    background: var(--term-bg);
+    color: var(--term-text);
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--rule);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.notes-body code {
+    font-family: "JetBrains Mono", monospace;
+    background: var(--code-bg);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 14.5px;
+    color: var(--kw);
+}
+
+.notes-body pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.notes-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 15px;
+}
+
+.notes-body th, .notes-body td {
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    text-align: left;
+}
+
+.notes-body th {
+    background: var(--rule);
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.notes-body strong {
+    font-weight: 600;
+}
+
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+    .page { padding: 16px 16px 40px; }
+    .stage { grid-template-columns: 1fr; }
+    .narrator-body { flex-direction: column; align-items: flex-start; }
+    .main-title { border-right: none; padding-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 12px; width: 100%;}
+    .transport-bar { flex-direction: column; gap: 12px; align-items: center; }
+    .theme-toggle { margin-left: 0; margin-top: 12px; }
+    .slot { grid-template-columns: 1fr; gap: 20px; }
+    .slot-info { padding-left: 0; align-items: center; text-align: center; }
+    .notes-body { padding: 24px; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- COHESIVE HEADER & NARRATOR PANEL -->
+<section class="panel narrator-panel">
+    <div class="narrator-body">
+        <h1 class="main-title">Data Types</h1>
+        <div class="mascot-frame" id="avatarContainer">
+            <img class="mascot-avatar" id="mascot" src="https://imageserver.ebscohost.com/img/embimages/ers/sp/embedded/89876642-45134.jpg?ephost1=dGJyMNHX8kSepq84xNvgOLCmsE2epq5Srqa4SK6WxWXS" alt="Mascot Avatar" style="object-fit: cover;">
+        </div>
+        <div class="speech-bubble" id="speechBubble">
+            <p id="mascotCaption"></p>
+        </div>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M9 18h6"></path><path d="M10 22h4"></path>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.45.62 2.84 1.5 3.5.76.76 1.23 1.52 1.41 2.5"></path>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<div class="stage">
+    <!-- LEFT COLUMN: Source + Console -->
+    <div class="col">
+        <!-- SOURCE PANEL -->
+        <section class="panel" style="display: flex; flex-direction: column;">
+            <div class="panel-head">
+                <span class="panel-label">Source</span>
+                <span class="panel-tag">Main.java</span>
+            </div>
+            <div class="code-body">
+                <div class="code-line" id="line1"><span class="ln">1</span><span class="kw">public class</span>&nbsp;Main {</div>
+                <div class="code-line" id="line2"><span class="ln">2</span>&nbsp;&nbsp;<span class="kw">public static void</span>&nbsp;main(String[] args) {</div>
+                <div class="code-line" id="line3"><span class="ln">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">byte</span>&nbsp;<span class="vr">age</span>;</div>
+                <div class="code-line" id="line4"><span class="ln">4</span>&nbsp;&nbsp;&nbsp;&nbsp;age&nbsp;=&nbsp;<span class="vl">25</span>;</div>
+                <div class="code-line" id="line5"><span class="ln">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">short</span>&nbsp;<span class="vr">salary</span>;</div>
+                <div class="code-line" id="line6"><span class="ln">6</span>&nbsp;&nbsp;&nbsp;&nbsp;salary&nbsp;=&nbsp;<span class="vl">30000</span>;</div>
+                <div class="code-line" id="line7"><span class="ln">7</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">int</span>&nbsp;<span class="vr">count</span>;</div>
+                <div class="code-line" id="line8"><span class="ln">8</span>&nbsp;&nbsp;&nbsp;&nbsp;count&nbsp;=&nbsp;<span class="vl">100000</span>;</div>
+                <div class="code-line" id="line9"><span class="ln">9</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">long</span>&nbsp;<span class="vr">population</span>;</div>
+                <div class="code-line" id="line10"><span class="ln">10</span>&nbsp;&nbsp;&nbsp;&nbsp;population&nbsp;=&nbsp;<span class="vl">8000000000L</span>;</div>
+                <div class="code-line" id="line11"><span class="ln">11</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">float</span>&nbsp;<span class="vr">temperature</span>;</div>
+                <div class="code-line" id="line12"><span class="ln">12</span>&nbsp;&nbsp;&nbsp;&nbsp;temperature&nbsp;=&nbsp;<span class="vl">36.5f</span>;</div>
+                <div class="code-line" id="line13"><span class="ln">13</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">double</span>&nbsp;<span class="vr">price</span>;</div>
+                <div class="code-line" id="line14"><span class="ln">14</span>&nbsp;&nbsp;&nbsp;&nbsp;price&nbsp;=&nbsp;<span class="vl">19.99</span>;</div>
+                <div class="code-line" id="line15"><span class="ln">15</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">char</span>&nbsp;<span class="vr">grade</span>;</div>
+                <div class="code-line" id="line16"><span class="ln">16</span>&nbsp;&nbsp;&nbsp;&nbsp;grade&nbsp;=&nbsp;<span class="vl">'A'</span>;</div>
+                <div class="code-line" id="line17"><span class="ln">17</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dt">boolean</span>&nbsp;<span class="vr">isActive</span>;</div>
+                <div class="code-line" id="line18"><span class="ln">18</span>&nbsp;&nbsp;&nbsp;&nbsp;isActive&nbsp;=&nbsp;<span class="kw">true</span>;</div>
+                <div class="code-line" id="line19"><span class="ln">19</span></div>
+                <div class="code-line" id="line20"><span class="ln">20</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(age);</div>
+                <div class="code-line" id="line21"><span class="ln">21</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(salary);</div>
+                <div class="code-line" id="line22"><span class="ln">22</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(count);</div>
+                <div class="code-line" id="line23"><span class="ln">23</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(population);</div>
+                <div class="code-line" id="line24"><span class="ln">24</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(temperature);</div>
+                <div class="code-line" id="line25"><span class="ln">25</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(price);</div>
+                <div class="code-line" id="line26"><span class="ln">26</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(grade);</div>
+                <div class="code-line" id="line27"><span class="ln">27</span>&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(isActive);</div>
+                <div class="code-line" id="line28"><span class="ln">28</span>&nbsp;&nbsp;}</div>
+                <div class="code-line" id="line29"><span class="ln">29</span>}</div>
+            </div>
+        </section>
+
+        <!-- CONSOLE PANEL -->
+        <section class="panel console-panel">
+            <div class="panel-head"><span class="panel-label">Console</span><span class="panel-tag">stdout</span></div>
+            <div class="console-body">
+                <div class="term-line" id="out1">25</div>
+                <div class="term-line" id="out2">30000</div>
+                <div class="term-line" id="out3">100000</div>
+                <div class="term-line" id="out4">8000000000</div>
+                <div class="term-line" id="out5">36.5</div>
+                <div class="term-line" id="out6">19.99</div>
+                <div class="term-line" id="out7">A</div>
+                <div class="term-line" id="out8">true</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- RIGHT COLUMN: Stack Frame + Transport Buttons -->
+    <div class="col">
+        <!-- STACK PANEL -->
+        <section class="panel stack-panel">
+            <div class="panel-head"><span class="panel-label">Stack Frame</span><span class="panel-tag" id="frameTag">main()</span></div>
+            <div class="stack-body" id="stackBody">
+                
+                <div class="stack-empty" id="stackEmpty">— no locals allocated yet —</div>
+
+                <!-- 1. BYTE -->
+                <div class="slot" id="ageSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">age</div>
+                            <div class="value-chip">25</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Stores whole numbers from -128 to 127.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">byte</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">1 byte</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c00</div>
+                        <div class="slot-main">
+                            <span class="slot-type">BYTE</span> <span class="slot-name">age</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">25</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. SHORT -->
+                <div class="slot" id="salarySlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">salary</div>
+                            <div class="value-chip">30000</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Stores medium numbers from -32k to 32k.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">short</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">2 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c01</div>
+                        <div class="slot-main">
+                            <span class="slot-type">SHORT</span> <span class="slot-name">salary</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">30000</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. INT -->
+                <div class="slot" id="countSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">count</div>
+                            <div class="value-chip">100000</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Default choice for regular whole numbers.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">int</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">4 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c03</div>
+                        <div class="slot-main">
+                            <span class="slot-type">INT</span> <span class="slot-name">count</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">100000</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. LONG -->
+                <div class="slot" id="populationSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">population</div>
+                            <div class="value-chip">8*10^9</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Used for massive numbers. Note the 'L' suffix.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">long</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">8 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c07</div>
+                        <div class="slot-main">
+                            <span class="slot-type">LONG</span> <span class="slot-name">population</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">8000000000L</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. FLOAT -->
+                <div class="slot" id="temperatureSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">temperature</div>
+                            <div class="value-chip">36.5f</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Stores single-precision decimals (requires 'f').</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">float</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">4 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c0F</div>
+                        <div class="slot-main">
+                            <span class="slot-type">FLOAT</span> <span class="slot-name">temperature</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">36.5f</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. DOUBLE -->
+                <div class="slot" id="priceSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">price</div>
+                            <div class="value-chip">19.99</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Default choice for higher-precision decimals.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">double</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">8 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c13</div>
+                        <div class="slot-main">
+                            <span class="slot-type">DOUBLE</span> <span class="slot-name">price</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">19.99</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. CHAR -->
+                <div class="slot" id="gradeSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">grade</div>
+                            <div class="value-chip">'A'</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Stores a single letter or character.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">char</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">2 bytes</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c1B</div>
+                        <div class="slot-main">
+                            <span class="slot-type">CHAR</span> <span class="slot-name">grade</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="slot-value">'A'</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. BOOLEAN -->
+                <div class="slot" id="isActiveSlot">
+                    <div class="slot-visuals">
+                        <div class="box-scene">
+                            <div class="box-3d">
+                                <div class="box-face box-back"></div><div class="box-face box-left"></div><div class="box-face box-right"></div><div class="box-face box-floor"></div>
+                            </div>
+                            <div class="box-tag">isActive</div>
+                            <div class="value-chip">true</div>
+                            <div class="little-person">
+                                <svg viewBox="0 0 32 48" class="little-guy">
+                                    <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle><path class="skin outline" fill="none" d="M16,23 L28,23"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="board-scene">
+                            <div class="board-placard">
+                                <div class="bp-def">Stores true/false logic flags.</div>
+                                <div class="bp-line"><span class="bp-lbl">Type</span><span class="bp-val dt-color">boolean</span></div>
+                                <div class="bp-line"><span class="bp-lbl">Size</span><span class="bp-val">JVM-Dep.</span></div>
+                            </div>
+                            <svg viewBox="0 0 32 48" class="board-guy">
+                                <path class="outline" fill="none" d="M13,32 L13,44 M19,32 L19,44"></path><path class="skin outline" fill="none" d="M10,22 L2,8 M22,22 L30,8"></path><rect class="shirt outline" x="10" y="17" width="12" height="15" rx="5"></rect><circle class="skin outline" cx="16" cy="10" r="7"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="slot-info">
+                        <div class="slot-addr">0x7ffe1a2b3c1D</div>
+                        <div class="slot-main">
+                            <span class="slot-type">BOOLEAN</span> <span class="slot-name">isActive</span>
+                            <span class="slot-assign"><span class="slot-eq">=</span><span class="kw">true</span></span><span class="slot-semi">;</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- EXTRA COMPACT TRANSPORT BAR -->
+        <section class="panel transport-bar">
+            <div class="transport-controls">
+                <button onclick="previousStep()">◂ Prev</button>
+                <button class="primary" id="playBtn" onclick="togglePlay()">▶ Play</button>
+                <button onclick="nextStep()">Next ▸</button>
+                <button onclick="resetAnimation()">↻ Reset</button>
+                <button id="fsBtn" onclick="toggleFullScreen()">⤢ Expand</button>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- DETAILED NOTES SECTION -->
+<section class="panel notes-panel">
+    <div class="panel-head">
+        <span class="panel-label">Reference</span>
+        <span class="panel-tag">Java Data Types — Detailed Notes</span>
+    </div>
+    <div class="notes-body">
+        
+        <h2>Java Data Types — Detailed Notes</h2>
+
+        <h3>1. What is a Data Type?</h3>
+        <p>A data type specifies:</p>
+        <ul>
+            <li>What kind of value a variable can store</li>
+            <li>How much memory is required</li>
+            <li>What range of values can be stored</li>
+            <li>What operations can be performed on the value</li>
+        </ul>
+        <h4>Example</h4>
+<pre><code><span class="dt">int</span> <span class="vr">age</span> = <span class="vl">22</span>;</code></pre>
+        <p>Here:</p>
+        <ul>
+            <li><code>int</code> → Data type</li>
+            <li><code>age</code> → Variable</li>
+            <li><code>22</code> → Value</li>
+        </ul>
+        <p>So, <code>int</code> tells Java that <code>age</code> will store an integer value.</p>
+
+        <h3>2. Classification of Data Types in Java</h3>
+        <p>Java data types are mainly divided into 2 categories:</p>
+<pre><code>                    Java Data Types
+                          |
+              +-----------+-----------+
+              |                       |
+        Primitive                Non-Primitive
+         Data Types               Data Types
+              |                       |
+       +------+------+          +-----+------+
+       |             |          |            |
+   Numeric       Non-Numeric   String      Arrays
+       |             |          Classes    Objects
+   +---+---+      boolean
+   |       |
+Integer  Floating
+Types     Types
+   |         |
+byte       float
+short      double
+int
+long
+char</code></pre>
+
+        <h3>3. Primitive Data Types</h3>
+        <p>Java has 8 primitive data types.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Size</th>
+                    <th>Default Value</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>byte</code></td><td>1 byte</td><td>0</td><td><code>byte x = 10;</code></td></tr>
+                <tr><td><code>short</code></td><td>2 bytes</td><td>0</td><td><code>short x = 100;</code></td></tr>
+                <tr><td><code>int</code></td><td>4 bytes</td><td>0</td><td><code>int x = 1000;</code></td></tr>
+                <tr><td><code>long</code></td><td>8 bytes</td><td>0L</td><td><code>long x = 10000L;</code></td></tr>
+                <tr><td><code>float</code></td><td>4 bytes</td><td>0.0f</td><td><code>float x = 10.5f;</code></td></tr>
+                <tr><td><code>double</code></td><td>8 bytes</td><td>0.0d</td><td><code>double x = 10.5;</code></td></tr>
+                <tr><td><code>char</code></td><td>2 bytes</td><td>'\u0000'</td><td><code>char x = 'A';</code></td></tr>
+                <tr><td><code>boolean</code></td><td>JVM-dependent</td><td>false</td><td><code>boolean x = true;</code></td></tr>
+            </tbody>
+        </table>
+        <p><strong>Important:</strong> The 8 primitive types are: <code>byte</code>, <code>short</code>, <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>char</code>, <code>boolean</code>.</p>
+
+        <h3>4. Integer Data Types</h3>
+        <p>Integer data types are used to store whole numbers.</p>
+        <p><code>byte</code> → <code>short</code> → <code>int</code> → <code>long</code></p>
+        
+        <h3>5. byte</h3>
+        <p><code>byte</code> is the smallest integer data type in Java.</p>
+        <ul>
+            <li><strong>Size:</strong> 1 byte = 8 bits</li>
+            <li><strong>Range:</strong> -128 to 127</li>
+        </ul>
+<pre><code><span class="dt">byte</span> age = <span class="vl">22</span>;
+System.out.println(age);</code></pre>
+        <p><strong>Output:</strong> <code>22</code></p>
+        <p><strong>Why range is -128 to 127?</strong> An 8-bit signed number has 2^8 = 256 values. Therefore: -128 to 127 (Total: 256 values).</p>
+
+        <h3>6. short</h3>
+        <p><code>short</code> stores larger integer values than byte.</p>
+        <ul>
+            <li><strong>Size:</strong> 2 bytes = 16 bits</li>
+            <li><strong>Range:</strong> -32,768 to 32,767</li>
+        </ul>
+<pre><code><span class="dt">short</span> marks = <span class="vl">25000</span>;
+System.out.println(marks);</code></pre>
+
+        <h3>7. int</h3>
+        <p><code>int</code> is the most commonly used integer data type in Java.</p>
+        <ul>
+            <li><strong>Size:</strong> 4 bytes = 32 bits</li>
+            <li><strong>Range:</strong> -2,147,483,648 to 2,147,483,647</li>
+        </ul>
+<pre><code><span class="dt">int</span> salary = <span class="vl">28000</span>;
+System.out.println(salary);</code></pre>
+        <p><strong>Important:</strong> When you write <code>int x = 100;</code>, 100 is normally treated as an int literal.</p>
+
+        <h3>8. long</h3>
+        <p><code>long</code> is used when the integer value is larger than the int range.</p>
+        <ul>
+            <li><strong>Size:</strong> 8 bytes = 64 bits</li>
+            <li><strong>Range:</strong> -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807</li>
+        </ul>
+<pre><code><span class="dt">long</span> population = <span class="vl">8000000000L</span>;
+System.out.println(population);</code></pre>
+        <p><strong>Why L?</strong> <code>L</code> tells Java that the number is a long literal. Without <code>L</code> (<code>long population = 8000000000;</code>), this causes a compilation error because the integer literal is first treated as an <code>int</code>.</p>
+
+        <h3>9. Floating-Point Data Types</h3>
+        <p>Floating-point types store numbers containing decimal values. Java provides: <code>float</code> and <code>double</code>.</p>
+
+        <h3>10. float</h3>
+        <p><code>float</code> stores decimal values using 32 bits.</p>
+        <ul>
+            <li><strong>Size:</strong> 4 bytes = 32 bits</li>
+        </ul>
+<pre><code><span class="dt">float</span> price = <span class="vl">99.50f</span>;
+System.out.println(price);</code></pre>
+        <p><strong>Why f?</strong> By default, a decimal literal such as <code>99.50</code> is considered a <code>double</code>. Therefore, <code>float price = 99.50;</code> causes an error. Use: <code>float price = 99.50f;</code></p>
+
+        <h3>11. double</h3>
+        <p><code>double</code> stores decimal values using 64 bits.</p>
+<pre><code><span class="dt">double</span> salary = <span class="vl">28000.50</span>;
+System.out.println(salary);</code></pre>
+        <p>Decimal literals are normally treated as double. Therefore this is valid: <code>double x = 10.5;</code></p>
+
+        <h3>12. float vs double</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>float</th>
+                    <th>double</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Size</td><td>4 bytes</td><td>8 bytes</td></tr>
+                <tr><td>Precision</td><td>Lower</td><td>Higher</td></tr>
+                <tr><td>Literal</td><td>10.5f</td><td>10.5</td></tr>
+                <tr><td>Usage</td><td>When memory matters</td><td>General decimal calculations</td></tr>
+            </tbody>
+        </table>
+<pre><code><span class="dt">float</span> a = <span class="vl">10.5f</span>;
+<span class="dt">double</span> b = <span class="vl">10.5</span>;
+
+System.out.println(a);
+System.out.println(b);</code></pre>
+
+        <h3>13. char</h3>
+        <p><code>char</code> is used to store a single character.</p>
+        <ul>
+            <li><strong>Size:</strong> 2 bytes = 16 bits</li>
+        </ul>
+<pre><code><span class="dt">char</span> grade = <span class="vl">'A'</span>;
+System.out.println(grade);</code></pre>
+        <p><strong>Important:</strong> Use single quotes for <code>char</code>. Correct: <code>char ch = 'A';</code> Incorrect: <code>char ch = "A";</code> (<code>"A"</code> is a String, not a char).</p>
+
+        <h3>14. char and Unicode</h3>
+        <p>Java char uses the UTF-16 representation. Therefore it can represent characters from many writing systems.</p>
+<pre><code><span class="dt">char</span> a = <span class="vl">'A'</span>;
+<span class="dt">char</span> b = <span class="vl">'க'</span>;
+<span class="dt">char</span> c = <span class="vl">'中'</span>;</code></pre>
+
+        <h3>15. Character as a Number</h3>
+        <p>A char internally represents a numeric Unicode value.</p>
+<pre><code><span class="dt">char</span> ch = <span class="vl">'A'</span>;
+System.out.println((<span class="dt">int</span>) ch); <span class="muted">// Output: 65</span></code></pre>
+        <p>Similarly: <code>char ch = 'B';</code> → Output is <code>66</code>.</p>
+
+        <h3>16. boolean</h3>
+        <p><code>boolean</code> stores logical values. It has only two values: <code>true</code> and <code>false</code>.</p>
+<pre><code><span class="dt">boolean</span> isStudent = <span class="kw">true</span>;
+System.out.println(isStudent); <span class="muted">// Output: true</span></code></pre>
+        <h4>Common usage</h4>
+<pre><code><span class="dt">int</span> age = <span class="vl">22</span>;
+<span class="dt">boolean</span> eligible = age >= <span class="vl">18</span>;
+System.out.println(eligible); <span class="muted">// Output: true</span></code></pre>
+
+        <h3>17. Important Point About boolean</h3>
+        <p>Unlike some languages, Java does not allow <code>boolean x = 1;</code> or <code>boolean x = 0;</code>. This is invalid. Java requires <code>boolean x = true;</code> or <code>boolean x = false;</code>.</p>
+
+        <h3>18. Non-Primitive Data Types</h3>
+        <p>Non-primitive/reference types include things such as: String, Arrays, Classes, Objects, Interfaces, and Enums.</p>
+<pre><code>String name = <span class="vl">"Akash"</span>;</code></pre>
+        <p>Here: <code>String</code> → Reference type, <code>name</code> → Reference variable.</p>
+
+        <h3>19. Primitive vs Non-Primitive</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Primitive</th>
+                    <th>Non-Primitive</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Built into Java</td><td>Created using classes/interfaces etc.</td></tr>
+                <tr><td>Stores a value</td><td>Variables hold references to objects</td></tr>
+                <tr><td>Fixed set of 8 types</td><td>Many types</td></tr>
+                <tr><td>Generally fixed size</td><td>Size depends on the object/type</td></tr>
+                <tr><td>Cannot call methods directly</td><td>Objects can provide methods</td></tr>
+                <tr><td>int, char, boolean</td><td>String, Array, Object</td></tr>
+            </tbody>
+        </table>
+
+        <h3>20. Complete Primitive Data Type Table</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Bits</th>
+                    <th>Bytes</th>
+                    <th>Approximate Range</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>byte</code></td><td>8</td><td>1</td><td>-128 to 127</td></tr>
+                <tr><td><code>short</code></td><td>16</td><td>2</td><td>-32,768 to 32,767</td></tr>
+                <tr><td><code>int</code></td><td>32</td><td>4</td><td>-2³¹ to 2³¹−1</td></tr>
+                <tr><td><code>long</code></td><td>64</td><td>8</td><td>-2⁶³ to 2⁶³−1</td></tr>
+                <tr><td><code>float</code></td><td>32</td><td>4</td><td>~6–7 decimal digits</td></tr>
+                <tr><td><code>double</code></td><td>64</td><td>8</td><td>~15–16 decimal digits</td></tr>
+                <tr><td><code>char</code></td><td>16</td><td>2</td><td>0 to 65,535</td></tr>
+                <tr><td><code>boolean</code></td><td>—</td><td>JVM-dependent</td><td>true / false</td></tr>
+            </tbody>
+        </table>
+        <p><em>Note: boolean does not have a language-specified size in bytes; its memory representation is JVM-dependent.</em></p>
+
+        <h3>21. Why Different Data Types?</h3>
+        <p>Suppose <code>int age = 22;</code>. There is no reason to use <code>long age = 22;</code> if the value will always fit comfortably in <code>int</code>. Choosing an appropriate data type helps with memory usage, range requirements, precision, correctness, and program design.</p>
+
+        <h3>22. Integer Size Hierarchy</h3>
+        <p>A simple way to remember: <code>byte</code> ↓ <code>short</code> ↓ <code>int</code> ↓ <code>long</code>. As we move downward: size increases and range increases. For floating point: <code>float</code> ↓ <code>double</code>.</p>
+
+        <h3>23. Default Values</h3>
+        <p>Default values apply to instance variables, static variables, and array elements, <strong>not</strong> local variables.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Default</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>byte</code>, <code>short</code>, <code>int</code></td><td>0</td></tr>
+                <tr><td><code>long</code></td><td>0L</td></tr>
+                <tr><td><code>float</code></td><td>0.0f</td></tr>
+                <tr><td><code>double</code></td><td>0.0d</td></tr>
+                <tr><td><code>char</code></td><td>'\u0000'</td></tr>
+                <tr><td><code>boolean</code></td><td>false</td></tr>
+                <tr><td><code>Reference</code></td><td>null</td></tr>
+            </tbody>
+        </table>
+<pre><code><span class="kw">class</span> Main {
+    <span class="kw">static</span> <span class="dt">int</span> x;
+    <span class="kw">static</span> <span class="dt">boolean</span> flag;
+    <span class="kw">static</span> <span class="dt">char</span> ch;
+
+    <span class="kw">public static void</span> main(String[] args) {
+        System.out.println(x); <span class="muted">// 0</span>
+        System.out.println(flag); <span class="muted">// false</span>
+        System.out.println((<span class="dt">int</span>) ch); <span class="muted">// 0</span>
+    }
+}</code></pre>
+
+        <h3>24. Local Variables Don't Have Default Values</h3>
+        <p>This is important.</p>
+<pre><code><span class="kw">class</span> Main {
+    <span class="kw">public static void</span> main(String[] args) {
+        <span class="dt">int</span> x;
+        System.out.println(x); <span class="muted">// Compilation error</span>
+    }
+}</code></pre>
+        <p>This produces a compilation error because <code>x</code> has not been initialized. You must do: <code>int x = 10;</code></p>
+
+        <h3>25. Literals in Java</h3>
+        <p>A literal is a fixed value written directly in the program. Examples: <code>10</code>, <code>100</code>, <code>10.5</code>, <code>'A'</code>, <code>true</code>, <code>"Java"</code>.</p>
+<pre><code><span class="dt">int</span> x = <span class="vl">10</span>;
+<span class="dt">double</span> price = <span class="vl">99.5</span>;
+<span class="dt">char</span> grade = <span class="vl">'A'</span>;
+<span class="dt">boolean</span> result = <span class="kw">true</span>;
+String name = <span class="vl">"Akash"</span>;</code></pre>
+
+        <h3>26. Integer Literals</h3>
+        <p>Java supports different number systems:</p>
+        <ul>
+            <li><strong>Decimal:</strong> <code>int x = 10;</code></li>
+            <li><strong>Binary (0b):</strong> <code>int x = 0b1010;</code> (Value: 10)</li>
+            <li><strong>Octal (0):</strong> <code>int x = 012;</code> (Value: 10)</li>
+            <li><strong>Hexadecimal (0x):</strong> <code>int x = 0xA;</code> (Value: 10)</li>
+        </ul>
+
+        <h3>27. Type Suffixes</h3>
+        <p>Java provides suffixes for certain literals:</p>
+        <ul>
+            <li><strong>Long:</strong> <code>long x = 100L;</code></li>
+            <li><strong>Float:</strong> <code>float x = 10.5f;</code></li>
+            <li><strong>Double:</strong> <code>double x = 10.5d;</code> (d is optional)</li>
+        </ul>
+
+        <h3>28. Underscores in Numbers</h3>
+        <p>Java allows underscores to improve readability. Instead of <code>int salary = 1000000;</code>, you can write <code>int salary = 1_000_000;</code>. Both represent 1000000. Another example: <code>long population = 8_000_000_000L;</code></p>
+
+        <h3>29. Type Conversion</h3>
+        <p>Type conversion means converting one data type into another.</p>
+<pre><code>Type Conversion
+      |
+      +------ Widening
+      |
+      +------ Narrowing</code></pre>
+
+        <h3>30. Widening Conversion</h3>
+        <p>Smaller compatible type → larger compatible type. No explicit casting is required.</p>
+<pre><code><span class="dt">int</span> x = <span class="vl">100</span>;
+<span class="dt">long</span> y = x;
+System.out.println(y);</code></pre>
+        <p>Typical numeric widening path: <code>byte</code> ↓ <code>short</code> ↓ <code>int</code> ↓ <code>long</code> ↓ <code>float</code> ↓ <code>double</code>.</p>
+
+        <h3>31. Narrowing Conversion</h3>
+        <p>Larger type → smaller type. Explicit casting is required.</p>
+<pre><code><span class="dt">double</span> x = <span class="vl">10.5</span>;
+<span class="dt">int</span> y = (<span class="dt">int</span>) x;
+System.out.println(y); <span class="muted">// Output: 10 (decimal part is removed)</span></code></pre>
+
+        <h3>32. Casting</h3>
+        <p>Syntax: <code>datatype variable = (datatype) value;</code></p>
+<pre><code><span class="dt">double</span> price = <span class="vl">99.99</span>;
+<span class="dt">int</span> x = (<span class="dt">int</span>) price;
+System.out.println(x); <span class="muted">// Output: 99</span></code></pre>
+        <p>Casting does not round the value. 99.99 → 99.</p>
+
+        <h3>33. Integer Overflow</h3>
+        <p>Consider:</p>
+<pre><code><span class="dt">int</span> x = <span class="vl">2147483647</span>;
+x = x + <span class="vl">1</span>;
+System.out.println(x); <span class="muted">// Result: -2147483648</span></code></pre>
+        <p>Why? Because int has a fixed 32-bit signed range. This is called integer overflow.</p>
+
+        <h3>34. Integer Division</h3>
+<pre><code><span class="dt">int</span> a = <span class="vl">10</span>;
+<span class="dt">int</span> b = <span class="vl">3</span>;
+System.out.println(a / b); <span class="muted">// Output: 3</span></code></pre>
+        <p>But: <code>double result = 10 / 3.0;</code> outputs approximately <code>3.3333333333333335</code>.</p>
+
+        <h3>35. Important Decimal Precision Example</h3>
+<pre><code><span class="dt">double</span> x = <span class="vl">0.1</span>;
+<span class="dt">double</span> y = <span class="vl">0.2</span>;
+System.out.println(x + y);</code></pre>
+        <p>You may see: <code>0.30000000000000004</code>. This happens because binary floating-point representation cannot represent many decimal fractions exactly.</p>
+
+        <h3>36. Data Type and Memory</h3>
+        <p>A simplified view: <code>byte</code> → 1 byte, <code>short</code> → 2 bytes, <code>int</code> → 4 bytes, <code>long</code> → 8 bytes, <code>float</code> → 4 bytes, <code>double</code> → 8 bytes, <code>char</code> → 2 bytes.</p>
+        <p><em>But remember: memory layout of variables inside the JVM is not simply equivalent to saying every variable always occupies exactly its primitive-width number of bytes, because JVM implementation, object layout, alignment, and storage context can affect actual memory usage.</em></p>
+
+        <h3>37. Important Interview Questions</h3>
+        <p><strong>Q1. How many primitive data types are there in Java?</strong><br>Answer: 8</p>
+        <p><strong>Q2. Which is the default integer type?</strong><br>Answer: int</p>
+        <p><strong>Q3. Which is the default decimal type?</strong><br>Answer: double</p>
+        <p><strong>Q4. What is the size of int?</strong><br>Answer: 4 bytes</p>
+        <p><strong>Q5. What is the range of byte?</strong><br>Answer: -128 to 127</p>
+        <p><strong>Q6. Why is L used?</strong><br>Answer: <code>long x = 100L;</code> L identifies the literal as a long.</p>
+        <p><strong>Q7. Why is f used?</strong><br>Answer: <code>float x = 10.5f;</code> Because decimal literals are normally double.</p>
+        <p><strong>Q8. Can char store numbers?</strong><br>Answer: A char stores a UTF-16 code unit, so it can represent numeric character values such as: <code>char ch = 65;</code> which represents <code>'A'</code>.</p>
+        <p><strong>Q9. Is String a primitive data type?</strong><br>Answer: No. String → Reference type</p>
+        <p><strong>Q10. Does Java have unsigned integer primitive types?</strong><br>Answer: Java's standard integer primitives (byte, short, int, long) are signed. Java also provides unsigned arithmetic methods for int and long, but the primitive types themselves remain signed.</p>
+
+        <h3>38. Easy Memory Trick</h3>
+        <p>Remember the 8 primitives as: <strong>B S I L</strong> | <strong>F D</strong> | <strong>C B</strong></p>
+        <ul>
+            <li><strong>B</strong> → byte, <strong>S</strong> → short, <strong>I</strong> → int, <strong>L</strong> → long</li>
+            <li><strong>F</strong> → float, <strong>D</strong> → double</li>
+            <li><strong>C</strong> → char, <strong>B</strong> → boolean</li>
+        </ul>
+        <p>Or remember: 4 integer + 2 decimal + 1 character + 1 boolean = 8 primitive types.</p>
+        
+        <h4>One-line summary</h4>
+        <p>
+            <strong>Java Data Types</strong><br>
+            → <strong>Primitive:</strong> byte, short, int, long, float, double, char, boolean<br>
+            → <strong>Reference:</strong> String, arrays, classes, objects, interfaces, enums, etc.
+        </p>
+
+    </div>
+</section>
+
+</div>
+
+<script>
+
+/* THEME */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
+
+/* FULLSCREEN TOGGLE */
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const fsBtn = document.getElementById("fsBtn");
+    if (document.fullscreenElement) {
+        fsBtn.innerHTML = "⤡ Shrink";
+    } else {
+        fsBtn.innerHTML = "⤢ Expand";
+    }
+});
+
+/* STEP ENGINE SCRIPT */
+const script = [
+    { line: 0, slot: null, state: '' }, // Step 0
+    { line: 3, slot: 'ageSlot', state: 'declared' }, // Step 1
+    { line: 4, slot: 'ageSlot', state: 'assigned' }, // Step 2
+    { line: 5, slot: 'salarySlot', state: 'declared' }, // Step 3
+    { line: 6, slot: 'salarySlot', state: 'assigned' }, // Step 4
+    { line: 7, slot: 'countSlot', state: 'declared' }, // Step 5
+    { line: 8, slot: 'countSlot', state: 'assigned' }, // Step 6
+    { line: 9, slot: 'populationSlot', state: 'declared' }, // Step 7
+    { line: 10, slot: 'populationSlot', state: 'assigned' }, // Step 8
+    { line: 11, slot: 'temperatureSlot', state: 'declared' }, // Step 9
+    { line: 12, slot: 'temperatureSlot', state: 'assigned' }, // Step 10
+    { line: 13, slot: 'priceSlot', state: 'declared' }, // Step 11
+    { line: 14, slot: 'priceSlot', state: 'assigned' }, // Step 12
+    { line: 15, slot: 'gradeSlot', state: 'declared' }, // Step 13
+    { line: 16, slot: 'gradeSlot', state: 'assigned' }, // Step 14
+    { line: 17, slot: 'isActiveSlot', state: 'declared' }, // Step 15
+    { line: 18, slot: 'isActiveSlot', state: 'assigned' }, // Step 16
+    { line: 20, slot: 'ageSlot', state: 'assigned', out: 1 }, // Step 17
+    { line: 21, slot: 'salarySlot', state: 'assigned', out: 2 }, // Step 18
+    { line: 22, slot: 'countSlot', state: 'assigned', out: 3 }, // Step 19
+    { line: 23, slot: 'populationSlot', state: 'assigned', out: 4 }, // Step 20
+    { line: 24, slot: 'temperatureSlot', state: 'assigned', out: 5 }, // Step 21
+    { line: 25, slot: 'priceSlot', state: 'assigned', out: 6 }, // Step 22
+    { line: 26, slot: 'gradeSlot', state: 'assigned', out: 7 }, // Step 23
+    { line: 27, slot: 'isActiveSlot', state: 'assigned', out: 8 }, // Step 24
+    { line: 28, slot: null, state: '' } // Step 25
+];
+
+let currentStep = 0;
+let playing = false;
+let timer = null;
+const totalSteps = script.length;
+
+const outs = {
+    1: document.getElementById("out1"),
+    2: document.getElementById("out2"),
+    3: document.getElementById("out3"),
+    4: document.getElementById("out4"),
+    5: document.getElementById("out5"),
+    6: document.getElementById("out6"),
+    7: document.getElementById("out7"),
+    8: document.getElementById("out8")
+};
+
+let typingTimeout = null;
+
+function renderStep() {
+    const stepData = script[currentStep];
+
+    // Highlight Code Line
+    document.querySelectorAll(".code-line").forEach(l => l.classList.remove("active"));
+    if (stepData.line > 0) {
+        const lineEl = document.getElementById("line" + stepData.line);
+        if (lineEl) {
+            lineEl.classList.add("active");
+            // Auto scroll code body
+            lineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // Hide stack empty state if we passed step 0
+    document.getElementById("stackEmpty").style.display = currentStep >= 1 ? "none" : "block";
+
+    // Manage Slot visibility
+    document.querySelectorAll(".slot").forEach(s => {
+        if (s.id !== stepData.slot) {
+            s.classList.remove("show", "declared", "assigned");
+        }
+    });
+
+    if (stepData.slot) {
+        const activeSlot = document.getElementById(stepData.slot);
+        
+        // This logic ensures animations re-fire correctly when advancing
+        if (!activeSlot.classList.contains("show")) {
+            activeSlot.classList.add("show");
+        }
+        
+        if (stepData.state === 'declared') {
+            activeSlot.classList.add("declared");
+            activeSlot.classList.remove("assigned");
+        } else if (stepData.state === 'assigned') {
+            activeSlot.classList.add("declared", "assigned");
+        }
+    }
+
+    // Console Outputs
+    Object.keys(outs).forEach(k => outs[k].classList.remove("show"));
+    if (stepData.out) {
+        for (let i = 1; i <= stepData.out; i++) {
+            outs[i].classList.add("show");
+            if (i === stepData.out) {
+                 // Auto scroll console
+                 outs[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+
+    setMascot(currentStep);
+}
+
+const mascotCaptions = [
+    "A variable is a named memory location used to store data in a program. The value stored in a variable can change during program execution.",
+    "Declaring a 'byte'. The JVM sets aside 1 byte of memory. It currently holds no valid data.",
+    "Assigning 25 to 'age'. The value flies into the allocated memory box.",
+    "Declaring a 'short'. It reserves 2 bytes, perfect for numbers up to ~32k.",
+    "Assigning 30000 to 'salary'. The value enters memory!",
+    "Declaring an 'int'. It uses 4 bytes and is the default choice for whole numbers.",
+    "Assigning 100000 to 'count'.",
+    "Declaring a 'long' for huge numbers. It uses 8 bytes of memory.",
+    "Assigning 8 billion to 'population'. Notice the 'L' suffix to tell Java it's a long!",
+    "Declaring a 'float' for decimals. It takes 4 bytes.",
+    "Assigning 36.5f to 'temperature'. The 'f' suffix is required for floats.",
+    "Declaring a 'double'. It uses 8 bytes for double-precision decimals.",
+    "Assigning 19.99 to 'price'.",
+    "Declaring a 'char'. It reserves 2 bytes for a single character.",
+    "Assigning 'A' to 'grade'. Single quotes are used for chars.",
+    "Declaring a 'boolean' to store true/false flags.",
+    "Assigning 'true' to 'isActive'.",
+    "Printing age... 25 is read from memory and sent to the console.",
+    "Printing salary... 30000 appears below.",
+    "Printing count...",
+    "Printing population...",
+    "Printing temperature...",
+    "Printing price...",
+    "Printing grade...",
+    "Printing isActive...",
+    "main() is finished! The stack frame pops, freeing all local variables."
+];
+
+function setMascot(step) {
+    const caption = document.getElementById("mascotCaption");
+    const avatar = document.getElementById("avatarContainer");
+    const bubble = document.getElementById("speechBubble");
+    
+    if (typingTimeout) clearInterval(typingTimeout);
+    
+    avatar.classList.remove("pop");
+    bubble.classList.remove("pop");
+    void avatar.offsetWidth; 
+    void bubble.offsetWidth;
+    avatar.classList.add("pop");
+    bubble.classList.add("pop");
+    
+    const fullText = mascotCaptions[step] || "...";
+    caption.textContent = "";
+    caption.classList.add("typing-cursor");
+    
+    let i = 0;
+    typingTimeout = setInterval(() => {
+        if (i < fullText.length) {
+            caption.textContent += fullText.charAt(i);
+            i++;
+        } else {
+            clearInterval(typingTimeout);
+            caption.classList.remove("typing-cursor");
+        }
+    }, 45); 
+}
+
+function play() {
+    playing = true;
+    document.getElementById("playBtn").textContent = "⏸ Pause";
+    timer = setInterval(() => {
+        if (currentStep >= totalSteps - 1) { pause(); return; }
+        currentStep++;
+        renderStep();
+    }, 4000); 
+}
+
+function pause() {
+    playing = false;
+    document.getElementById("playBtn").textContent = "▶ Play";
+    if (timer) { clearInterval(timer); timer = null; }
+}
+
+function togglePlay() {
+    if (playing) { pause(); } else {
+        if (currentStep >= totalSteps - 1) { currentStep = 0; }
+        play();
+    }
+}
+
+function nextStep() {
+    pause();
+    if (currentStep < totalSteps - 1) { currentStep++; renderStep(); }
+}
+
+function previousStep() {
+    pause();
+    if (currentStep > 0) { currentStep--; renderStep(); }
+}
+
+function resetAnimation() {
+    pause();
+    currentStep = 0;
+    renderStep();
+}
+
+// Initial render
+renderStep();
+
+</script>
+
+</body>
+</html>
